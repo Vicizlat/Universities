@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <StartupObject>Universities.App</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Templates\settings-gear-icon-plain.png" />
+    <None Remove="Templates\settings-gear-icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Universities.Utils\Universities.Utils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Templates\Icons\settings-gear-icon-plain.png" />
+    <Resource Include="Templates\Icons\settings-gear-icon.png" />
+  </ItemGroup>
+
+</Project>
