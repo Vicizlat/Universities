@@ -2,8 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:uc="clr-namespace:Universities.Templates.UserControls"
-        x:Class="Universities.SettingsWindow" mc:Ignorable="d"
+        xmlns:uc="clr-namespace:Universities.Views.UserControls"
+        x:Class="Universities.Views.SettingsWindow" mc:Ignorable="d"
         Width="800" Height="360" ShowInTaskbar="True" ResizeMode="NoResize" WindowStyle="None"
         WindowStartupLocation="CenterScreen" BorderBrush="Black" BorderThickness="1">
     <Border Padding="20">
@@ -50,7 +50,7 @@
                 <TextBlock Grid.Column="0" Grid.Row="8" Padding="2" Margin="350, 0, 0, 0" VerticalAlignment="Center"
                            Text="New Separator:"/>
                 <TextBox x:Name="Separator" Grid.Column="0" Grid.Row="8" Padding="2" Margin="10, 0" Width="50" HorizontalAlignment="Right"
-                         TextChanged="Separator_TextChanged"/>
+                         MaxLength="1" TextChanged="Separator_TextChanged"/>
                 <Button x:Name="ChangeSeparator" Grid.Row="8" Grid.Column="1" Margin="10, 0" Content="Apply"
                         Background="LightGreen" IsEnabled="False" Click="ChangeSeparatorButton_Click"/>
                 <Button x:Name="Save" Grid.Row="10" Grid.Column="0" Margin="10, 0" Content="Save"

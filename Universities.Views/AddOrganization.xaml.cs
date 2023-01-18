@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Universities.Controller;
 
-namespace Universities
+namespace Universities.Views
 {
     public partial class AddOrganization
     {
@@ -30,7 +30,7 @@ namespace Universities
             if (ParentOrganization.SelectedItem == null)
             {
                 string message = "Are you sure you want to save without a Parent Organization?";
-                if (!controller.QuestionBox(message, "Question")) return;
+                if (!PromptBox.Question(message)) return;
             }
             int organizationId = controller.Organizations.Last().OrganizationId + 1;
             int parentOrganizationId = ParentOrganization.SelectedIndex + 1;

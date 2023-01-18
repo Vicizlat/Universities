@@ -3,11 +3,10 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Universities.Controller;
-using Universities.Models;
-using Universities.Templates.Icons;
 
-namespace Universities
+namespace Universities.Views
 {
     public partial class MainWindow
     {
@@ -18,16 +17,15 @@ namespace Universities
         {
             InitializeComponent();
             this.controller = controller;
-            IconsDockPanel.Children.Add(new SettingsImage(controller));
             if (controller.Organizations.Count > 0) SelectOrganization.ItemsSource = controller.Organizations.Select(controller.GetOrganizationName);
-            PopulateFields(GetDocument());
+            PopulateFields();
             controller.OnDocumentsChanged += OnDocumentsChanged;
             controller.OnOrganizationsChanged += OnOrganizationsChanged;
         }
 
-        private void OnDocumentsChanged(object sender, EventArgs e)
+        private void OnDocumentsChanged(object? sender, EventArgs e)
         {
-            PopulateFields(GetDocument());
+            PopulateFields();
         }
 
         private void OnOrganizationsChanged(object? sender, EventArgs e)
@@ -37,33 +35,56 @@ namespace Universities
             SaveButton.IsEnabled = IsSaveEnabled();
         }
 
+        private void SettingsImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e) => new SettingsWindow(controller).ShowDialog();
+
+        private void AddOrganization_OnClick(object sender, RoutedEventArgs e) => new AddOrganization(controller).ShowDialog();
+
         private void PreviousButton_OnClick(object sender, RoutedEventArgs e)
         {
             docId--;
-            PopulateFields(GetDocument());
+            PopulateFields();
         }
 
         private void NextButton_OnClick(object sender, RoutedEventArgs e)
         {
             docId++;
-            PopulateFields(GetDocument());
+            PopulateFields();
         }
 
-        private DocumentModel GetDocument()
+        private void SaveButton_OnClick(object sender, RoutedEventArgs e)
         {
-            if (docId < 0 || docId >= controller.Documents.Count) return null;
-            return controller.Documents[docId];
+            string[] document = controller.GetDocumentArray(docId);
+            string firstName = document[20];
+            string lastName = document[17];
+            string documentId = document[0];
+            int seqNo = int.Parse(document[14]);
+            int orgId = controller.Organizations[SelectOrganization.SelectedIndex].OrganizationId;
+            if (controller.AddPerson(firstName, lastName, orgId, documentId, seqNo))
+            {
+                if (controller.RemoveDocument(docId))
+                {
+                    if (controller.SaveDocuments())
+                    {
+                        PopulateFields();
+                        return;
+                    }
+                    controller.AddDocument(docId, document);
+                }
+            }
+            controller.FindAndRemovePerson(firstName, lastName, documentId, seqNo);
+            MessageBox.Show("Failed to save Person. No changes were made.");
         }
 
-        private void PopulateFields(DocumentModel doc)
+        private void PopulateFields()
         {
+            string[] document = controller.GetDocumentArray(docId);
             SaveButton.IsEnabled = IsSaveEnabled();
             SelectOrganization.SelectedIndex = -1;
             PreviousButton.IsEnabled = docId >= 0;
             PreviousButton.Content = $"<< Previous {(docId < 0 ? "(0)" : $"({docId})")}";
             NextButton.IsEnabled = docId < controller.Documents.Count - 1;
             NextButton.Content = $"({controller.Documents.Count - docId - 1}) Next >>";
-            if (doc == null)
+            if (document.Length <= 0)
             {
                 Wos.Text = string.Empty;
                 SeqNo.Text = string.Empty;
@@ -74,39 +95,18 @@ namespace Universities
             }
             else
             {
-                Wos.Text = doc.Ut;
-                SeqNo.Text = $"{doc.SeqNo}";
-                Author.Text = $"{doc.FirstName} {doc.LastName}";
-                Address.Text = doc.FullAddress;
+                Wos.Text = document[0];
+                SeqNo.Text = document[14];
+                Author.Text = $"{document[20]} {document[17]}";
+                Address.Text = document[7];
                 StringBuilder sb = new StringBuilder()
-                    .AppendLine(doc.OrgaName)
-                    .AppendLine(doc.OrgaName1)
-                    .AppendLine(doc.OrgaName2)
-                    .AppendLine(doc.OrgaName3)
-                    .AppendLine(doc.OrgaName4);
+                    .AppendLine(document[8])
+                    .AppendLine(document[9])
+                    .AppendLine(document[10])
+                    .AppendLine(document[11])
+                    .AppendLine(document[12]);
                 OrganizationNames.Text = sb.ToString().TrimEnd();
-                SubOrganizationNames.Text = doc.SubOrgaName;
-            }
-        }
-
-        private void AddOrganization_OnClick(object sender, RoutedEventArgs e)
-        {
-            new AddOrganization(controller).ShowDialog();
-        }
-
-        private void SaveButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            DocumentModel document = GetDocument();
-            string firstName = document.FirstName;
-            string lastName = document.LastName;
-            string documentId = document.Ut;
-            int seqNo = document.SeqNo;
-            int orgId = controller.Organizations[SelectOrganization.SelectedIndex].OrganizationId;
-            if (controller.AddPerson(firstName, lastName, orgId, documentId, seqNo))
-            {
-                controller.Documents.Remove(document);
-                controller.SaveDocuments();
-                PopulateFields(GetDocument());
+                SubOrganizationNames.Text = document[13];
             }
         }
 

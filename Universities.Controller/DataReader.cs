@@ -9,46 +9,9 @@ using Universities.Utils;
 
 namespace Universities.Controller
 {
-    public class MainController
+    public static class DataReader
     {
-        public event EventHandler OnDocumentsChanged;
-        public event EventHandler OnOrganizationsChanged;
-        public List<DocumentModel> Documents { get; set; }
-        public List<OrganizationModel> Organizations { get; set; }
-        public List<PersonModel> People { get; set; }
-        private const string Separators = ",;";
-
-        public MainController()
-        {
-            Documents = new List<DocumentModel>();
-            Organizations = new List<OrganizationModel>();
-            People = new List<PersonModel>();
-            if (FileHandler.FileExists(Constants.SettingsPath, Constants.SettingsFileName) && Settings.Instance.ReadSettingsFile())
-            {
-                LoadFiles();
-            }
-            else
-            {
-                string message = "There are no saved file locations. Do you want to open the Settings window to choose file locations?";
-                if (QuestionBox(message, "Question")) ShowSettingsWindow();
-            }
-        }
-
-        public void LoadFiles()
-        {
-            StringBuilder sb = new StringBuilder();
-            Documents = ReadDataSetFile(Settings.Instance.DataSetFilePath, out string message);
-            sb.AppendLine(message);
-            Organizations = ReadOrganizationsFile(Settings.Instance.OrganizationsFilePath, out message);
-            sb.AppendLine(message);
-            People = ReadPeopleFile(Settings.Instance.PeopleFilePath, out message);
-            sb.AppendLine(message);
-            MessageBox.Show(sb.ToString());
-            OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
-            OnOrganizationsChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        private List<DocumentModel> ReadDataSetFile(string filePath, out string message)
+        public static List<DocumentModel> ReadDataSetFile(string filePath, out string message)
         {
             try
             {
@@ -68,8 +31,8 @@ namespace Universities.Controller
                         Settings.Instance.Separator = line[2];
                         continue;
                     }
-                    string[] lineArr = StringSplit.SkipStrings(line, Separators[0], '\"');
-                    if (lineArr.Length < 20) lineArr = StringSplit.SkipStrings(line, Separators[1], '\"');
+                    string[] lineArr = StringSplit.SkipStrings(line, Constants.Separators[0], '\"');
+                    if (lineArr.Length < 20) lineArr = StringSplit.SkipStrings(line, Constants.Separators[1], '\"');
                     if (string.IsNullOrEmpty(lineArr[14]))
                     {
                         emptyEntries.Add(line);
@@ -90,7 +53,7 @@ namespace Universities.Controller
                     StringBuilder sb = new StringBuilder($"There are {duplicateEntries.Count} duplicate entries in the document.")
                         .AppendLine("Do you want to save them to a file?").AppendLine()
                         .AppendLine("WARNING: Only the duplicate line will be saved!");
-                    bool save = QuestionBox(sb.ToString(), "Warning");
+                    bool save = Warning(sb.ToString());
                     duplicateEntries.Insert(0, lines[0]);
                     if (save && FileDialogHandler.ShowSaveFileDialog("Save Duplicate entries", out string duplicatesFilePath))
                     {
@@ -110,7 +73,7 @@ namespace Universities.Controller
                     Logging.Instance.WriteLine($"Found {emptyEntries.Count} Empty entries.");
                     StringBuilder sb = new StringBuilder($"There are {emptyEntries.Count} entries with missing data in the document.")
                         .AppendLine("Do you want to save them to a file?").AppendLine();
-                    bool save = QuestionBox(sb.ToString(), "Stop");
+                    bool save = Stop(sb.ToString());
                     emptyEntries.Insert(0, lines[0]);
                     if (save && FileDialogHandler.ShowSaveFileDialog("Save Empty entries", out string emptiesFilePath))
                     {
@@ -137,9 +100,10 @@ namespace Universities.Controller
             }
         }
 
-        private void RemoveLinesFromDataSet(string filePath, ref string[] lines, List<string> entries)
+        private static void RemoveLinesFromDataSet(string filePath, ref string[] lines, List<string> entries)
         {
-            if (!QuestionBox(Constants.RemoveMessage, "Question")) return;
+            string message = "Do you want to remove these entries from the main document.";
+            if (!Question(message)) return;
             List<string> newLines = lines.ToList();
             foreach (string entry in entries.Skip(1))
             {
@@ -150,7 +114,7 @@ namespace Universities.Controller
             Logging.Instance.WriteLine($"{lines.Length - 1} entries successfully saved to {filePath}.");
         }
 
-        private List<OrganizationModel> ReadOrganizationsFile(string filePath, out string message)
+        public static List<OrganizationModel> ReadOrganizationsFile(string filePath, out string message)
         {
             try
             {
@@ -168,8 +132,8 @@ namespace Universities.Controller
                         Settings.Instance.Separator = line[14];
                         continue;
                     }
-                    string[] lineArr = StringSplit.SkipStrings(line, Separators[0], '\"');
-                    if (lineArr.Length < 3) lineArr = StringSplit.SkipStrings(line, Separators[1], '\"');
+                    string[] lineArr = StringSplit.SkipStrings(line, Constants.Separators[0], '\"');
+                    if (lineArr.Length < 3) lineArr = StringSplit.SkipStrings(line, Constants.Separators[1], '\"');
                     int id = int.Parse(lineArr[0]);
                     string name = lineArr[1];
                     int? parentId = int.TryParse(lineArr[2], out int pId) ? pId : null;
@@ -187,7 +151,7 @@ namespace Universities.Controller
             }
         }
 
-        private List<PersonModel> ReadPeopleFile(string filePath, out string message)
+        public static List<PersonModel> ReadPeopleFile(string filePath, out string message)
         {
             try
             {
@@ -210,8 +174,8 @@ namespace Universities.Controller
                         Settings.Instance.Separator = line[8];
                         continue;
                     }
-                    string[] lineArr = StringSplit.SkipStrings(line, Separators[0], '\"');
-                    if (lineArr.Length < 10) lineArr = StringSplit.SkipStrings(line, Separators[1], '\"');
+                    string[] lineArr = StringSplit.SkipStrings(line, Constants.Separators[0], '\"');
+                    if (lineArr.Length < 10) lineArr = StringSplit.SkipStrings(line, Constants.Separators[1], '\"');
                     people.Add(new PersonModel(lineArr));
                 }
                 Logging.Instance.WriteLine($"Finished processing {lines.Length - 1} People.");
@@ -226,82 +190,19 @@ namespace Universities.Controller
             }
         }
 
-        public string GetOrganizationName(OrganizationModel o)
+        public static bool Question(string message)
         {
-            OrganizationModel parent = Organizations.FirstOrDefault(or => or.OrganizationId == o.ParentOrgId);
-            return $"{o.OrganizationName} ({parent?.OrganizationName})";
+            return MessageBox.Show(message, "Attention!", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
         }
 
-        /// <summary>
-        /// Shows MessageBox with Caption = "Attention!", YesNo buttons and configurable image.
-        /// </summary>
-        /// <param name="message">Message to show...</param>
-        /// <param name="imageText">Accepted values: None, Stop, Question, Warning, Information</param>
-        /// <returns>True if Yes button is pressed. False if No button is pressed or box is closed.</returns>
-        public bool QuestionBox(string message, string imageText)
+        public static bool Warning(string message)
         {
-            MessageBoxImage image = Enum.Parse<MessageBoxImage>(imageText);
-            return MessageBox.Show(message, "Attention!", MessageBoxButton.YesNo, image) == MessageBoxResult.Yes;
+            return MessageBox.Show(message, "Attention!", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes;
         }
 
-        public bool SaveDocuments()
+        public static bool Stop(string message)
         {
-            List<string> exportDocuments = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportDocumentsHeader) };
-            exportDocuments.AddRange(Documents.Select(d => d.ToString()));
-            return FileHandler.WriteAllLines(Settings.Instance.DataSetFilePath, exportDocuments);
+            return MessageBox.Show(message, "Attention!", MessageBoxButton.YesNo, MessageBoxImage.Stop) == MessageBoxResult.Yes;
         }
-
-        public bool AddOrganization(int organizationId, string organizationName, int parentOrganizationId)
-        {
-            Organizations.Add(new OrganizationModel(organizationId, organizationName, parentOrganizationId));
-            OnOrganizationsChanged?.Invoke(this, EventArgs.Empty);
-            return SaveOrganizations();
-        }
-
-        public bool SaveOrganizations()
-        {
-            List<string> exportOrganizations = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportOrganizationsHeader) };
-            exportOrganizations.AddRange(Organizations.Select(o => o.ToString()));
-            return FileHandler.WriteAllLines(Settings.Instance.OrganizationsFilePath, exportOrganizations);
-        }
-
-        public bool AddPerson(string firstName, string lastName, int orgId, string docId, int seqNo)
-        {
-            PersonModel findPerson = People.Find(p => p.FirstName == firstName && p.LastName == lastName);
-            int id = findPerson?.PersonId ?? (People.Count == 0 ? 1 : People.Last().PersonId + 1);
-            string[] personArray = { $"{id}", firstName, lastName, $"{orgId}", docId, $"{seqNo}", null, null, null, null };
-            People.Add(new PersonModel(personArray));
-            return SavePeople();
-        }
-
-        public bool SavePeople()
-        {
-            List<string> exportPeople = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportPeopleHeader) };
-            exportPeople.AddRange(People.Select(p => p.ToString()));
-            if (string.IsNullOrEmpty(Settings.Instance.PeopleFilePath))
-            {
-                if (!FileDialogHandler.ShowSaveFileDialog("Save People", out string filePath)) return false;
-                Settings.Instance.PeopleFilePath = filePath;
-            }
-            return FileHandler.WriteAllLines(Settings.Instance.PeopleFilePath, exportPeople);
-        }
-
-        public bool ShiftPeopleIds(int newStartingId)
-        {
-            List<PersonModel> shiftedPeople = new List<PersonModel>();
-            foreach (PersonModel person in People)
-            {
-                PersonModel findPerson = shiftedPeople.Find(p => p.LastPersonId == person.PersonId);
-                person.LastPersonId = person.PersonId;
-                person.PersonId = findPerson?.PersonId ?? (shiftedPeople.Count == 0 ? newStartingId : shiftedPeople.Last().PersonId + 1);
-                shiftedPeople.Add(new PersonModel(person.ToStringArray()) { LastPersonId = person.LastPersonId});
-            }
-            List<string> exportPeople = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportPeopleHeader) };
-            exportPeople.AddRange(shiftedPeople.Select(p => p.ToString()));
-            if (!FileDialogHandler.ShowSaveFileDialog("Save People as new file", out string filePath)) return false;
-            return FileHandler.WriteAllLines(filePath, exportPeople);
-        }
-
-        public void ShowSettingsWindow() => new SettingsWindow(this).ShowDialog();
     }
 }

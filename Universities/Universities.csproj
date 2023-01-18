@@ -1,24 +1,46 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<StartupObject>Universities.App</StartupObject>
+		<Product>Universities</Product>
+		<Authors>Victor Zlatarev</Authors>
+		<Copyright>Copyright © 2022</Copyright>
+		<Version>0.1.0</Version>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
-    <UseWPF>true</UseWPF>
-    <StartupObject>Universities.App</StartupObject>
-  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="NuGet.CommandLine" Version="6.4.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="squirrel.windows" Version="2.0.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Templates\settings-gear-icon-plain.png" />
-    <None Remove="Templates\settings-gear-icon.png" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Universities.Controller\Universities.Controller.csproj" />
+		<ProjectReference Include="..\Universities.Utils\Universities.Utils.csproj" />
+		<ProjectReference Include="..\Universities.Views\Universities.Views.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Universities.Utils\Universities.Utils.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Update="Loading.gif">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Resource Include="Templates\Icons\settings-gear-icon-plain.png" />
-    <Resource Include="Templates\Icons\settings-gear-icon.png" />
-  </ItemGroup>
+	<PropertyGroup>
+		<NugetTools>$(PkgNuGet_CommandLine)\tools</NugetTools>
+		<SquirrelTools>$(Pkgsquirrel_windows)\tools</SquirrelTools>
+		<NuspecFile>$(SolutionDir)Universities\ReleaseSpec.nuspec</NuspecFile>
+	</PropertyGroup>
 
+	<Target Name="GenerateRelease" AfterTargets="AfterBuild" Condition="$(Configuration) == Release">
+		<XmlPeek XmlInputPath="$(NuspecFile)" Query="/package/metadata/id/text()">
+			<Output TaskParameter="Result" ItemName="ID" />
+		</XmlPeek>
+		<Exec Command="$(NugetTools)\NuGet.exe pack $(NuspecFile) -Version $(Version) -Properties Configuration=Release -OutputDirectory $(SolutionDir)Deployment\GeneratedNugets" />
+		<Exec Command="$(SquirrelTools)\Squirrel.exe --releasify $(SolutionDir)Deployment\GeneratedNugets\@(ID).$(Version).nupkg -r $(SolutionDir)Deployment\Releases -g $(SolutionDir)Loading.gif --no-msi" />
+	</Target>
 </Project>

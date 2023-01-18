@@ -1,44 +1,43 @@
-﻿<Window x:Class="Universities.MainWindow"
+﻿<Window x:Class="Universities.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:uc="clr-namespace:Universities.Templates.UserControls"
+        xmlns:uc="clr-namespace:Universities.Views.UserControls"
+        xmlns:images="clr-namespace:Universities.Views.Images"
         mc:Ignorable="d" FontSize="18"
         Title="MainWindow" Height="500" MinHeight="500" Width="900" MinWidth="800" WindowStartupLocation="CenterScreen">
-    <Grid>
+    <Grid Margin="10, 0, 10, 10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
             <RowDefinition Height="2*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="2*"/>
-            <RowDefinition Height="6*"/>
-            <RowDefinition Height="2*"/>
-            <RowDefinition Height="10*"/>
-            <RowDefinition Height="2*"/>
-            <RowDefinition Height="4*"/>
-            <RowDefinition Height="2*"/>
-            <RowDefinition Height="4*"/>
-            <RowDefinition Height="1*"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <DockPanel x:Name="IconsDockPanel" Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
-                   HorizontalAlignment="Right" VerticalAlignment="Top"/>
-        <uc:LabelTextBlock Grid.Row="0" Grid.Column="0" Label="WOS Document:"/>
-        <uc:LabelTextBlock Grid.Row="0" Grid.Column="1" Label="SeqNo:"/>
+        <images:ButtonImage Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" FileName="SettingsIcon" ToolTip="Settings" HorizontalAlignment="Right"
+                            Source="Images\SettingsIconBW.png" MouseLeftButtonUp="SettingsImage_MouseLeftButtonUp"/>
+        <uc:LabelTextBlock Grid.Row="0" Grid.Column="0" Margin="10, 0" Label="WOS Document:"/>
+        <uc:LabelTextBlock Grid.Row="0" Grid.Column="1" Margin="10, 0" Label="SeqNo:"/>
         <TextBox x:Name="Wos" Grid.Row="1" Grid.Column="0" Margin="10, 0" Padding="2"/>
         <TextBlock x:Name="SeqNo" Grid.Row="1" Grid.Column="1" Margin="10, 0" Padding="2" HorizontalAlignment="Left"/>
-        <uc:LabelTextBlock Grid.Row="2" Grid.Column="0" Label="Author:"/>
-        <uc:LabelTextBlock Grid.Row="2" Grid.Column="1" Label="Address:"/>
+        <uc:LabelTextBlock Grid.Row="2" Grid.Column="0" Margin="10, 0" Label="Author:"/>
+        <uc:LabelTextBlock Grid.Row="2" Grid.Column="1" Margin="10, 0" Label="Address:"/>
         <TextBox x:Name="Author" Grid.Row="3" Grid.Column="0" Margin="10, 0" Padding="2"/>
         <TextBox x:Name="Address" Grid.Row="3" Grid.Column="1" TextWrapping="Wrap" Margin="10, 0" Padding="2"/>
-        <uc:LabelTextBlock Grid.Row="4" Grid.Column="0" Label="Organization Names:"/>
-        <uc:LabelTextBlock Grid.Row="4" Grid.Column="1" Label="SubOrganization Names:"/>
+        <uc:LabelTextBlock Grid.Row="4" Grid.Column="0" Margin="10, 0" Label="Organization Names:"/>
+        <uc:LabelTextBlock Grid.Row="4" Grid.Column="1" Margin="10, 0" Label="SubOrganization Names:"/>
         <TextBox x:Name="OrganizationNames" Grid.Row="5" Grid.Column="0" Margin="10, 0" Padding="2"/>
         <TextBox x:Name="SubOrganizationNames" Grid.Row="5" Grid.Column="1" Margin="10, 0" Padding="2"/>
-        <uc:LabelTextBlock Grid.Row="6" Grid.Column="0" Label="Select Organization:"/>
+        <uc:LabelTextBlock Grid.Row="6" Grid.Column="0" Margin="10, 0" Label="Select Organization:"/>
         <Grid Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
@@ -49,7 +48,7 @@
             <Button x:Name="AddOrganization" Grid.Column="1" Content="Add Organization" Margin="10, 0" Padding="2"
                     Click="AddOrganization_OnClick"/>
         </Grid>
-        <Grid Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2">
+        <Grid Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 20, 0, 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>

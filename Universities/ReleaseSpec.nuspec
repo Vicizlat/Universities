@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+	<metadata>
+		<id>Universities</id>
+		<version>0.0.0</version>
+		<title>Universities</title>
+		<authors>Victor Zlatarev</authors>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<license type="expression">MIT</license>
+		<projectUrl>https://github.com/Vicizlat/Universities</projectUrl>
+		<description>Description</description>
+		<copyright>Victor Zlatarev © 2022</copyright>
+	</metadata>
+
+	<files>
+		<file src="bin\Release\net6.0-windows\**" target="lib\net45" exclude="*.pdb;*.nupkg;*.vshost.*"/>
+	</files>
+</package>

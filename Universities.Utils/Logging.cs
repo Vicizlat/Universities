@@ -11,7 +11,7 @@ namespace Universities.Utils
 
         public Logging()
         {
-            writer = new StreamWriter(Path.Combine(Constants.LogsPath, Constants.LogFileName));
+            writer = new StreamWriter(Constants.LogFilePath);
             thisInstance = this;
         }
 

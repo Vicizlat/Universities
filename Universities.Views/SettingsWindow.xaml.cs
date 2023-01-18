@@ -5,11 +5,12 @@ using Universities.Controller;
 using Universities.Handlers;
 using Universities.Utils;
 
-namespace Universities
+namespace Universities.Views
 {
     public partial class SettingsWindow
     {
         private readonly MainController controller;
+        private int newStartId;
 
         public SettingsWindow(MainController controller)
         {
@@ -77,12 +78,12 @@ namespace Universities
 
         private void NewStartId_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ShiftIds.IsEnabled = !string.IsNullOrEmpty(NewStartId.Text) && int.TryParse(NewStartId.Text, out int result);
+            ShiftIds.IsEnabled = !string.IsNullOrEmpty(NewStartId.Text) && int.TryParse(NewStartId.Text, out newStartId);
         }
 
         private void ShiftIdsButton_Click(object sender, RoutedEventArgs e)
         {
-            if (controller.ShiftPeopleIds(int.Parse(NewStartId.Text))) MessageBox.Show("All done!");
+            if (controller.ShiftPeopleIds(newStartId)) MessageBox.Show("All done!");
         }
 
         private void Separator_TextChanged(object sender, TextChangedEventArgs e)

@@ -1,4 +1,4 @@
-﻿namespace Universities.Templates.UserControls
+﻿namespace Universities.Views.UserControls
 {
     public partial class LabelTextBlock
     {

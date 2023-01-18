@@ -7,18 +7,22 @@ namespace Universities.Utils
     {
         private static readonly string WorkingFolder = Environment.CurrentDirectory;
         public static readonly string SettingsPath = Directory.CreateDirectory(Path.Combine(WorkingFolder, "Settings")).FullName;
+        public static readonly string SettingsFilePath = Path.Combine(SettingsPath, "Settings.xml");
         public static readonly string LogsPath = Directory.CreateDirectory(Path.Combine(WorkingFolder, "Logs")).FullName;
-
-        public static string LogFileName = $"Log-{DateTime.Now:[yyyy-MM-dd][HH-mm-ss]}.txt";
-        public const string SettingsFileName = "Settings.xml";
-        public const string RemoveMessage = "Do you want to remove these entries from the main document.";
-        public static string[] ExportOrganizationsHeader =
+        public static readonly string LogFileName = $"Log-{DateTime.Now:[yyyy-MM-dd][HH-mm-ss]}.txt";
+        public static readonly string LogFilePath = Path.Combine(LogsPath, LogFileName);
+        public static readonly char[] Separators =
+        {
+            ',',
+            ';'
+        };
+        public static readonly string[] ExportOrganizationsHeader =
         {
             "OrganizationID",
             "OrganizationName",
             "ParentOrgaID"
         };
-        public static string[] ExportPeopleHeader =
+        public static readonly string[] ExportPeopleHeader =
         {
             "PersonID",
             "FirstName",
@@ -31,7 +35,7 @@ namespace Universities.Utils
             "OtherNames",
             "FormerInstitution"
         };
-        public static string[] ExportDocumentsHeader =
+        public static readonly string[] ExportDocumentsHeader =
         {
             "UT",
             "country",

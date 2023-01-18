@@ -1,5 +1,4 @@
-﻿using System;
-using Universities.Utils;
+﻿using Universities.Utils;
 
 namespace Universities.Models
 {
@@ -26,7 +25,7 @@ namespace Universities.Models
         public string Display_name { get; set; }
         public string Wos_standard { get; set; }
         public string FirstName { get; set; }
-        private readonly string[] documentArray = new string[21];
+        public readonly string[] documentArray = new string[21];
 
         public DocumentModel(string[] lineArr)
         {

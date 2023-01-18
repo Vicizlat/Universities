@@ -12,12 +12,11 @@ namespace Universities.Utils
         public string OrganizationsFilePath { get; set; }
         public string PeopleFilePath { get; set; }
         public char Separator { get; set; }
-        private static readonly XmlSerializer Serializer = new XmlSerializer(typeof(Settings));
-        private readonly string settingsPath;
+        private XmlSerializer Serializer { get; }
 
         public Settings()
         {
-            settingsPath = Path.Combine(Constants.SettingsPath, Constants.SettingsFileName);
+            Serializer = new XmlSerializer(typeof(Settings));
             thisInstance = this;
         }
 
@@ -25,25 +24,27 @@ namespace Universities.Utils
         {
             try
             {
-                if (!File.Exists(settingsPath)) return false;
-                using TextReader reader = new StreamReader(settingsPath);
+                using TextReader reader = new StreamReader(Constants.SettingsFilePath);
                 thisInstance = (Settings)Serializer.Deserialize(reader);
                 return true;
             }
-            catch { return false; }
+            catch (Exception e)
+            {
+                Logging.Instance.WriteLine(e.Message);
+                return false;
+            }
         }
 
         public bool WriteSettingsFile()
         {
             try
             {
-                using TextWriter writer = new StreamWriter(settingsPath);
+                using TextWriter writer = new StreamWriter(Constants.SettingsFilePath);
                 Serializer.Serialize(writer, thisInstance);
                 return true;
             }
             catch (Exception e)
             {
-                
                 Logging.Instance.WriteLine(e.Message);
                 return false;
             }
