@@ -16,12 +16,14 @@ namespace Universities.Controller
         public List<DocumentModel> Documents { get; set; }
         public List<OrganizationModel> Organizations { get; set; }
         public List<PersonModel> People { get; set; }
+        public string Version;
 
-        public MainController()
+        public MainController(string version)
         {
             Documents = new List<DocumentModel>();
             Organizations = new List<OrganizationModel>();
             People = new List<PersonModel>();
+            Version = version;
         }
 
         public void LoadFiles()

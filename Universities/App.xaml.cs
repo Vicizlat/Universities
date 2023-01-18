@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Windows;
+using System.Threading.Tasks;
+using Squirrel;
 using Universities.Controller;
 using Universities.Handlers;
 using Universities.Utils;
@@ -11,18 +13,16 @@ namespace Universities
     public partial class App
     {
         private MainController controller { get; set; }
+        private UpdateManager manager;
+        private UpdateInfo updateInfo;
+        private string installedVersion;
 
-        private void Application_Startup(object sender, StartupEventArgs e)
+        private async void Application_Startup(object sender, StartupEventArgs e)
         {
             Logging.Instance.WriteLine("Logging started");
-            string[] files = Directory.GetFiles(Constants.LogsPath);
-            while (files.Length > 50)
-            {
-                File.Delete(files[0]);
-                files = Directory.GetFiles(Constants.LogsPath);
-            }
-
-            controller = new MainController();
+            ManageLogFiles(Constants.LogsPath);
+            await CheckForUpdate();
+            controller = new MainController(installedVersion);
             if (FileHandler.FileExists(Constants.SettingsFilePath) && Settings.Instance.ReadSettingsFile())
             {
                 controller.LoadFiles();
@@ -35,6 +35,31 @@ namespace Universities
             MainWindow = new MainWindow(controller);
             MainWindow.Show();
             MainWindow.Closed += CallShutdown;
+        }
+
+        private async Task CheckForUpdate()
+        {
+            manager = await UpdateManager.GitHubUpdateManager(@"https://github.com/Vicizlat/Universities");
+            installedVersion = manager.CurrentlyInstalledVersion()?.ToString() ?? "Debug";
+            if (installedVersion == "Debug") return;
+            updateInfo = await manager.CheckForUpdate();
+            string newVersion = updateInfo.FutureReleaseEntry.Version.ToString();
+            if (updateInfo.ReleasesToApply.Count > 0)
+            {
+                await manager.UpdateApp();
+                Logging.Instance.WriteLine($"Succesfuly Updated from v.{installedVersion} to v.{newVersion}!");
+                UpdateManager.RestartApp("Universities.exe");
+            }
+        }
+
+        private void ManageLogFiles(string logsPath)
+        {
+            string[] files = Directory.GetFiles(logsPath);
+            while (files.Length > 50)
+            {
+                File.Delete(files[0]);
+                files = Directory.GetFiles(logsPath);
+            }
         }
 
         private void CallShutdown(object sender, EventArgs e)

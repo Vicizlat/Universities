@@ -16,6 +16,7 @@ namespace Universities.Views
         public MainWindow(MainController controller)
         {
             InitializeComponent();
+            Title = $"Universities v. {controller.Version}";
             this.controller = controller;
             if (controller.Organizations.Count > 0) SelectOrganization.ItemsSource = controller.Organizations.Select(controller.GetOrganizationName);
             PopulateFields();
