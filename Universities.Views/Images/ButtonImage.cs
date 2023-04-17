@@ -14,7 +14,7 @@ namespace Universities.Views.Images
         {
             MouseEnter += Image_MouseEnter;
             MouseLeave += Image_MouseLeave;
-            Margin = new Thickness(20, 10, 0, 20);
+            Margin = new Thickness(10, 0, 0, 0);
             Cursor = Cursors.Hand;
         }
 

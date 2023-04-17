@@ -16,8 +16,13 @@ namespace Universities.Views
         public MainWindow(MainController controller)
         {
             InitializeComponent();
-            Title = $"Universities v. {controller.Version}";
             this.controller = controller;
+            Title = $"Universities v. {controller.InstalledVersion}     Current user: {controller.CurrentUser}";
+            if (!controller.IsAdmin)
+            {
+                AddUser.Visibility = Visibility.Hidden;
+                DataManage.Visibility = Visibility.Hidden;
+            }
             if (controller.Organizations.Count > 0) SelectOrganization.ItemsSource = controller.Organizations.Select(controller.GetOrganizationName);
             PopulateFields();
             controller.OnDocumentsChanged += OnDocumentsChanged;
@@ -36,7 +41,29 @@ namespace Universities.Views
             SaveButton.IsEnabled = IsSaveEnabled();
         }
 
-        private void SettingsImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e) => new SettingsWindow(controller).ShowDialog();
+        private void AddUserIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            LoginWindow loginWindow = new LoginWindow(0, false);
+            if (loginWindow.ShowDialog().Value) controller.AddUser(loginWindow.UsernameText, loginWindow.PasswordText, loginWindow.IsAdmin);
+        }
+
+        private void ImportExportIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            DataManagementWindow dataManagementWindow = new DataManagementWindow(controller);
+            dataManagementWindow.OnShiftIdsClicked += DataManagementWindow_OnShiftIdsClicked;
+            dataManagementWindow.ShowDialog();
+        }
+
+        private void SettingsIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            SettingsWindow settingsWindow = new SettingsWindow();
+            settingsWindow.ShowDialog();
+        }
+
+        private void DataManagementWindow_OnShiftIdsClicked(object? sender, int newStartId)
+        {
+            if (controller.ShiftPeopleIds(newStartId)) MessageBox.Show("All done!");
+        }
 
         private void AddOrganization_OnClick(object sender, RoutedEventArgs e) => new AddOrganization(controller).ShowDialog();
 

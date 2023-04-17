@@ -11,6 +11,9 @@ namespace Universities.Utils
         public static readonly string LogsPath = Directory.CreateDirectory(Path.Combine(WorkingFolder, "Logs")).FullName;
         public static readonly string LogFileName = $"Log-{DateTime.Now:[yyyy-MM-dd][HH-mm-ss]}.txt";
         public static readonly string LogFilePath = Path.Combine(LogsPath, LogFileName);
+        public const string ConnectionDetailsWarning = "Some connection information is missing in the Settings file." +
+            " Please provide connection details in the Settings window.";
+        public const string MissmatchData = "Data does not match expectations. Did you load the wrong file?";
         public static readonly char[] Separators =
         {
             ',',

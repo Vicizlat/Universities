@@ -1,10 +1,10 @@
-﻿using System;
-using Universities.Utils;
+﻿using Universities.Utils;
 
-namespace Universities.Models
+namespace Universities.Data.Models
 {
-    public class PersonModel
+    public class Person
     {
+        public int Id { get; set; }
         public int PersonId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -16,9 +16,13 @@ namespace Universities.Models
         public string OtherNames { get; set; }
         public string FormerInstitution { get; set; }
         public int LastPersonId { get; set; }
-        private readonly string[] personArray = new string[10];
 
-        public PersonModel(string[] lineArr)
+        public Person()
+        {
+
+        }
+
+        public Person(string[] lineArr) : this()
         {
             PersonId = int.Parse(lineArr[0]);
             FirstName = lineArr[1];
@@ -31,22 +35,34 @@ namespace Universities.Models
             OtherNames = lineArr[8];
             FormerInstitution = lineArr[9];
             LastPersonId = -1;
-            Array.Copy(lineArr, personArray, 10);
-            for (int i = 1; i < 5; i++)
-            {
-                if (i == 3) continue;
-                personArray[i] = $"\"{personArray[i]}\"";
-            }
         }
 
-        public string[] ToStringArray()
+        public string[] ToArray()
         {
-            return new[] { $"{PersonId}", FirstName, LastName, $"{OrgId}", DocId, $"{SeqNo}", null, null, null, null };
+            return new string[]
+            {
+                $"{PersonId}",
+                FirstName,
+                LastName,
+                $"{OrgId}",
+                DocId,
+                $"{SeqNo}",
+                $"{AuthorId}",
+                EmailAddress,
+                OtherNames,
+                FormerInstitution
+            };
         }
 
         public override string ToString()
         {
-            return string.Join(Settings.Instance.Separator, personArray);
+            string[] personArray = ToArray();
+            string[] pArray = new string[personArray.Length];
+            for (int i = 1; i < personArray.Length; i++)
+            {
+                pArray[i] = $"\"{personArray[i]}\"";
+            }
+            return string.Join(Settings.Instance.Separator, pArray);
         }
     }
 }

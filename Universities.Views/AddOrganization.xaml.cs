@@ -1,7 +1,9 @@
 ﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Universities.Controller;
+using Universities.Utils;
 
 namespace Universities.Views
 {
@@ -37,6 +39,18 @@ namespace Universities.Views
             string organizationName = OrganizationName.Text;
             DialogResult = controller.AddOrganization(organizationId, organizationName, parentOrganizationId);
             Close();
+        }
+
+        private void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && Save.IsEnabled)
+            {
+                Save_Click(this, e);
+            }
+            if (e.Key == Key.Escape)
+            {
+                Cancel_Click(this, e);
+            }
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)

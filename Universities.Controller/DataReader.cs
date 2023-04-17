@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows;
+using Universities.Data.Models;
 using Universities.Handlers;
 using Universities.Models;
 using Universities.Utils;
@@ -11,120 +11,48 @@ namespace Universities.Controller
 {
     public static class DataReader
     {
-        public static List<DocumentModel> ReadDataSetFile(string filePath, out string message)
+        public static event EventHandler? OnDocumentFound;
+        public static event EventHandler? OnIncompleteDocumentFound;
+
+        public static bool ReadDataSetFile(string filePath, out string message)
         {
             try
             {
-                if (!FileHandler.ReadAllLines(filePath, out string[] lines))
+                if (!ReadLines(filePath, out string[] lines, out message)) return false;
+                if (!lines[0].StartsWith("UT"))
                 {
-                    message = $"Error reading file {filePath}. The file is missing or may be in use by another program.";
-                    MessageBox.Show(message);
-                    return new List<DocumentModel>();
+                    message = Constants.MissmatchData;
+                    return false;
                 }
-                List<DocumentModel> documents = new List<DocumentModel>();
-                List<string> duplicateEntries = new List<string>();
-                List<string> emptyEntries = new List<string>();
-                foreach (string line in lines)
+                Settings.Instance.Separator = lines[0][2];
+                Settings.Instance.WriteSettingsFile();
+                foreach (string line in lines.Skip(1))
                 {
-                    if (line.StartsWith("UT"))
-                    {
-                        Settings.Instance.Separator = line[2];
-                        continue;
-                    }
-                    string[] lineArr = StringSplit.SkipStrings(line, Constants.Separators[0], '\"');
-                    if (lineArr.Length < 20) lineArr = StringSplit.SkipStrings(line, Constants.Separators[1], '\"');
+                    string[] lineArr = StringSplit.SkipStrings(line, Settings.Instance.Separator, '\"');
                     if (string.IsNullOrEmpty(lineArr[14]))
                     {
-                        emptyEntries.Add(line);
+                        OnIncompleteDocumentFound?.Invoke(lineArr, EventArgs.Empty);
                         continue;
                     }
-                    string firstName = string.IsNullOrEmpty(lineArr[20]) ? lineArr[19].Split(',')[1] : lineArr[20];
-                    string lastName = lineArr[17];
-                    if (documents.Any(d => d.Ut == lineArr[0] && d.FirstName == firstName && d.LastName == lastName))
-                    {
-                        duplicateEntries.Add(line);
-                        continue;
-                    }
-                    documents.Add(new DocumentModel(lineArr));
-                }
-                if (duplicateEntries.Count > 0)
-                {
-                    Logging.Instance.WriteLine($"Found {duplicateEntries.Count} Duplicate entries.");
-                    StringBuilder sb = new StringBuilder($"There are {duplicateEntries.Count} duplicate entries in the document.")
-                        .AppendLine("Do you want to save them to a file?").AppendLine()
-                        .AppendLine("WARNING: Only the duplicate line will be saved!");
-                    bool save = Warning(sb.ToString());
-                    duplicateEntries.Insert(0, lines[0]);
-                    if (save && FileDialogHandler.ShowSaveFileDialog("Save Duplicate entries", out string duplicatesFilePath))
-                    {
-                        if (FileHandler.WriteAllLines(duplicatesFilePath, duplicateEntries))
-                        {
-                            Logging.Instance.WriteLine($"{duplicateEntries.Count - 1} entries successfully saved to {duplicatesFilePath}.");
-                            RemoveLinesFromDataSet(filePath, ref lines, duplicateEntries);
-                        }
-                    }
-                    else
-                    {
-                        Logging.Instance.WriteLine("Duplicate entries were NOT saved to a file.");
-                    }
-                }
-                if (emptyEntries.Count > 0)
-                {
-                    Logging.Instance.WriteLine($"Found {emptyEntries.Count} Empty entries.");
-                    StringBuilder sb = new StringBuilder($"There are {emptyEntries.Count} entries with missing data in the document.")
-                        .AppendLine("Do you want to save them to a file?").AppendLine();
-                    bool save = Stop(sb.ToString());
-                    emptyEntries.Insert(0, lines[0]);
-                    if (save && FileDialogHandler.ShowSaveFileDialog("Save Empty entries", out string emptiesFilePath))
-                    {
-                        if (FileHandler.WriteAllLines(emptiesFilePath, duplicateEntries))
-                        {
-                            Logging.Instance.WriteLine($"{emptyEntries.Count - 1} entries successfully saved to {emptiesFilePath}.");
-                            RemoveLinesFromDataSet(filePath, ref lines, emptyEntries);
-                        }
-                    }
-                    else
-                    {
-                        Logging.Instance.WriteLine("Incomplete entries were NOT saved to a file.");
-                    }
+                    OnDocumentFound?.Invoke(lineArr, EventArgs.Empty);
                 }
                 Logging.Instance.WriteLine($"Finished processing {lines.Length - 1} Documents.");
-                message = $"Successfully loaded {documents.Count} Documents.";
-                return documents.OrderBy(d => d.LastName).ThenBy(d => d.FirstName).ToList();
+                return true;
             }
             catch (Exception e)
             {
                 message = "Error loading DataSet File!";
                 Logging.Instance.WriteLine($"{message} {e.Message}");
-                return new List<DocumentModel>();
+                return false;
             }
         }
 
-        private static void RemoveLinesFromDataSet(string filePath, ref string[] lines, List<string> entries)
-        {
-            string message = "Do you want to remove these entries from the main document.";
-            if (!Question(message)) return;
-            List<string> newLines = lines.ToList();
-            foreach (string entry in entries.Skip(1))
-            {
-                newLines.Remove(entry);
-            }
-            lines = newLines.ToArray();
-            FileHandler.WriteAllLines(filePath, lines);
-            Logging.Instance.WriteLine($"{lines.Length - 1} entries successfully saved to {filePath}.");
-        }
-
-        public static List<OrganizationModel> ReadOrganizationsFile(string filePath, out string message)
+        public static List<Organization> ReadOrganizationsFile(MainController controller, string filePath, out string message)
         {
             try
             {
-                if (!FileHandler.ReadAllLines(filePath, out string[] lines))
-                {
-                    message = $"Error reading file {filePath}. The file is missing or may be in use by another program.";
-                    MessageBox.Show(message);
-                    return new List<OrganizationModel>();
-                }
-                List<OrganizationModel> organizations = new List<OrganizationModel>();
+                List<Organization> organizations = new List<Organization>();
+                if (!ReadLines(filePath, out string[] lines, out message)) return organizations;
                 foreach (string line in lines)
                 {
                     if (line.StartsWith("OrganizationID"))
@@ -137,7 +65,9 @@ namespace Universities.Controller
                     int id = int.Parse(lineArr[0]);
                     string name = lineArr[1];
                     int? parentId = int.TryParse(lineArr[2], out int pId) ? pId : null;
-                    organizations.Add(new OrganizationModel(id, name, parentId));
+                    organizations.Add(new Organization(id, name, parentId));
+                    //controller.Context.Organizations.Add(new Organization(id, name, parentId));
+                    //controller.Context.SaveChanges();
                 }
                 Logging.Instance.WriteLine($"Finished processing {lines.Length - 1} Organizations.");
                 message = $"Successfully loaded {organizations.Count} Organizations.";
@@ -147,26 +77,21 @@ namespace Universities.Controller
             {
                 message = "Error loading Organizations File!";
                 Logging.Instance.WriteLine($"{message} {e.Message}");
-                return new List<OrganizationModel>();
+                return new List<Organization>();
             }
         }
 
-        public static List<PersonModel> ReadPeopleFile(string filePath, out string message)
+        public static List<Person> ReadPeopleFile(MainController controller, string filePath, out string message)
         {
             try
             {
+                List<Person> people = new List<Person>();
                 if (string.IsNullOrEmpty(filePath))
                 {
                     message = "No People file selected.";
-                    return new List<PersonModel>();
+                    return people;
                 }
-                if (!FileHandler.ReadAllLines(filePath, out string[] lines))
-                {
-                    message = $"Error reading file {filePath}. The file is missing or may be in use by another program.";
-                    MessageBox.Show(message);
-                    return new List<PersonModel>();
-                }
-                List<PersonModel> people = new List<PersonModel>();
+                if (!ReadLines(filePath, out string[] lines, out message)) return people;
                 foreach (string line in lines)
                 {
                     if (line.StartsWith("PersonID"))
@@ -176,7 +101,9 @@ namespace Universities.Controller
                     }
                     string[] lineArr = StringSplit.SkipStrings(line, Constants.Separators[0], '\"');
                     if (lineArr.Length < 10) lineArr = StringSplit.SkipStrings(line, Constants.Separators[1], '\"');
-                    people.Add(new PersonModel(lineArr));
+                    people.Add(new Person(lineArr));
+                    //controller.Context.People.Add(new Person(lineArr));
+                    //controller.Context.SaveChanges();
                 }
                 Logging.Instance.WriteLine($"Finished processing {lines.Length - 1} People.");
                 message = $"Successfully loaded {people.Count} People.";
@@ -186,23 +113,20 @@ namespace Universities.Controller
             {
                 message = "Error loading People File!";
                 Logging.Instance.WriteLine($"{message} {e.Message}");
-                return new List<PersonModel>();
+                return new List<Person>();
             }
         }
 
-        public static bool Question(string message)
+        private static bool ReadLines(string filePath, out string[] lines, out string message)
         {
-            return MessageBox.Show(message, "Attention!", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
-        }
-
-        public static bool Warning(string message)
-        {
-            return MessageBox.Show(message, "Attention!", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes;
-        }
-
-        public static bool Stop(string message)
-        {
-            return MessageBox.Show(message, "Attention!", MessageBoxButton.YesNo, MessageBoxImage.Stop) == MessageBoxResult.Yes;
+            bool readResult = FileHandler.ReadAllLines(filePath, out lines);
+            message = string.Empty;
+            if (!readResult)
+            {
+                message = $"Error reading file {filePath}. The file is missing or may be in use by another program.";
+                MessageBox.Show(message);
+            }
+            return readResult;
         }
     }
 }

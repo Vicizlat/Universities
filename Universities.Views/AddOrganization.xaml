@@ -6,7 +6,7 @@
         mc:Ignorable="d"
         Height="100" Width="500" ShowInTaskbar="True" ResizeMode="NoResize" WindowStyle="None"
         Background="LightGray" BorderThickness="1"
-        WindowState="Normal" WindowStartupLocation="CenterScreen" Topmost="True" >
+        WindowState="Normal" WindowStartupLocation="CenterScreen" Topmost="True" KeyUp="Window_KeyUp">
     <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>

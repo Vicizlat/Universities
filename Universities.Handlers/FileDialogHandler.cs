@@ -5,7 +5,7 @@ namespace Universities.Handlers
 {
     public static class FileDialogHandler
     {
-        public static bool OpenFileDialog(string title, out string filePath)
+        public static bool ShowOpenFileDialog(string title, out string filePath)
         {
             filePath = string.Empty;
             OpenFileDialog openDlg = new OpenFileDialog

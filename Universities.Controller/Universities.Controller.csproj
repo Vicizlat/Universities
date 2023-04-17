@@ -1,12 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Universities.Data\Universities.Data.csproj" />
     <ProjectReference Include="..\Universities.Handlers\Universities.Handlers.csproj" />
     <ProjectReference Include="..\Universities.Models\Universities.Models.csproj" />
     <ProjectReference Include="..\Universities.Utils\Universities.Utils.csproj" />

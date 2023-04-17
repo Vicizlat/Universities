@@ -8,6 +8,11 @@ namespace Universities.Utils
     {
         private static Settings thisInstance;
         public static Settings Instance => thisInstance ?? new Settings();
+        public string Server { get; set; }
+        public string Port { get; set; }
+        public string Database { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
         public string DataSetFilePath { get; set; }
         public string OrganizationsFilePath { get; set; }
         public string PeopleFilePath { get; set; }
@@ -48,6 +53,12 @@ namespace Universities.Utils
                 Logging.Instance.WriteLine(e.Message);
                 return false;
             }
+        }
+
+        public string GetConnectionString()
+        {
+            if (string.IsNullOrEmpty(Server) || string.IsNullOrEmpty(Port) || string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password)) return string.Empty;
+            return $"Server={Server};Port={Port};User={Username};Password={Password};";
         }
     }
 }

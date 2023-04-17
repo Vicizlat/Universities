@@ -1,9 +1,11 @@
-﻿using Universities.Utils;
+﻿using System.Diagnostics;
+using Universities.Utils;
 
-namespace Universities.Models
+namespace Universities.Data.Models
 {
-    public class DocumentModel
+    public class IncompleteDocument
     {
+        public int Id { get; set; }
         public string Ut { get; set; }
         public string Country { get; set; }
         public string ZipLocation { get; set; }
@@ -18,15 +20,22 @@ namespace Universities.Models
         public string OrgaName3 { get; set; }
         public string OrgaName4 { get; set; }
         public string SubOrgaName { get; set; }
-        public int SeqNo { get; set; }
+        public int? SeqNo { get; set; }
         public string Full_name { get; set; }
         public string Role { get; set; }
         public string LastName { get; set; }
         public string Display_name { get; set; }
         public string Wos_standard { get; set; }
         public string FirstName { get; set; }
+        public string AssignedToUser { get; set; }
+        public bool Processed { get; set; }
 
-        public DocumentModel(string[] lineArr)
+        public IncompleteDocument()
+        {
+
+        }
+
+        public IncompleteDocument(string[] lineArr) : this()
         {
             Ut = lineArr[0];
             Country = lineArr[1];
@@ -42,13 +51,15 @@ namespace Universities.Models
             OrgaName3 = lineArr[11];
             OrgaName4 = lineArr[12];
             SubOrgaName = lineArr[13];
-            SeqNo = int.Parse(lineArr[14]);
+            SeqNo = int.TryParse(lineArr[14], out int seqNo) ? seqNo : null;
             Full_name = lineArr[15];
             Role = lineArr[16];
             LastName = lineArr[17];
             Display_name = lineArr[18];
             Wos_standard = lineArr[19];
             FirstName = string.IsNullOrEmpty(lineArr[20]) ? lineArr[19].Split(',')[1].Trim() : lineArr[20].Trim();
+            AssignedToUser = string.Empty;
+            Processed = false;
         }
 
         public string[] ToArray()
@@ -75,7 +86,9 @@ namespace Universities.Models
                 LastName,
                 Display_name,
                 Wos_standard,
-                FirstName
+                FirstName,
+                AssignedToUser,
+                Processed.ToString()
             };
         }
 

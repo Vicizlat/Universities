@@ -7,13 +7,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Universities", "Universitie
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Universities.Utils", "Universities.Utils\Universities.Utils.csproj", "{CE23DF3F-E29E-4A16-9750-CB5A10C63494}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Universities.Views", "Universities.Views\Universities.Views.csproj", "{4E95DF12-8C6E-4A90-B67D-959D8B498597}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Universities.Views", "Universities.Views\Universities.Views.csproj", "{4E95DF12-8C6E-4A90-B67D-959D8B498597}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Universities.Controller", "Universities.Controller\Universities.Controller.csproj", "{47BEB2FF-1A79-4BB5-8808-A45E58989D47}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Universities.Controller", "Universities.Controller\Universities.Controller.csproj", "{47BEB2FF-1A79-4BB5-8808-A45E58989D47}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Universities.Models", "Universities.Models\Universities.Models.csproj", "{7D971AED-D74C-4FD8-BE3D-635F6458CB6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Universities.Models", "Universities.Models\Universities.Models.csproj", "{7D971AED-D74C-4FD8-BE3D-635F6458CB6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Universities.Handlers", "Universities.Handlers\Universities.Handlers.csproj", "{63CAD0F1-C45D-4F7E-8FDF-51992A1458CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Universities.Handlers", "Universities.Handlers\Universities.Handlers.csproj", "{63CAD0F1-C45D-4F7E-8FDF-51992A1458CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Universities.Data", "Universities.Data\Universities.Data.csproj", "{E08F69C4-C940-4071-85B8-80809BB34BC1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{63CAD0F1-C45D-4F7E-8FDF-51992A1458CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63CAD0F1-C45D-4F7E-8FDF-51992A1458CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63CAD0F1-C45D-4F7E-8FDF-51992A1458CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E08F69C4-C940-4071-85B8-80809BB34BC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E08F69C4-C940-4071-85B8-80809BB34BC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E08F69C4-C940-4071-85B8-80809BB34BC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E08F69C4-C940-4071-85B8-80809BB34BC1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
