@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Universities.Utils;
+﻿using Universities.Utils;
 
 namespace Universities.Data.Models
 {

@@ -6,11 +6,14 @@
         xmlns:local="clr-namespace:Universities.Views"
         mc:Ignorable="d"
         x:Name="DataManageWindow" Title="Data Management" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow"
-        Height="400" MinHeight="400" Width="1132" MinWidth="962" KeyUp="Window_KeyUp">
+        Height="400" MinHeight="400" Width="1132" MinWidth="962" KeyUp="Window_KeyUp" Closing="DataManageWindow_Closing">
     <Window.Resources>
         <local:MultiBoolToVisibilityConverter x:Key="MultiBoolToVisibilityConverter"/>
         <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <local:MultiWidthConverter x:Key="MultiWidthConverter"/>
+        <DataTemplate x:Key="ProcessedColumnDataTemplate">
+            <CheckBox IsEnabled="False" IsChecked="{Binding [22]}"/>
+        </DataTemplate>
     </Window.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -28,88 +31,95 @@
                 </MultiBinding>
             </Button.Visibility>
         </Button>
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Orientation="Horizontal">
+            <CheckBox x:Name="cbPrDocs" Margin="5" Content="Show Processed Documents" IsChecked="True" Click="CheckBox_Click"/>
+            <CheckBox x:Name="cbAssDocs" Margin="5" Content="Show Documents Assigned to Everyone" IsChecked="True" Click="CheckBox_Click"/>
+        </StackPanel>
         <Button x:Name="ExportButton" Grid.Row="0" Padding="2" Margin="10, 4" Width="200" Content="Export"
                     HorizontalAlignment="Right" VerticalAlignment="Top" Click="ExportButton_Click"/>
         <TabControl Grid.Row="1">
             <TabItem x:Name="DocumentsTab" Header="Documents" Width="180" FontSize="18">
-                <ListView x:Name="lvDocuments" Margin="-3" SelectionMode="Extended" FontSize="12"
-                          SelectionChanged="ListView_SelectionChanged">
+                <ListView x:Name="lvDocuments" Margin="-3" SelectionMode="Extended" FontSize="12" SelectionChanged="ListView_SelectionChanged">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [0]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="Ut"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [0]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Ut"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="70" DisplayMemberBinding="{Binding [1]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="City"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [4]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="City"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="150" DisplayMemberBinding="{Binding [2]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="Street"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [5]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Street"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="45" DisplayMemberBinding="{Binding [3]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="AddrNo"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [6]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AddrNo"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [4]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="OrgaName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [8]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="OrgaName"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [5]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="OrgaName1"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [9]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="OrgaName1"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [6]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="SubOrgaName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [13]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="SubOrgaName"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="45" DisplayMemberBinding="{Binding [7]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="SeqNo"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [14]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="SeqNo"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="100" DisplayMemberBinding="{Binding [8]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="LastName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [17]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="LastName"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="100" DisplayMemberBinding="{Binding [9]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="FirstName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [20]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="FirstName"/>
+                            </GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding [21]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AssignedTo"/>
+                            </GridViewColumn>
+                            <GridViewColumn CellTemplate="{StaticResource ProcessedColumnDataTemplate}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Processed"/>
                             </GridViewColumn>
                         </GridView>
                     </ListView.View>
                 </ListView>
             </TabItem>
             <TabItem x:Name="OrganizationsTab" Header="Organizations" Width="180" FontSize="18">
-                <ListView x:Name="lvOrganizations" Margin="-3" SelectionMode="Extended" FontSize="12"
-                          SelectionChanged="ListView_SelectionChanged">
+                <ListView x:Name="lvOrganizations" Margin="-3" SelectionMode="Extended" FontSize="12" SelectionChanged="ListView_SelectionChanged">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [0]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="OrganizationId"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [0]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="OrganizationId"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [1]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="OrganizationName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [1]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="OrganizationName"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [2]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="ParentId"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [2]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="ParentId"/>
                             </GridViewColumn>
                         </GridView>
                     </ListView.View>
                 </ListView>
             </TabItem>
             <TabItem x:Name="PeopleTab" Header="People" Width="180" FontSize="18">
-                <ListView x:Name="lvPeople" Margin="-3" SelectionMode="Extended" FontSize="12"
-                          SelectionChanged="ListView_SelectionChanged">
+                <ListView x:Name="lvPeople" Margin="-3" SelectionMode="Extended" FontSize="12" SelectionChanged="ListView_SelectionChanged">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Width="100" DisplayMemberBinding="{Binding [0]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="PersonId"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [0]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="PersonId"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [1]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="FirstName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [1]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="FirstName"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [2]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="LastName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [2]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="LastName"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="100" DisplayMemberBinding="{Binding [3]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="OrgId"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [3]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="OrgId"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [4]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="DocId"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [4]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="DocId"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="100" DisplayMemberBinding="{Binding [5]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="SeqNo"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [5]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="SeqNo"/>
                             </GridViewColumn>
                         </GridView>
                     </ListView.View>
@@ -128,84 +138,88 @@
                 </TabItem.Width>
             </TabItem>
             <TabItem x:Name="DuplicateDocumentsTab" Header="Duplicate Documents" Width="140" Height="20" VerticalAlignment="Bottom">
-                <ListView x:Name="lvDuplicateDocuments" Margin="-3" SelectionMode="Extended" FontSize="12"
-                          SelectionChanged="ListView_SelectionChanged">
+                <ListView x:Name="lvDuplicateDocuments" Margin="-3" SelectionMode="Extended" FontSize="12" SelectionChanged="ListView_SelectionChanged">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [0]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="Ut"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [0]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Ut"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="70" DisplayMemberBinding="{Binding [4]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="City"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [4]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="City"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="150" DisplayMemberBinding="{Binding [5]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="Street"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [5]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Street"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="45" DisplayMemberBinding="{Binding [6]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="AddrNo"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [6]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AddrNo"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [8]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="OrgaName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [8]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="OrgaName"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [9]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="OrgaName1"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [9]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="OrgaName1"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [13]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="SubOrgaName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [13]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="SubOrgaName"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="45" DisplayMemberBinding="{Binding [14]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="SeqNo"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [14]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="SeqNo"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="100" DisplayMemberBinding="{Binding [17]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="LastName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [17]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="LastName"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="100" DisplayMemberBinding="{Binding [20]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="FirstName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [20]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="FirstName"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="80" DisplayMemberBinding="{Binding [21]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="AssignedTo"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [21]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AssignedTo"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="70" DisplayMemberBinding="{Binding [22]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="Processed"/>
+                            <GridViewColumn CellTemplate="{StaticResource ProcessedColumnDataTemplate}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Processed"/>
                             </GridViewColumn>
                         </GridView>
                     </ListView.View>
                 </ListView>
             </TabItem>
             <TabItem x:Name="IncompleteDocumentsTab" Header="Incomplete Documents" Width="140" Height="20" VerticalAlignment="Bottom">
-                <ListView x:Name="lvIncompleteDocuments" Margin="-3" SelectionMode="Extended" FontSize="12"
-                          SelectionChanged="ListView_SelectionChanged">
+                <ListView x:Name="lvIncompleteDocuments" Margin="-3" SelectionMode="Extended" FontSize="12" SelectionChanged="ListView_SelectionChanged">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [0]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="Ut"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [0]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Ut"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="70" DisplayMemberBinding="{Binding [1]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="City"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [4]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="City"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="150" DisplayMemberBinding="{Binding [2]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="Street"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [5]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Street"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="45" DisplayMemberBinding="{Binding [3]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="AddrNo"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [6]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AddrNo"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [4]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="OrgaName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [8]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="OrgaName"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [5]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="OrgaName1"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [9]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="OrgaName1"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="140" DisplayMemberBinding="{Binding [6]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="SubOrgaName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [13]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="SubOrgaName"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="45" DisplayMemberBinding="{Binding [7]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="SeqNo"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [14]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="SeqNo"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="100" DisplayMemberBinding="{Binding [8]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="LastName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [17]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="LastName"/>
                             </GridViewColumn>
-                            <GridViewColumn Width="100" DisplayMemberBinding="{Binding [9]}">
-                                <GridViewColumnHeader Click="ListViewColumnHeader_Click" Content="FirstName"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding [20]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="FirstName"/>
+                            </GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding [21]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AssignedTo"/>
+                            </GridViewColumn>
+                            <GridViewColumn CellTemplate="{StaticResource ProcessedColumnDataTemplate}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Processed"/>
                             </GridViewColumn>
                         </GridView>
                     </ListView.View>
@@ -213,23 +227,24 @@
             </TabItem>
         </TabControl>
         <TextBlock Grid.Row="2" Margin="10" Padding="2" FontWeight="Bold" VerticalAlignment="Bottom" Text="Actions on selected items:"/>
-        <StackPanel Grid.Row="2" Margin="200, 0, 0, 10" Orientation="Horizontal" VerticalAlignment="Bottom">
-            <StackPanel.Visibility>
+        <StackPanel Grid.Row="2" Margin="200, 0, 0, 10" Orientation="Horizontal" VerticalAlignment="Bottom"
+                    Visibility="{Binding IsSelected, ElementName=DocumentsTab, Converter={StaticResource BoolToVisibilityConverter}}">
+            <TextBlock Margin="10, 0" Padding="2" Width="90" Text="Assign to User:"/>
+            <ComboBox x:Name="Users" Padding="2" Width="120" SelectionChanged="Users_SelectionChanged"/>
+            <Button x:Name="Assign" Margin="10, -3" Padding="2" Width="120" IsEnabled="False" Content="Assign" Click="Assign_Click"/>
+            <TextBlock Margin="40, 0, 0, 0" Padding="2" Width="50" Text="Mark as:"/>
+            <Button Margin="10, -3" Padding="2" Width="100" Background="LightGreen" Content="Processed" Click="Button_Click"/>
+            <Button Margin="0, -3" Padding="2" Width="100" Background="Orange" Content="Not Processed" Click="Button_Click"/>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Margin="200, 0, 0, 10" Orientation="Horizontal" VerticalAlignment="Bottom"
+                    Visibility="{Binding IsSelected, ElementName=PeopleTab, Converter={StaticResource BoolToVisibilityConverter}}">
+            <!--<StackPanel.Visibility>
                 <MultiBinding Converter="{StaticResource MultiBoolToVisibilityConverter}">
                     <Binding Path="IsSelected" ElementName="DocumentsTab"/>
                     <Binding Path="IsSelected" ElementName="DuplicateDocumentsTab"/>
                     <Binding Path="IsSelected" ElementName="IncompleteDocumentsTab"/>
                 </MultiBinding>
-            </StackPanel.Visibility>
-            <TextBlock Margin="10, 0" Padding="2" Width="90" Text="Assign to User:"/>
-            <ComboBox x:Name="Users" Padding="2" Width="120" SelectionChanged="Users_SelectionChanged"/>
-            <Button x:Name="Assign" Margin="10, -3" Padding="2" Width="120" IsEnabled="False"  Content="Assign"/>
-            <TextBlock Margin="40, 0, 0, 0" Padding="2" Width="50" Text="Mark as:"/>
-            <Button Margin="10, -3" Padding="2" Width="100" Background="LightGreen" Content="Processed"/>
-            <Button Margin="0, -3" Padding="2" Width="100" Background="Orange" Content="Not Processed"/>
-        </StackPanel>
-        <StackPanel Grid.Row="2" Margin="200, 0, 0, 10" Orientation="Horizontal" VerticalAlignment="Bottom"
-                    Visibility="{Binding IsSelected, ElementName=PeopleTab, Converter={StaticResource BoolToVisibilityConverter}}">
+            </StackPanel.Visibility>-->
             <TextBlock Margin="10, 0" Padding="2" Width="65" Text="Shift IDs by:"/>
             <TextBox x:Name="NewStartId" Margin="0, -3" Padding="2" Width="60" KeyDown="Numbers_OnKeyDown" TextChanged="ShiftId_TextChanged"/>
             <Button x:Name="ShiftIds" Margin="10, -3" Padding="2" Width="60" IsEnabled="False" Content="Apply" Click="ShiftIdsButton_Click"/>

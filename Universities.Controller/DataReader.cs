@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows;
 using Universities.Data.Models;
 using Universities.Handlers;
-using Universities.Models;
 using Universities.Utils;
 
 namespace Universities.Controller
@@ -12,7 +11,6 @@ namespace Universities.Controller
     public static class DataReader
     {
         public static event EventHandler? OnDocumentFound;
-        public static event EventHandler? OnIncompleteDocumentFound;
 
         public static bool ReadDataSetFile(string filePath, out string message)
         {
@@ -29,11 +27,6 @@ namespace Universities.Controller
                 foreach (string line in lines.Skip(1))
                 {
                     string[] lineArr = StringSplit.SkipStrings(line, Settings.Instance.Separator, '\"');
-                    if (string.IsNullOrEmpty(lineArr[14]))
-                    {
-                        OnIncompleteDocumentFound?.Invoke(lineArr, EventArgs.Empty);
-                        continue;
-                    }
                     OnDocumentFound?.Invoke(lineArr, EventArgs.Empty);
                 }
                 Logging.Instance.WriteLine($"Finished processing {lines.Length - 1} Documents.");
@@ -66,8 +59,8 @@ namespace Universities.Controller
                     string name = lineArr[1];
                     int? parentId = int.TryParse(lineArr[2], out int pId) ? pId : null;
                     organizations.Add(new Organization(id, name, parentId));
-                    //controller.Context.Organizations.Add(new Organization(id, name, parentId));
-                    //controller.Context.SaveChanges();
+                    controller.Context.Organizations.Add(new Organization(id, name, parentId));
+                    controller.Context.SaveChanges();
                 }
                 Logging.Instance.WriteLine($"Finished processing {lines.Length - 1} Organizations.");
                 message = $"Successfully loaded {organizations.Count} Organizations.";
@@ -102,8 +95,8 @@ namespace Universities.Controller
                     string[] lineArr = StringSplit.SkipStrings(line, Constants.Separators[0], '\"');
                     if (lineArr.Length < 10) lineArr = StringSplit.SkipStrings(line, Constants.Separators[1], '\"');
                     people.Add(new Person(lineArr));
-                    //controller.Context.People.Add(new Person(lineArr));
-                    //controller.Context.SaveChanges();
+                    controller.Context.People.Add(new Person(lineArr));
+                    controller.Context.SaveChanges();
                 }
                 Logging.Instance.WriteLine($"Finished processing {lines.Length - 1} People.");
                 message = $"Successfully loaded {people.Count} People.";

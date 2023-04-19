@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using Universities.Controller;
+using Universities.Data.Models;
 using Universities.Handlers;
 
 namespace Universities.Views
@@ -24,7 +25,8 @@ namespace Universities.Views
             InitializeComponent();
             DataContext = this;
             this.controller = controller;
-            lvDocuments.ItemsSource = GetDocuments(controller.Documents.Select(d => d.ToArray()));
+            controller.Documents = controller.Context.Documents.ToList();
+            UpdateDocumentsView();
             lvOrganizations.ItemsSource = controller.Organizations.Select(o => o.ToArray());
             lvPeople.ItemsSource = controller.People.Select(o => o.ToArray());
             lvDuplicateDocuments.ItemsSource = controller.DuplicateDocuments.Select(d => d.ToArray());
@@ -35,15 +37,32 @@ namespace Universities.Views
             controller.OnPeopleChanged += Controller_OnPeopleChanged;
         }
 
-        private IEnumerable<string[]> GetDocuments(IEnumerable<string[]> documents)
+        private void UpdateDocumentsView()
         {
-            foreach (string[] item in documents)
+            if (cbAssDocs.IsChecked == true)
             {
-                yield return new[]
+                if (cbPrDocs.IsChecked == true)
                 {
-                    item[0], item[4], item[5], item[6], item[8], item[9], item[13], item[14], item[17],
-                    string.IsNullOrEmpty(item[20]) ? item[19].Split(',')[1].Trim() : item[20].Trim()
-                };
+                    lvDocuments.ItemsSource = controller.Documents.Select(d => d.ToArray());
+                }
+                else
+                {
+                    lvDocuments.ItemsSource = controller.Documents.Where(d => !d.Processed).Select(d => d.ToArray());
+                }
+            }
+            else
+            {
+                if (cbPrDocs.IsChecked == true)
+                {
+                    lvDocuments.ItemsSource = controller.Documents.Where(d => d.AssignedToUser == controller.CurrentUser).Select(d => d.ToArray());
+                }
+                else
+                {
+                    lvDocuments.ItemsSource = controller.Documents
+                        .Where(d => d.AssignedToUser == controller.CurrentUser)
+                        .Where(d => !d.Processed)
+                        .Select(d => d.ToArray());
+                }
             }
         }
 
@@ -67,15 +86,16 @@ namespace Universities.Views
             string direction = newDir.ToString();
             if (DocumentsTab.IsSelected)
             {
-                lvDocuments.ItemsSource = GetDocuments(controller.GetDocumentsOrderedBy(sortBy, direction).Select(d => d.ToArray()));
+                controller.Documents = CollectionSorter.GetDocumentsOrderedBy(controller, sortBy, direction).ToList();
+                UpdateDocumentsView();
             }
             else if (OrganizationsTab.IsSelected)
             {
-                lvOrganizations.ItemsSource = controller.GetOrganizationsOrderedBy(sortBy, direction).Select(d => d.ToArray());
+                lvOrganizations.ItemsSource = CollectionSorter.GetOrganizationsOrderedBy(controller, sortBy, direction).Select(d => d.ToArray());
             }
             else if (PeopleTab.IsSelected)
             {
-                lvPeople.ItemsSource = controller.GetPeopleOrderedBy(sortBy, direction).Select(d => d.ToArray());
+                lvPeople.ItemsSource = CollectionSorter.GetPeopleOrderedBy(controller, sortBy, direction).Select(d => d.ToArray());
             }
         }
 
@@ -110,7 +130,7 @@ namespace Universities.Views
 
         private void Controller_OnDocumentsChanged(object? sender, EventArgs e)
         {
-            lvDocuments.ItemsSource = GetDocuments(controller.Documents.Select(d => d.ToArray()));
+            UpdateDocumentsView();
         }
 
         private void Controller_OnOrganizationsChanged(object? sender, EventArgs e)
@@ -128,7 +148,18 @@ namespace Universities.Views
             ShiftIds.IsEnabled = !string.IsNullOrEmpty(NewStartId.Text) && int.TryParse(NewStartId.Text, out newStartId);
         }
 
-        private void ShiftIdsButton_Click(object sender, RoutedEventArgs e) => OnShiftIdsClicked?.Invoke(sender, newStartId);
+        private void ShiftIdsButton_Click(object sender, RoutedEventArgs e)
+        {
+            List<Person> shiftedPeople = new List<Person>();
+            foreach (Person person in controller.People)
+            {
+                Person? findPerson = shiftedPeople.Find(p => p.LastPersonId == person.PersonId);
+                person.LastPersonId = person.PersonId;
+                person.PersonId = findPerson?.PersonId ?? (shiftedPeople.Count == 0 ? newStartId : shiftedPeople.Last().PersonId + 1);
+                shiftedPeople.Add(new Person(person.ToArray()) { LastPersonId = person.LastPersonId });
+            }
+            MessageBox.Show("All done!");
+        }
 
         private void Numbers_OnKeyDown(object sender, KeyEventArgs e) => e.Handled = KeyPressHandler.NotNumbers(e);
 
@@ -139,13 +170,45 @@ namespace Universities.Views
 
         private void Users_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Assign.IsEnabled = true;
+            Assign.IsEnabled = !((string)Users.SelectedItem).Contains("Unable");
+        }
+
+        private void Assign_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (string[] item in lvDocuments.SelectedItems)
+            {
+                controller.AssignUserToDocuments(item, (string)Users.SelectedItem);
+            }
+            lvDocuments.SelectedItems.Clear();
+            UpdateDocumentsView();
         }
 
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ListView selectedList = sender as ListView;
             object items = selectedList.SelectedItems;
+        }
+
+        private void DataManageWindow_Closing(object sender, CancelEventArgs e)
+        {
+            controller.UpdateDocuments();
+        }
+
+        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateDocumentsView();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            string senderButton = ((Button)sender).Content.ToString() ?? string.Empty;
+            bool processed = senderButton == "Processed";
+            foreach (string[] item in lvDocuments.SelectedItems)
+            {
+                controller.SetDocumentProcessedStatus(item, processed);
+            }
+            lvDocuments.SelectedItems.Clear();
+            UpdateDocumentsView();
         }
     }
 }

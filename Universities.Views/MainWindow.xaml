@@ -5,13 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:uc="clr-namespace:Universities.Views.UserControls"
         xmlns:images="clr-namespace:Universities.Views.Images"
-        mc:Ignorable="d" FontSize="18"
-        Title="MainWindow" Height="500" MinHeight="500" Width="900" MinWidth="800" WindowStartupLocation="CenterScreen">
+        xmlns:local="clr-namespace:Universities.Views"
+        mc:Ignorable="d" FontSize="18" Title="MainWindow" MinHeight="500" MinWidth="900" WindowState="Maximized">
     <Grid Margin="10, 0, 10, 20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="60"/>
             <RowDefinition Height="30"/>
-            <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="40"/>
             <RowDefinition Height="2*"/>
@@ -23,27 +23,37 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Grid Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Margin="10, 10" HorizontalAlignment="Right">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <images:ButtonImage x:Name="AddUser" Grid.Column="0" Grid.RowSpan="2" FileName="AddUserIcon" ToolTip="Add User"
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0, 10" HorizontalAlignment="Right" Orientation="Horizontal">
+            <images:ButtonImage x:Name="AddUser" FileName="AddUserIcon" ToolTip="Add User"
                             Source="Images\AddUserIconBW.png" MouseLeftButtonUp="AddUserIcon_MouseLeftButtonUp"/>
-            <images:ButtonImage x:Name="DataManage" Grid.Column="1" Grid.RowSpan="2" FileName="ImportExportIcon" ToolTip="Manage Data"
+            <images:ButtonImage x:Name="DataManage" FileName="ImportExportIcon" ToolTip="Manage Data"
                             Source="Images\ImportExportIconBW.png" MouseLeftButtonUp="ImportExportIcon_MouseLeftButtonUp"/>
-            <images:ButtonImage Grid.Column="2" Grid.RowSpan="2" FileName="SettingsIcon" ToolTip="Settings"
+            <images:ButtonImage FileName="SettingsIcon" ToolTip="Settings"
                             Source="Images\SettingsIconBW.png" MouseLeftButtonUp="SettingsIcon_MouseLeftButtonUp"/>
-        </Grid>
-        <uc:LabelTextBlock Grid.Row="0" Grid.Column="0" Margin="10, 0" Label="WOS Document:"/>
-        <uc:LabelTextBlock Grid.Row="0" Grid.Column="1" Margin="10, 0" Label="SeqNo:"/>
-        <TextBox x:Name="Wos" Grid.Row="1" Grid.Column="0" Margin="10, 0" Padding="2"/>
-        <TextBlock x:Name="SeqNo" Grid.Row="1" Grid.Column="1" Margin="10, 0" Padding="2" HorizontalAlignment="Left"/>
-        <uc:LabelTextBlock Grid.Row="2" Grid.Column="0" Margin="10, 0" Label="Author:"/>
-        <uc:LabelTextBlock Grid.Row="2" Grid.Column="1" Margin="10, 0" Label="Address:"/>
-        <TextBox x:Name="Author" Grid.Row="3" Grid.Column="0" Margin="10, 0" Padding="2"/>
-        <TextBox x:Name="Address" Grid.Row="3" Grid.Column="1" TextWrapping="Wrap" Margin="10, 0" Padding="2"/>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Bottom">
+            <uc:TextBoxLabeled x:Name="ALastName" Margin="10, 0" Width="180" Label="Last name:"/>
+            <uc:TextBoxLabeled x:Name="AFirstName" Margin="10, 0" Width="180" Label="First name:"/>
+            <uc:TextBoxLabeled x:Name="Wos" Margin="10, 0" Width="200" Label="WOS Document:"/>
+            <uc:TextBoxLabeled x:Name="SeqNo" Margin="10, 0" Width="80" Label="SeqNo:"/>
+        </StackPanel>
+        <uc:TextBoxLabeled x:Name="Address" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="10, 0" Label="Address:" VerticalAlignment="Bottom"/>
+        <uc:LabelTextBlock Grid.Row="2" Grid.Column="0" Margin="10, 0" Label="Possible matching names:"/>
+        <ListView x:Name="lvSimilarAuthors" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="10, 0" SelectionMode="Extended">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="100" DisplayMemberBinding="{Binding [17]}" Header="LastName"/>
+                    <GridViewColumn Width="100" DisplayMemberBinding="{Binding [20]}" Header="FirstName"/>
+                    <GridViewColumn Width="150" DisplayMemberBinding="{Binding [7]}" Header="Address"/>
+                    <GridViewColumn Width="140" DisplayMemberBinding="{Binding [8]}" Header="OrgaName"/>
+                    <GridViewColumn Width="140" DisplayMemberBinding="{Binding [9]}" Header="OrgaName1"/>
+                    <GridViewColumn Width="140" DisplayMemberBinding="{Binding [10]}" Header="OrgaName2"/>
+                    <GridViewColumn Width="140" DisplayMemberBinding="{Binding [11]}" Header="OrgaName3"/>
+                    <GridViewColumn Width="140" DisplayMemberBinding="{Binding [12]}" Header="OrgaName4"/>
+                    <GridViewColumn Width="140" DisplayMemberBinding="{Binding [13]}" Header="SubOrgaName"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
         <uc:LabelTextBlock Grid.Row="4" Grid.Column="0" Margin="10, 0" Label="Organization Names:"/>
         <uc:LabelTextBlock Grid.Row="4" Grid.Column="1" Margin="10, 0" Label="SubOrganization Names:"/>
         <TextBox x:Name="OrganizationNames" Grid.Row="5" Grid.Column="0" Margin="10, 0" Padding="2"/>
@@ -59,15 +69,10 @@
             <Button x:Name="AddOrganization" Grid.Column="1" Content="Add Organization" Margin="10, 0" Padding="2"
                     Click="AddOrganization_OnClick"/>
         </Grid>
-        <Grid Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 20, 0, 0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Button x:Name="PreviousButton" Grid.Column="0" Margin="10, 0" Padding="2" Click="PreviousButton_OnClick"/>
-            <Button x:Name="SaveButton" Grid.Column="1" Margin="10, 0" Padding="2" Content="Save" Click="SaveButton_OnClick"/>
-            <Button x:Name="NextButton" Grid.Column="2" Margin="10, 0" Padding="2" Click="NextButton_OnClick"/>
-        </Grid>
+        <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 20, 0, 0" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button x:Name="PreviousButton" Margin="10, 0" Padding="2" Width="200" Click="PreviousButton_OnClick"/>
+            <Button x:Name="SaveButton" Margin="10, 0" Padding="2" Width="200" Content="Save" Click="SaveButton_OnClick"/>
+            <Button x:Name="NextButton" Margin="10, 0" Padding="2" Width="200" Click="NextButton_OnClick"/>
+        </StackPanel>
     </Grid>
 </Window>

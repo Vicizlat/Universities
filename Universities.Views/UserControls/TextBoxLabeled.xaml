@@ -11,6 +11,6 @@
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Padding="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" Text="{Binding (local:TextBoxLabeled.Label)}"/>
-        <TextBox Grid.Row="1" Padding="2" VerticalContentAlignment="Center" Text="{Binding (local:TextBoxLabeled.Text)}" TextChanged="TextBox_TextChanged"/>
+        <TextBox x:Name="TextBox" Grid.Row="1" Padding="2" VerticalContentAlignment="Center" Text="{Binding (local:TextBoxLabeled.Text)}" TextChanged="TextBox_TextChanged"/>
     </Grid>
 </UserControl>

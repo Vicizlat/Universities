@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -12,10 +13,12 @@ namespace Universities.Views
     {
         private readonly MainController controller;
         private int docId = -1;
+        public string[] docArray;
 
         public MainWindow(MainController controller)
         {
             InitializeComponent();
+            DataContext = this;
             this.controller = controller;
             Title = $"Universities v. {controller.InstalledVersion}     Current user: {controller.CurrentUser}";
             if (!controller.IsAdmin)
@@ -50,7 +53,6 @@ namespace Universities.Views
         private void ImportExportIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             DataManagementWindow dataManagementWindow = new DataManagementWindow(controller);
-            dataManagementWindow.OnShiftIdsClicked += DataManagementWindow_OnShiftIdsClicked;
             dataManagementWindow.ShowDialog();
         }
 
@@ -58,11 +60,6 @@ namespace Universities.Views
         {
             SettingsWindow settingsWindow = new SettingsWindow();
             settingsWindow.ShowDialog();
-        }
-
-        private void DataManagementWindow_OnShiftIdsClicked(object? sender, int newStartId)
-        {
-            if (controller.ShiftPeopleIds(newStartId)) MessageBox.Show("All done!");
         }
 
         private void AddOrganization_OnClick(object sender, RoutedEventArgs e) => new AddOrganization(controller).ShowDialog();
@@ -81,60 +78,64 @@ namespace Universities.Views
 
         private void SaveButton_OnClick(object sender, RoutedEventArgs e)
         {
-            string[] document = controller.GetDocumentArray(docId);
-            string firstName = document[20];
-            string lastName = document[17];
-            string documentId = document[0];
-            int seqNo = int.Parse(document[14]);
             int orgId = controller.Organizations[SelectOrganization.SelectedIndex].OrganizationId;
-            if (controller.AddPerson(firstName, lastName, orgId, documentId, seqNo))
+            int personId = controller.GetPersonId(docArray[20], docArray[17]);
+            controller.AddPerson(personId, docArray[20], docArray[17], orgId, docArray[0], int.Parse(docArray[14]));
+            controller.SetDocumentProcessedStatus(docArray, true);
+            foreach (string[] item in lvSimilarAuthors.SelectedItems)
             {
-                if (controller.RemoveDocument(docId))
-                {
-                    if (controller.SaveDocuments())
-                    {
-                        PopulateFields();
-                        return;
-                    }
-                    controller.AddDocument(docId, document);
-                }
+                controller.AddPerson(personId, item[20], item[17], orgId, item[0], int.Parse(item[14]));
+                controller.SetDocumentProcessedStatus(item, true);
             }
-            controller.FindAndRemovePerson(firstName, lastName, documentId, seqNo);
-            MessageBox.Show("Failed to save Person. No changes were made.");
+            //if (controller.AddPerson(personId, firstName, lastName, orgId, docArray[0], int.Parse(docArray[14])))
+            //{
+            //    if (controller.SaveDocuments())
+            //    {
+            //        PopulateFields();
+            //        return;
+            //    }
+            //}
+            //MessageBox.Show("Failed to save Person. No changes were made.");
         }
 
         private void PopulateFields()
         {
-            string[] document = controller.GetDocumentArray(docId);
+            docArray = controller.GetDocumentArray(docId);
             SaveButton.IsEnabled = IsSaveEnabled();
             SelectOrganization.SelectedIndex = -1;
             PreviousButton.IsEnabled = docId >= 0;
             PreviousButton.Content = $"<< Previous {(docId < 0 ? "(0)" : $"({docId})")}";
             NextButton.IsEnabled = docId < controller.Documents.Count - 1;
             NextButton.Content = $"({controller.Documents.Count - docId - 1}) Next >>";
-            if (document.Length <= 0)
+            if (docId < 0)
             {
-                Wos.Text = string.Empty;
-                SeqNo.Text = string.Empty;
-                Author.Text = string.Empty;
-                Address.Text = string.Empty;
+                ALastName.TextBox.Text = string.Empty;
+                AFirstName.TextBox.Text = string.Empty;
+                Wos.TextBox.Text = string.Empty;
+                SeqNo.TextBox.Text = string.Empty;
+                Address.TextBox.Text = string.Empty;
                 OrganizationNames.Text = string.Empty;
                 SubOrganizationNames.Text = string.Empty;
+                lvSimilarAuthors.ItemsSource = new List<string[]>();
             }
             else
             {
-                Wos.Text = document[0];
-                SeqNo.Text = document[14];
-                Author.Text = $"{document[20]} {document[17]}";
-                Address.Text = document[7];
+                ALastName.TextBox.Text = docArray[17];
+                AFirstName.TextBox.Text = docArray[20];
+                Wos.TextBox.Text = docArray[0];
+                SeqNo.TextBox.Text = docArray[14];
+                Address.TextBox.Text = docArray[7];
                 StringBuilder sb = new StringBuilder()
-                    .AppendLine(document[8])
-                    .AppendLine(document[9])
-                    .AppendLine(document[10])
-                    .AppendLine(document[11])
-                    .AppendLine(document[12]);
+                    .AppendLine(docArray[8])
+                    .AppendLine(docArray[9])
+                    .AppendLine(docArray[10])
+                    .AppendLine(docArray[11])
+                    .AppendLine(docArray[12]);
                 OrganizationNames.Text = sb.ToString().TrimEnd();
-                SubOrganizationNames.Text = document[13];
+                SubOrganizationNames.Text = docArray[13];
+                lvSimilarAuthors.ItemsSource = controller.Documents
+                    .Where(d => d.Ut != docArray[0] && d.LastName == docArray[17])
+                    .Select(d => d.ToArray());
             }
         }
 
@@ -145,7 +146,7 @@ namespace Universities.Views
 
         private bool IsSaveEnabled()
         {
-            return SelectOrganization.SelectedIndex >= 0 && !string.IsNullOrEmpty(Wos.Text) && !string.IsNullOrEmpty(Author.Text);
+            return SelectOrganization.SelectedIndex >= 0 && !string.IsNullOrEmpty(Wos.TextBox.Text) && !string.IsNullOrEmpty(ALastName.TextBox.Text);
         }
     }
 }

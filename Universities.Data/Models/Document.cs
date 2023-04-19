@@ -85,7 +85,9 @@ namespace Universities.Data.Models
                 LastName,
                 Display_name,
                 Wos_standard,
-                FirstName
+                FirstName,
+                AssignedToUser,
+                Processed.ToString()
             };
         }
 
