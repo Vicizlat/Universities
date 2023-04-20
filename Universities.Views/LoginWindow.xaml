@@ -10,10 +10,9 @@
         WindowStartupLocation="CenterScreen" BorderThickness="1" KeyUp="Window_KeyUp">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="40"/>
             <RowDefinition Height="50"/>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -21,23 +20,12 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Label x:Name="Title" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="10, 10, 0, 0" Padding="2" FontSize="12"
-               d:Content="Please enter username and password to login"
-               Content="{Binding (local:LoginWindow.WindowTitle)}"/>
-        <CheckBox x:Name="SetAdmin" Grid.Row="1" Margin="10, 0" FontSize="10" VerticalContentAlignment="Bottom"
-                  Visibility="Hidden" Content="Make new user an Admin"/>
-        <Button x:Name="OpenSettingsButton" Grid.Row="1" Grid.Column="1" Padding="2" Margin="10, 0" FontSize="10" Foreground="Blue"
-                Background="Transparent" BorderThickness="0" Content="Open Settings window..." Click="OpenSettingsButton_Click"/>
-        <uc:TextBoxLabeled x:Name="Username" Grid.Row="2" Grid.Column="0" Margin="10, 0"
-                           Label="Username:" TextChanged="Text_OnTextChanged"/>
-        <uc:PasswordBoxLabeled x:Name="Password" Grid.Row="2" Grid.Column="1" Margin="10, 0"
-                               Label="Password:" PasswordChanged="Password_PasswordChanged"/>
-        <TextBlock x:Name="Alert1" Grid.Row="3" Grid.Column="0" Margin="12, 0" FontSize="10" Foreground="Red"
-                   Visibility="Hidden" Text="Incorrect Username or Password"/>
-        <TextBlock x:Name="Alert2" Grid.Row="3" Grid.Column="1" Margin="12, 0" FontSize="10" Foreground="Red"
-                   Visibility="Hidden" Text="Attempts left: "/>
-        <Button x:Name="Login" Grid.Row="4" Grid.Column="0" Margin="10, 0" Background="LightGreen"
-                Content="{Binding (local:LoginWindow.ConfirmButtonText)}" IsEnabled="False" Click="Login_Click"/>
-        <Button x:Name="Cancel" Grid.Row="4" Grid.Column="1" Margin="10, 0" Background="IndianRed"
-                Content="Cancel" Click="Cancel_Click"/>
+               d:Content="Enter username and password for the new User"/>
+        <uc:TextBoxLabeled x:Name="Username" Grid.Row="1" Grid.Column="0" Margin="10, 0" Label="Username:" TextChanged="Text_OnTextChanged"/>
+        <uc:PasswordBoxLabeled x:Name="Password" Grid.Row="1" Grid.Column="1" Margin="10, 0" Label="Password:" PasswordChanged="Password_PasswordChanged"/>
+        <CheckBox x:Name="SetAdminCheck" Grid.Row="2" Grid.Column="1" Margin="10, 0" FontSize="10" IsChecked="False" Content="Make new user an Admin"/>
+        <Button x:Name="Confirm" Grid.Row="3" Grid.Column="0" Margin="10, 0" Background="LightGreen" IsEnabled="False"
+                Content="Confirm" Click="ConfirmButton_Click"/>
+        <Button x:Name="Cancel" Grid.Row="3" Grid.Column="1" Margin="10, 0" Background="IndianRed" Content="Cancel" Click="Cancel_Click"/>
     </Grid>
 </Window>

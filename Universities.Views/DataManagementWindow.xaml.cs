@@ -31,7 +31,7 @@ namespace Universities.Views
             lvPeople.ItemsSource = controller.People.Select(o => o.ToArray());
             lvDuplicateDocuments.ItemsSource = controller.DuplicateDocuments.Select(d => d.ToArray());
             lvIncompleteDocuments.ItemsSource = controller.IncompleteDocuments.Select(d => d.ToArray());
-            Users.ItemsSource = controller.GetUsers().Where(u => u != "root");
+            Users.ItemsSource = SqlCommands.GetUsers().Where(u => u != "root");
             controller.OnDocumentsChanged += Controller_OnDocumentsChanged;
             controller.OnOrganizationsChanged += Controller_OnOrganizationsChanged;
             controller.OnPeopleChanged += Controller_OnPeopleChanged;
@@ -86,16 +86,16 @@ namespace Universities.Views
             string direction = newDir.ToString();
             if (DocumentsTab.IsSelected)
             {
-                controller.Documents = CollectionSorter.GetDocumentsOrderedBy(controller, sortBy, direction).ToList();
+                controller.Documents = CollectionSorter.GetDocumentsOrderedBy(sortBy, direction).ToList();
                 UpdateDocumentsView();
             }
             else if (OrganizationsTab.IsSelected)
             {
-                lvOrganizations.ItemsSource = CollectionSorter.GetOrganizationsOrderedBy(controller, sortBy, direction).Select(d => d.ToArray());
+                lvOrganizations.ItemsSource = CollectionSorter.GetOrganizationsOrderedBy(sortBy, direction).Select(d => d.ToArray());
             }
             else if (PeopleTab.IsSelected)
             {
-                lvPeople.ItemsSource = CollectionSorter.GetPeopleOrderedBy(controller, sortBy, direction).Select(d => d.ToArray());
+                lvPeople.ItemsSource = CollectionSorter.GetPeopleOrderedBy(sortBy, direction).Select(d => d.ToArray());
             }
         }
 

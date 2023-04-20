@@ -7,67 +7,45 @@ namespace Universities.Views
 {
     public partial class LoginWindow
     {
-        public string WindowTitle { get; set; }
-        public string ConfirmButtonText { get; set; }
-        public bool IsLogin { get; }
-        public bool IsAdmin { get; set; }
+        public bool SetAdmin { get; set; }
 
         public string UsernameText = string.Empty;
         public string PasswordText = string.Empty;
 
-        public LoginWindow(int attempts, bool isLogin)
+        public LoginWindow(bool addUser)
         {
             InitializeComponent();
             DataContext = this;
-            IsLogin = isLogin;
-            if (isLogin)
+            if (addUser)
             {
-                WindowTitle = "Please enter username and password to login";
-                ConfirmButtonText = "Login";
-                if (attempts < 3)
-                {
-                    Alert1.Visibility = Visibility.Visible;
-                    Alert2.Visibility = Visibility.Visible;
-                    Alert2.Text += attempts;
-                }
+                SetAdminCheck.Visibility = Visibility.Visible;
+                Title.Content = "Create new User:";
             }
             else
             {
-                SetAdmin.Visibility = Visibility.Visible;
-                SetAdmin.IsChecked = false;
-                OpenSettingsButton.Visibility = Visibility.Hidden;
-                WindowTitle = "Enter username and password for the new User";
-                ConfirmButtonText = "Add User";
+                Title.Content = "Change password for User:";
+                SetAdminCheck.Visibility = Visibility.Hidden;
+                Username.IsEnabled = false;
+                Username.Text = Settings.Instance.Username;
+                Password.Label = "New Password";
             }
         }
 
         private void Text_OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            Login.IsEnabled = !string.IsNullOrEmpty(Username.Text) && !string.IsNullOrEmpty(Password.PassBox.Password);
+            Confirm.IsEnabled = !string.IsNullOrEmpty(Username.Text) && !string.IsNullOrEmpty(Password.PassBox.Password);
         }
 
         private void Password_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            Login.IsEnabled = !string.IsNullOrEmpty(Username.Text) && !string.IsNullOrEmpty(Password.PassBox.Password);
+            Confirm.IsEnabled = !string.IsNullOrEmpty(Username.Text) && !string.IsNullOrEmpty(Password.PassBox.Password);
         }
 
-        private void OpenSettingsButton_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = new SettingsWindow().ShowDialog().Value;
-            Close();
-        }
-
-        private void Login_Click(object sender, RoutedEventArgs e)
+        private void ConfirmButton_Click(object sender, RoutedEventArgs e)
         {
             UsernameText = Username.Text;
             PasswordText = Password.PassBox.Password;
-            if (IsLogin)
-            {
-                Settings.Instance.Username = Username.Text;
-                Settings.Instance.Password = Password.PassBox.Password;
-                Settings.Instance.WriteSettingsFile();
-            }
-            IsAdmin = SetAdmin.IsChecked.HasValue ? SetAdmin.IsChecked.Value : false;
+            SetAdmin = SetAdminCheck.IsChecked == true;
             DialogResult = true;
             Close();
         }
@@ -80,9 +58,9 @@ namespace Universities.Views
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter && Login.IsEnabled)
+            if (e.Key == Key.Enter && Confirm.IsEnabled)
             {
-                Login_Click(this, e);
+                ConfirmButton_Click(this, e);
             }
             if (e.Key == Key.Escape)
             {

@@ -1,13 +1,13 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
+using Universities.Controller;
 using Universities.Utils;
 
 namespace Universities.Views
 {
     public partial class SettingsWindow
     {
-        public SettingsWindow(bool allowAddUser = false)
+        public SettingsWindow()
         {
             InitializeComponent();
             Server.Text = Settings.Instance.Server;
@@ -16,6 +16,28 @@ namespace Universities.Views
             Username.Text = Settings.Instance.Username;
             Password.PassBox.Password = Settings.Instance.Password;
             Separator.Text = Settings.Instance.Separator.ToString();
+        }
+
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.Instance.Server = Server.Text;
+            Settings.Instance.Port = Port.Text;
+            Settings.Instance.Database = Database.Text;
+            Settings.Instance.Username = Username.Text;
+            Settings.Instance.Password = Password.PassBox.Password;
+            Settings.Instance.Separator = Separator.Text[0];
+            DialogResult = Settings.Instance.WriteSettingsFile();
+           Close();
+        }
+
+        private void ChangePasswordButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoginWindow loginWindow = new LoginWindow(false);
+            if (loginWindow.ShowDialog() == true)
+            {
+                SqlCommands.UpdateUserPassword(loginWindow.UsernameText, loginWindow.PasswordText);
+                Settings.Instance.Password = loginWindow.PasswordText;
+            }
         }
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
@@ -28,19 +50,6 @@ namespace Universities.Views
             {
                 CancelButton_Click(this, e);
             }
-        }
-
-        private void SaveButton_Click(object sender, RoutedEventArgs e)
-        {
-            Settings.Instance.Server = Server.Text;
-            Settings.Instance.Port = Port.Text;
-            Settings.Instance.Database = Database.Text;
-            Settings.Instance.Username = Username.Text;
-            Settings.Instance.Password = Password.PassBox.Password;
-            Settings.Instance.Separator = Separator.Text[0];
-            Settings.Instance.WriteSettingsFile();
-            DialogResult = true;
-            Close();
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)

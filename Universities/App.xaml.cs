@@ -7,7 +7,6 @@ using Universities.Handlers;
 using Universities.Utils;
 using Universities.Views;
 using Universities.Data;
-using MySqlConnector;
 
 namespace Universities
 {
@@ -25,39 +24,7 @@ namespace Universities
             UniversitiesContext context = null;
 
             if (!FileHandler.FileExists(Constants.SettingsFilePath)) Settings.Instance.WriteSettingsFile();
-            if (Settings.Instance.ReadSettingsFile())
-            {
-                if (!TryGetContext(out context))
-                {
-                    if (string.IsNullOrEmpty(Settings.Instance.Server) ||
-                        string.IsNullOrEmpty(Settings.Instance.Port) ||
-                        string.IsNullOrEmpty(Settings.Instance.Database))
-                    {
-                        if (!PromptForSettingsDetails(out context)) return;
-                    }
-                    else if (string.IsNullOrEmpty(Settings.Instance.Username) || string.IsNullOrEmpty(Settings.Instance.Password))
-                    {
-                        for (int i = 3; i >= 0; i--)
-                        {
-                            if (i > 0 && new LoginWindow(i, true).ShowDialog().Value)
-                            {
-                                if (TryGetContext(out context))
-                                {
-                                    PromptBox.Information("Connected to Database", currentUser);
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                PromptBox.Error("Can't connect to Database");
-                                CallShutdown();
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-            else
+            if (!Settings.Instance.ReadSettingsFile() || !TryGetContext(out context))
             {
                 if (!PromptForSettingsDetails(out context)) return;
             }
@@ -99,33 +66,8 @@ namespace Universities
             string pass = $"Password={Settings.Instance.Password};";
             string connectionString = $"{server}{port}{database}{user}{pass}";
             context = new UniversitiesContext(connectionString);
-            currentUser = CheckUser();
+            currentUser = SqlCommands.GetCurrentUser(out isAdmin);
             return context.Database.CanConnect();
-        }
-
-        public string CheckUser()
-        {
-            try
-            {
-                string currentUser = null;
-                using (MySqlConnection Connection = new MySqlConnection(Settings.Instance.GetConnectionString()))
-                using (MySqlCommand Command = new MySqlCommand("select current_user;", Connection))
-                {
-                    Connection.Open();
-                    currentUser = (string)Command.ExecuteScalar();
-                }
-                using (MySqlConnection Connection = new MySqlConnection(Settings.Instance.GetConnectionString()))
-                using (MySqlCommand Command = new MySqlCommand("SHOW GRANTS;", Connection))
-                {
-                    Connection.Open();
-                    isAdmin = ((string)Command.ExecuteScalar()).StartsWith("GRANT ALL");
-                }
-                return currentUser?.Remove(currentUser.Length - 2) ?? string.Empty;
-            }
-            catch
-            {
-                return "Not connected to DB";
-            }
         }
 
         private void ManageLogFiles(string logsPath)

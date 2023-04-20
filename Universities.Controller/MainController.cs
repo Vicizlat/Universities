@@ -1,5 +1,4 @@
-﻿using MySqlConnector;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -28,6 +27,8 @@ namespace Universities.Controller
 
         public MainController(UniversitiesContext context, string currentUser, bool isAdmin, string installedVersion)
         {
+            CollectionSorter.Controller = this;
+            SqlCommands.Controller = this;
             Context = context;
             CurrentUser = currentUser;
             IsAdmin = isAdmin;
@@ -210,63 +211,6 @@ namespace Universities.Controller
                 Settings.Instance.PeopleFilePath = filePath;
             }
             return FileHandler.WriteAllLines(Settings.Instance.PeopleFilePath, exportPeople);
-        }
-
-        public void AddUser(string username, string password, bool isAdmin)
-        {
-            if (!string.IsNullOrEmpty(CurrentUser) && IsAdmin)
-            {
-                string command = $"CREATE USER '{username}' IDENTIFIED BY '{password}';";
-                if (isAdmin) command += $"GRANT ALL ON *.* TO '{username}';";
-                else command += $"GRANT SELECT, INSERT, UPDATE ON *.* TO '{username}';";
-                using (MySqlConnection Connection = new MySqlConnection(Settings.Instance.GetConnectionString()))
-                using (MySqlCommand Command = new MySqlCommand(command, Connection))
-                {
-                    Connection.Open();
-                    Command.ExecuteNonQuery();
-                }
-                MessageBox.Show($"User '{username}' added successfully!", CurrentUser, MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            }
-            else MessageBox.Show("You don't have permission to add users!", CurrentUser, MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-
-        public void UpdateUserPassword(string username, string password)
-        {
-            if (IsAdmin || CurrentUser == username)
-            {
-                string command = $"UPDATE mysql.user SET Password = '{password}' WHERE (`Host` = '%') and (`User` = '{username}');";
-                using (MySqlConnection Connection = new MySqlConnection(Settings.Instance.GetConnectionString()))
-                using (MySqlCommand Command = new MySqlCommand(command, Connection))
-                {
-                    Connection.Open();
-                    Command.ExecuteNonQuery();
-                }
-                MessageBox.Show($"Password for User '{username}' changed successfully!", CurrentUser, MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            }
-            else MessageBox.Show($"Unable to change password for User '{username}'!", CurrentUser, MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-
-        public List<string> GetUsers()
-        {
-            try
-            {
-                List<string> users = new List<string>();
-                using (MySqlConnection Connection = new MySqlConnection(Settings.Instance.GetConnectionString()))
-                using (MySqlCommand Command = new MySqlCommand("SELECT * FROM mysql.user;", Connection))
-                {
-                    Connection.Open();
-                    MySqlDataReader reader = Command.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        users.Add((string)reader.GetValue("User"));
-                    }
-                }
-                return users;
-            }
-            catch
-            {
-                return new List<string>() { "Unable to get Users" };
-            }
         }
     }
 }

@@ -46,8 +46,8 @@ namespace Universities.Views
 
         private void AddUserIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            LoginWindow loginWindow = new LoginWindow(0, false);
-            if (loginWindow.ShowDialog().Value) controller.AddUser(loginWindow.UsernameText, loginWindow.PasswordText, loginWindow.IsAdmin);
+            LoginWindow loginWindow = new LoginWindow(true);
+            if (loginWindow.ShowDialog() == true) SqlCommands.AddUser(loginWindow.UsernameText, loginWindow.PasswordText, loginWindow.SetAdmin);
         }
 
         private void ImportExportIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
