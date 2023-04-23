@@ -13,10 +13,9 @@ namespace Universities.Utils
         public string Database { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
-        public string DataSetFilePath { get; set; }
-        public string OrganizationsFilePath { get; set; }
-        public string PeopleFilePath { get; set; }
         public char Separator { get; set; }
+        public int PeopleStartId { get; set; }
+        public int OrgaStartId { get; set; }
         private XmlSerializer Serializer { get; }
 
         public Settings()

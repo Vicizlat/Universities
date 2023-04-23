@@ -6,6 +6,7 @@ namespace Universities.Utils
     public static class Constants
     {
         private static readonly string WorkingFolder = Environment.CurrentDirectory;
+        public static readonly string DocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         public static readonly string SettingsPath = Directory.CreateDirectory(Path.Combine(WorkingFolder, "Settings")).FullName;
         public static readonly string SettingsFilePath = Path.Combine(SettingsPath, "Settings.xml");
         public static readonly string LogsPath = Directory.CreateDirectory(Path.Combine(WorkingFolder, "Logs")).FullName;

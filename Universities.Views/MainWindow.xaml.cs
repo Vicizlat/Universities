@@ -26,7 +26,10 @@ namespace Universities.Views
                 AddUser.Visibility = Visibility.Hidden;
                 DataManage.Visibility = Visibility.Hidden;
             }
-            if (controller.Organizations.Count > 0) SelectOrganization.ItemsSource = controller.Organizations.Select(controller.GetOrganizationName);
+            if (controller.Organizations.Count > 0)
+            {
+                SelectOrganization.ItemsSource = controller.Organizations.Select(o => controller.GetOrganizationDisplayName(o.OrganizationId));
+            }
             PopulateFields();
             controller.OnDocumentsChanged += OnDocumentsChanged;
             controller.OnOrganizationsChanged += OnOrganizationsChanged;
@@ -39,7 +42,7 @@ namespace Universities.Views
 
         private void OnOrganizationsChanged(object? sender, EventArgs e)
         {
-            SelectOrganization.ItemsSource = controller.Organizations.Select(controller.GetOrganizationName);
+            SelectOrganization.ItemsSource = controller.Organizations.Select(o => controller.GetOrganizationDisplayName(o.OrganizationId));
             SelectOrganization.SelectedIndex = -1;
             SaveButton.IsEnabled = IsSaveEnabled();
         }
@@ -62,7 +65,11 @@ namespace Universities.Views
             settingsWindow.ShowDialog();
         }
 
-        private void AddOrganization_OnClick(object sender, RoutedEventArgs e) => new AddOrganization(controller).ShowDialog();
+        private void AddOrganization_OnClick(object sender, RoutedEventArgs e)
+        {
+            AddOrganization addOrganizationWindow = new AddOrganization(controller);
+            addOrganizationWindow.ShowDialog();
+        }
 
         private void PreviousButton_OnClick(object sender, RoutedEventArgs e)
         {
@@ -78,29 +85,32 @@ namespace Universities.Views
 
         private void SaveButton_OnClick(object sender, RoutedEventArgs e)
         {
-            int orgId = controller.Organizations[SelectOrganization.SelectedIndex].OrganizationId;
-            int personId = controller.GetPersonId(docArray[20], docArray[17]);
-            controller.AddPerson(personId, docArray[20], docArray[17], orgId, docArray[0], int.Parse(docArray[14]));
-            controller.SetDocumentProcessedStatus(docArray, true);
-            foreach (string[] item in lvSimilarAuthors.SelectedItems)
+            int orgId;
+            int personId;
+            if (lvSimilarProcessedAuthors.SelectedItem != null)
             {
-                controller.AddPerson(personId, item[20], item[17], orgId, item[0], int.Parse(item[14]));
-                controller.SetDocumentProcessedStatus(item, true);
+                orgId = int.Parse(((string[])lvSimilarProcessedAuthors.SelectedItem)[3]);
+                personId = int.Parse(((string[])lvSimilarProcessedAuthors.SelectedItem)[0]);
             }
-            //if (controller.AddPerson(personId, firstName, lastName, orgId, docArray[0], int.Parse(docArray[14])))
-            //{
-            //    if (controller.SaveDocuments())
-            //    {
-            //        PopulateFields();
-            //        return;
-            //    }
-            //}
-            //MessageBox.Show("Failed to save Person. No changes were made.");
+            else
+            {
+                orgId = controller.Organizations[SelectOrganization.SelectedIndex].OrganizationId;
+                personId = controller.GetPersonId(docArray[20], docArray[17], orgId);
+            }
+            List<string[]> documents = new List<string[]>() { docArray };
+            documents.AddRange(lvSimilarPendingAuthors.SelectedItems.OfType<string[]>());
+            foreach (string[] doc in documents)
+            {
+                controller.AddPerson(new string[] { $"{personId}", doc[20], doc[17], $"{orgId}", doc[0], doc[14], "", "", "", "" });
+                controller.UpdateDocument(doc, true);
+            }
+            controller.UpdateDocuments();
         }
 
         private void PopulateFields()
         {
-            docArray = controller.GetDocumentArray(docId);
+            docArray = docId >= 0 && docId < controller.Documents.Count ? controller.Documents[docId].ToArray() : Array.Empty<string>();
+            if (docArray.Length < 0) docId = -1;
             SaveButton.IsEnabled = IsSaveEnabled();
             SelectOrganization.SelectedIndex = -1;
             PreviousButton.IsEnabled = docId >= 0;
@@ -114,9 +124,10 @@ namespace Universities.Views
                 Wos.TextBox.Text = string.Empty;
                 SeqNo.TextBox.Text = string.Empty;
                 Address.TextBox.Text = string.Empty;
-                OrganizationNames.Text = string.Empty;
-                SubOrganizationNames.Text = string.Empty;
-                lvSimilarAuthors.ItemsSource = new List<string[]>();
+                OrganizationNames.TextBox.Text = string.Empty;
+                SubOrganizationName.TextBox.Text = string.Empty;
+                lvSimilarPendingAuthors.ItemsSource = new List<string[]>();
+                lvSimilarProcessedAuthors.ItemsSource = new List<string[]>();
             }
             else
             {
@@ -131,22 +142,33 @@ namespace Universities.Views
                     .AppendLine(docArray[10])
                     .AppendLine(docArray[11])
                     .AppendLine(docArray[12]);
-                OrganizationNames.Text = sb.ToString().TrimEnd();
-                SubOrganizationNames.Text = docArray[13];
-                lvSimilarAuthors.ItemsSource = controller.Documents
+                OrganizationNames.TextBox.Text = sb.ToString().TrimEnd();
+                SubOrganizationName.TextBox.Text = docArray[13];
+                lvSimilarPendingAuthors.ItemsSource = controller.Documents
                     .Where(d => d.Ut != docArray[0] && d.LastName == docArray[17])
                     .Select(d => d.ToArray());
+                List<string[]> similarProcessedAuthors = new List<string[]>();
+                foreach (string[] author in controller.People.Where(p => p.LastName == docArray[17]).Select(p => p.ToArray()))
+                {
+                    similarProcessedAuthors.Add(author.Append(controller.GetOrganizationDisplayName(int.Parse(author[3]))).ToArray());
+                }
+                lvSimilarProcessedAuthors.ItemsSource = similarProcessedAuthors;
             }
         }
 
         private void SelectOrganization_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SaveButton.IsEnabled = IsSaveEnabled();
+            if (sender is ListView && lvSimilarProcessedAuthors.SelectedItem != null)
+            {
+                SelectOrganization.SelectedItem = ((string[])lvSimilarProcessedAuthors.SelectedItem)[10];
+            }
         }
 
         private bool IsSaveEnabled()
         {
-            return SelectOrganization.SelectedIndex >= 0 && !string.IsNullOrEmpty(Wos.TextBox.Text) && !string.IsNullOrEmpty(ALastName.TextBox.Text);
+            if (lvSimilarProcessedAuthors.SelectedItem != null) return true;
+            return SelectOrganization.SelectedIndex >= 0;
         }
     }
 }

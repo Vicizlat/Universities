@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:uc="clr-namespace:Universities.Views.UserControls"
         x:Class="Universities.Views.SettingsWindow" mc:Ignorable="d"
-        Width="500" Height="280" ShowInTaskbar="True" ResizeMode="NoResize" WindowStyle="None"
+        Width="500" Height="330" ShowInTaskbar="True" ResizeMode="NoResize" WindowStyle="None"
         WindowStartupLocation="CenterScreen" BorderThickness="1" KeyUp="Window_KeyUp">
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -13,6 +13,7 @@
             <RowDefinition Height="50"/>
             <RowDefinition Height="20"/>
             <RowDefinition Height="30"/>
+            <RowDefinition Height="50"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -30,7 +31,16 @@
         <Button Grid.Row="2" Grid.Column="2" Padding="2" Margin="10, 20, 10, 0" Content="Change password" Click="ChangePasswordButton_Click"/>
         <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Padding="2" Margin="10, 0" FontSize="16" Text="Set Separator for CSV export:"/>
         <TextBox x:Name="Separator" Grid.Row="4" Grid.Column="2" Padding="2" Margin="10, 0" MaxLength="1" VerticalContentAlignment="Center"/>
-        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Height="30" VerticalAlignment="Bottom">
+        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+            <uc:TextBoxLabeled x:Name="PeopleStartId" Grid.Column="0" Margin="10, 0" Label="People Start Id:"/>
+            <uc:TextBoxLabeled x:Name="OrgaStartId" Grid.Column="2" Margin="10, 0" Label="Organizations Start Id:"/>
+        </Grid>
+        <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Height="30" VerticalAlignment="Bottom">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="*"/>

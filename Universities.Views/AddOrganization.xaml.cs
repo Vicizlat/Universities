@@ -24,21 +24,7 @@ namespace Universities.Views
 
         private void ParentOrganization_OnLoaded(object sender, RoutedEventArgs e)
         {
-            ParentOrganization.ItemsSource = controller.Organizations.Select(controller.GetOrganizationName);
-        }
-
-        private void Save_Click(object sender, RoutedEventArgs e)
-        {
-            if (ParentOrganization.SelectedItem == null)
-            {
-                string message = "Are you sure you want to save without a Parent Organization?";
-                if (!PromptBox.Question(message)) return;
-            }
-            int organizationId = controller.Organizations.Last().OrganizationId + 1;
-            int parentOrganizationId = ParentOrganization.SelectedIndex + 1;
-            string organizationName = OrganizationName.Text;
-            DialogResult = controller.AddOrganization(organizationId, organizationName, parentOrganizationId);
-            Close();
+            ParentOrganization.ItemsSource = controller.Organizations.Select(o => controller.GetOrganizationDisplayName(o.OrganizationId));
         }
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
@@ -53,9 +39,21 @@ namespace Universities.Views
             }
         }
 
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            if (ParentOrganization.SelectedItem == null)
+            {
+                string message = "Are you sure you want to save without a Parent Organization?";
+                if (!PromptBox.Question(message)) return;
+            }
+            int orgId = controller.Organizations.Last()?.OrganizationId + 1 ?? Settings.Instance.OrgaStartId;
+            int? parOrgId = controller.GetOrganizationId(controller.GetOrganizationName(ParentOrganization.SelectedIndex));
+            controller.AddOrganization(new string[] { $"{orgId}", OrganizationName.Text, $"{parOrgId}" });
+            Close();
+        }
+
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
             Close();
         }
     }

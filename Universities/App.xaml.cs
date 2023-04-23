@@ -31,7 +31,7 @@ namespace Universities
             MainController controller = new MainController(context, currentUser, isAdmin, installedVersion);
             MainWindow = new MainWindow(controller);
             MainWindow.Show();
-            MainWindow.Closed += delegate { CallShutdown(); };
+            MainWindow.Closed += delegate { Shutdown(); };
         }
 
         public bool PromptForSettingsDetails(out UniversitiesContext context)
@@ -51,7 +51,7 @@ namespace Universities
                 {
                     PromptBox.Error("Can't connect to Database");
                     context = null;
-                    CallShutdown();
+                    Shutdown();
                     return false;
                 }
             }
@@ -95,14 +95,6 @@ namespace Universities
             }
         }
 
-        private void CallShutdown()
-        {
-            Logging.Instance.Close();
-            Shutdown();
-        }
-
-        private void Application_Exit(object sender, ExitEventArgs e)
-        {
-        }
+        private void Application_Exit(object sender, ExitEventArgs e) => Logging.Instance.Close();
     }
 }

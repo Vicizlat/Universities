@@ -14,11 +14,11 @@ namespace Universities.Data.Models
 
         }
 
-        public Organization(int id, string name, int? parentId) : this()
+        public Organization(string[] lineArr) : this()
         {
-            OrganizationId = id;
-            OrganizationName = name;
-            ParentId = parentId;
+            OrganizationId = int.Parse(lineArr[0]);
+            OrganizationName = lineArr[1];
+            ParentId = int.TryParse(lineArr[2], out int pId) ? pId : null;
         }
 
         public override string ToString()

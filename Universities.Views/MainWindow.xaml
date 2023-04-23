@@ -6,15 +6,16 @@
         xmlns:uc="clr-namespace:Universities.Views.UserControls"
         xmlns:images="clr-namespace:Universities.Views.Images"
         xmlns:local="clr-namespace:Universities.Views"
-        mc:Ignorable="d" FontSize="18" Title="MainWindow" MinHeight="500" MinWidth="900" WindowState="Maximized">
+        mc:Ignorable="d" FontSize="18" Title="MainWindow" MinHeight="700" MinWidth="900" WindowState="Maximized">
     <Grid Margin="10, 0, 10, 20">
         <Grid.RowDefinitions>
             <RowDefinition Height="60"/>
             <RowDefinition Height="60"/>
+            <RowDefinition Height="160"/>
             <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="40"/>
-            <RowDefinition Height="2*"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="40"/>
             <RowDefinition Height="30"/>
             <RowDefinition Height="50"/>
@@ -23,7 +24,13 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0, 10" HorizontalAlignment="Right" Orientation="Horizontal">
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Bottom">
+            <uc:TextBoxLabeled x:Name="ALastName" Margin="10, 0" Width="180" Label="Last name:"/>
+            <uc:TextBoxLabeled x:Name="AFirstName" Margin="10, 0" Width="180" Label="First name:"/>
+            <uc:TextBoxLabeled x:Name="Wos" Margin="10, 0" Width="200" Label="WOS Document:"/>
+            <uc:TextBoxLabeled x:Name="SeqNo" Margin="10, 0" Width="80" Label="SeqNo:"/>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0, 10" Orientation="Horizontal" HorizontalAlignment="Right">
             <images:ButtonImage x:Name="AddUser" FileName="AddUserIcon" ToolTip="Add User"
                             Source="Images\AddUserIconBW.png" MouseLeftButtonUp="AddUserIcon_MouseLeftButtonUp"/>
             <images:ButtonImage x:Name="DataManage" FileName="ImportExportIcon" ToolTip="Manage Data"
@@ -31,35 +38,40 @@
             <images:ButtonImage FileName="SettingsIcon" ToolTip="Settings"
                             Source="Images\SettingsIconBW.png" MouseLeftButtonUp="SettingsIcon_MouseLeftButtonUp"/>
         </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Bottom">
-            <uc:TextBoxLabeled x:Name="ALastName" Margin="10, 0" Width="180" Label="Last name:"/>
-            <uc:TextBoxLabeled x:Name="AFirstName" Margin="10, 0" Width="180" Label="First name:"/>
-            <uc:TextBoxLabeled x:Name="Wos" Margin="10, 0" Width="200" Label="WOS Document:"/>
-            <uc:TextBoxLabeled x:Name="SeqNo" Margin="10, 0" Width="80" Label="SeqNo:"/>
-        </StackPanel>
         <uc:TextBoxLabeled x:Name="Address" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="10, 0" Label="Address:" VerticalAlignment="Bottom"/>
-        <uc:LabelTextBlock Grid.Row="2" Grid.Column="0" Margin="10, 0" Label="Possible matching names:"/>
-        <ListView x:Name="lvSimilarAuthors" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="10, 0" SelectionMode="Extended">
+        <uc:TextBoxLabeled x:Name="OrganizationNames" Grid.Row="2" Grid.Column="0" Margin="10, 0" Padding="0, 10" Label="Organization Names:"/>
+        <uc:TextBoxLabeled x:Name="SubOrganizationName" Grid.Row="2" Grid.Column="1" Margin="10, 0" Padding="0, 10" Label="SubOrganization Name:"/>
+        <uc:LabelTextBlock Grid.Row="3" Grid.Column="0" Margin="10, 0" Label="Possible matching names (pending processing):"/>
+        <ListView x:Name="lvSimilarPendingAuthors" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="10, 0" SelectionMode="Extended">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Width="100" DisplayMemberBinding="{Binding [17]}" Header="LastName"/>
-                    <GridViewColumn Width="100" DisplayMemberBinding="{Binding [20]}" Header="FirstName"/>
-                    <GridViewColumn Width="150" DisplayMemberBinding="{Binding [7]}" Header="Address"/>
-                    <GridViewColumn Width="140" DisplayMemberBinding="{Binding [8]}" Header="OrgaName"/>
-                    <GridViewColumn Width="140" DisplayMemberBinding="{Binding [9]}" Header="OrgaName1"/>
-                    <GridViewColumn Width="140" DisplayMemberBinding="{Binding [10]}" Header="OrgaName2"/>
-                    <GridViewColumn Width="140" DisplayMemberBinding="{Binding [11]}" Header="OrgaName3"/>
-                    <GridViewColumn Width="140" DisplayMemberBinding="{Binding [12]}" Header="OrgaName4"/>
-                    <GridViewColumn Width="140" DisplayMemberBinding="{Binding [13]}" Header="SubOrgaName"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [17]}" Header="LastName"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [20]}" Header="FirstName"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [7]}" Header="Address"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [8]}" Header="OrgaName"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [9]}" Header="OrgaName1"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [10]}" Header="OrgaName2"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [11]}" Header="OrgaName3"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [12]}" Header="OrgaName4"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [13]}" Header="SubOrgaName"/>
                 </GridView>
             </ListView.View>
         </ListView>
-        <uc:LabelTextBlock Grid.Row="4" Grid.Column="0" Margin="10, 0" Label="Organization Names:"/>
-        <uc:LabelTextBlock Grid.Row="4" Grid.Column="1" Margin="10, 0" Label="SubOrganization Names:"/>
-        <TextBox x:Name="OrganizationNames" Grid.Row="5" Grid.Column="0" Margin="10, 0" Padding="2"/>
-        <TextBox x:Name="SubOrganizationNames" Grid.Row="5" Grid.Column="1" Margin="10, 0" Padding="2"/>
-        <uc:LabelTextBlock Grid.Row="6" Grid.Column="0" Margin="10, 0" Label="Select Organization:"/>
-        <Grid Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2">
+        <uc:LabelTextBlock Grid.Row="5" Grid.Column="0" Margin="10, 0" Label="Possible matching names (already processed):"/>
+        <ListView x:Name="lvSimilarProcessedAuthors" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="10, 0" SelectionMode="Single"
+                  SelectionChanged="SelectOrganization_OnSelectionChanged">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn DisplayMemberBinding="{Binding [0]}" Header="Person Id"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [1]}" Header="Last Name"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [2]}" Header="First Name"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [10]}" Header="OrgaName (ParentOrgaName)"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [4]}" Header="Document Id"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <uc:LabelTextBlock Grid.Row="7" Grid.Column="0" Margin="10, 0" Label="Select Organization:"/>
+        <Grid Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="*"/>
@@ -69,7 +81,7 @@
             <Button x:Name="AddOrganization" Grid.Column="1" Content="Add Organization" Margin="10, 0" Padding="2"
                     Click="AddOrganization_OnClick"/>
         </Grid>
-        <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 20, 0, 0" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 20, 0, 0" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button x:Name="PreviousButton" Margin="10, 0" Padding="2" Width="200" Click="PreviousButton_OnClick"/>
             <Button x:Name="SaveButton" Margin="10, 0" Padding="2" Width="200" Content="Save" Click="SaveButton_OnClick"/>
             <Button x:Name="NextButton" Margin="10, 0" Padding="2" Width="200" Click="NextButton_OnClick"/>

@@ -16,6 +16,8 @@ namespace Universities.Views
             Username.Text = Settings.Instance.Username;
             Password.PassBox.Password = Settings.Instance.Password;
             Separator.Text = Settings.Instance.Separator.ToString();
+            PeopleStartId.Text = $"{Settings.Instance.PeopleStartId}";
+            OrgaStartId.Text = $"{Settings.Instance.OrgaStartId}";
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -26,6 +28,8 @@ namespace Universities.Views
             Settings.Instance.Username = Username.Text;
             Settings.Instance.Password = Password.PassBox.Password;
             Settings.Instance.Separator = Separator.Text[0];
+            Settings.Instance.PeopleStartId = int.Parse(PeopleStartId.Text);
+            Settings.Instance.OrgaStartId = int.Parse(OrgaStartId.Text);
             DialogResult = Settings.Instance.WriteSettingsFile();
            Close();
         }

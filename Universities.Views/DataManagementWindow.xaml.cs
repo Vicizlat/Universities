@@ -101,31 +101,16 @@ namespace Universities.Views
 
         private void ImportButton_Click(object sender, RoutedEventArgs e)
         {
-            if (DocumentsTab.IsSelected)
-            {
-                if (FileDialogHandler.ShowOpenFileDialog("Open DataSet file", out string filePath))
-                {
-                    controller.ImportDataset(filePath);
-                }
-            }
-            if (OrganizationsTab.IsSelected)
-            {
-                if (FileDialogHandler.ShowOpenFileDialog("Open Organizations file", out string filePath))
-                {
-                    controller.ImportOrganizations(filePath);
-                }
-            }
-            if (PeopleTab.IsSelected)
-            {
-                if (FileDialogHandler.ShowOpenFileDialog("Open People file", out string filePath))
-                {
-                    controller.ImportPeople(filePath);
-                }
-            }
+            if (DocumentsTab.IsSelected) ImportExport.ImportDocuments();
+            if (OrganizationsTab.IsSelected) ImportExport.ImportOrganizations();
+            if (PeopleTab.IsSelected) ImportExport.ImportPeople();
         }
 
         private void ExportButton_Click(object sender, RoutedEventArgs e)
         {
+            if (DocumentsTab.IsSelected) ImportExport.ExportDocuments();
+            if (OrganizationsTab.IsSelected) ImportExport.ExportOrganizations();
+            if (PeopleTab.IsSelected) ImportExport.ExportPeople();
         }
 
         private void Controller_OnDocumentsChanged(object? sender, EventArgs e)
@@ -175,18 +160,11 @@ namespace Universities.Views
 
         private void Assign_Click(object sender, RoutedEventArgs e)
         {
-            foreach (string[] item in lvDocuments.SelectedItems)
-            {
-                controller.AssignUserToDocuments(item, (string)Users.SelectedItem);
-            }
+            List<string[]> selectedItems = new List<string[]>();
+            foreach (string[] item in lvDocuments.SelectedItems) selectedItems.Add(item);
+            selectedItems.ForEach(i => controller.UpdateDocument(i, (string)Users.SelectedItem));
             lvDocuments.SelectedItems.Clear();
-            UpdateDocumentsView();
-        }
-
-        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ListView selectedList = sender as ListView;
-            object items = selectedList.SelectedItems;
+            //UpdateDocumentsView();
         }
 
         private void DataManageWindow_Closing(object sender, CancelEventArgs e)
@@ -203,12 +181,11 @@ namespace Universities.Views
         {
             string senderButton = ((Button)sender).Content.ToString() ?? string.Empty;
             bool processed = senderButton == "Processed";
-            foreach (string[] item in lvDocuments.SelectedItems)
-            {
-                controller.SetDocumentProcessedStatus(item, processed);
-            }
+            List<string[]> selectedItems = new List<string[]>();
+            foreach (string[] item in lvDocuments.SelectedItems) selectedItems.Add(item);
+            selectedItems.ForEach(i => controller.UpdateDocument(i, processed));
             lvDocuments.SelectedItems.Clear();
-            UpdateDocumentsView();
+            //UpdateDocumentsView();
         }
     }
 }

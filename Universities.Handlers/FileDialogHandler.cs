@@ -7,30 +7,36 @@ namespace Universities.Handlers
     {
         public static bool ShowOpenFileDialog(string title, out string filePath)
         {
-            filePath = string.Empty;
             OpenFileDialog openDlg = new OpenFileDialog
             {
                 Filter = "Comma Separated Value | *.csv",
                 Title = title
             };
-            if (!openDlg.ShowDialog() ?? false) return false;
-            filePath = openDlg.FileName;
-            return true;
+            if (openDlg.ShowDialog() == true)
+            {
+                filePath = openDlg.FileName;
+                return true;
+            }
+            filePath = string.Empty;
+            return false;
         }
 
         public static bool ShowSaveFileDialog(string title, out string filePath)
         {
-            filePath = string.Empty;
             SaveFileDialog saveDlg = new SaveFileDialog
             {
                 Filter = "Comma Separated Value | *.csv",
                 AddExtension = true,
-                InitialDirectory = Settings.Instance.DataSetFilePath,
+                InitialDirectory = Constants.DocumentsFolder,
                 Title = title
             };
-            if (!saveDlg.ShowDialog() ?? false) return false;
-            filePath = saveDlg.FileName;
-            return true;
+            if (saveDlg.ShowDialog() == true)
+            {
+                filePath = saveDlg.FileName;
+                return true;
+            }
+            filePath = string.Empty;
+            return false;
         }
     }
 }

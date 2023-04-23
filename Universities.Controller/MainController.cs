@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Windows;
 using Universities.Data;
 using Universities.Data.Models;
-using Universities.Handlers;
 using Universities.Utils;
 
 namespace Universities.Controller
@@ -29,6 +27,7 @@ namespace Universities.Controller
         {
             CollectionSorter.Controller = this;
             SqlCommands.Controller = this;
+            ImportExport.Controller = this;
             Context = context;
             CurrentUser = currentUser;
             IsAdmin = isAdmin;
@@ -37,38 +36,25 @@ namespace Universities.Controller
             //Context.Database.EnsureCreated();
             UpdateDocuments();
             UpdateOrganizations();
-            People = GetPeople().ToList();
+            UpdatePeople();
             if (isAdmin)
             {
-                DuplicateDocuments = GetDuplicateDocuments().ToList();
-                IncompleteDocuments = GetIncompleteDocuments().ToList();
+                DuplicateDocuments = Context.DuplicateDocuments.ToList();
+                IncompleteDocuments = Context.IncompleteDocuments.ToList();
             }
             DataReader.OnDocumentFound += DataReader_OnDocumentFound;
+            DataReader.OnOrganizationFound += DataReader_OnOrganizationFound;
+            DataReader.OnPersonFound += DataReader_OnPersonFound;
+            ImportExport.OnDocumentsChanged += ImportExport_OnDocumentsChanged;
+            ImportExport.OnOrganizationsChanged += ImportExport_OnOrganizationsChanged;
+            ImportExport.OnPeopleChanged += ImportExport_OnPeopleChanged;
         }
 
-        public IEnumerable<Person> GetPeople()
-        {
-            foreach (Person person in Context.People)
-            {
-                yield return person;
-            }
-        }
+        private void ImportExport_OnDocumentsChanged(object? sender, EventArgs e) => OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
 
-        public IEnumerable<DuplicateDocument> GetDuplicateDocuments()
-        {
-            foreach (DuplicateDocument dupDoc in Context.DuplicateDocuments)
-            {
-                yield return dupDoc;
-            }
-        }
+        private void ImportExport_OnOrganizationsChanged(object? sender, EventArgs e) => OnOrganizationsChanged?.Invoke(this, EventArgs.Empty);
 
-        public IEnumerable<IncompleteDocument> GetIncompleteDocuments()
-        {
-            foreach (IncompleteDocument emptyDoc in Context.IncompleteDocuments)
-            {
-                yield return emptyDoc;
-            }
-        }
+        private void ImportExport_OnPeopleChanged(object? sender, EventArgs e) => OnPeopleChanged?.Invoke(this, EventArgs.Empty);
 
         private void DataReader_OnDocumentFound(object? sender, EventArgs e)
         {
@@ -97,14 +83,20 @@ namespace Universities.Controller
             }
         }
 
-        public void ImportDataset(string filePath)
+        private void DataReader_OnOrganizationFound(object? sender, EventArgs e)
         {
-            if (DataReader.ReadDataSetFile(filePath, out string message))
-            {
-                OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
-                message = $"Successfully loaded {Documents.Count} Documents.";
-            }
-            MessageBox.Show(message);
+            if (sender == null) return;
+            AddOrganization((string[])sender);
+        }
+
+        private void DataReader_OnPersonFound(object? sender, EventArgs e)
+        {
+            if (sender == null) return;
+            string[] personArr = (string[])sender;
+            Person person = new Person(personArr);
+            People.Add(person);
+            Context.People.Add(person);
+            Context.SaveChanges();
         }
 
         public void UpdateDocuments()
@@ -113,104 +105,84 @@ namespace Universities.Controller
             OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public void ImportOrganizations(string filePath)
-        {
-            Organizations = DataReader.ReadOrganizationsFile(this, filePath, out string message);
-            MessageBox.Show(message);
-            OnOrganizationsChanged?.Invoke(this, EventArgs.Empty);
-        }
-
         public void UpdateOrganizations()
         {
             Organizations = Context.Organizations.ToList();
             OnOrganizationsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public void ImportPeople(string filePath)
+        public void UpdatePeople()
         {
-            People = DataReader.ReadPeopleFile(this, filePath, out string message);
-            MessageBox.Show(message);
+            People = Context.People.ToList();
             OnPeopleChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public void AssignUserToDocuments(string[] doc, string user)
+        public void UpdateDocument(string[] doc, object updateData)
         {
-            Document document = Context.Documents.FirstOrDefault(d => d.Ut == doc[0] && d.FirstName == doc[20] && d.LastName == doc[17]);
+            Document? document = Context.Documents.FirstOrDefault(d => d.Ut == doc[0] && d.FirstName == doc[20] && d.LastName == doc[17]);
             if (document != null)
             {
-                document.AssignedToUser = user;
+                if (updateData is bool) document.Processed = (bool)updateData;
+                if (updateData is string) document.AssignedToUser = (string)updateData;
                 Context.SaveChanges();
+                OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
-        public void SetDocumentProcessedStatus(string[] doc, bool processed)
+        public string GetOrganizationDisplayName(int orgId)
         {
-            Document document = Context.Documents.FirstOrDefault(d => d.Ut == doc[0] && d.FirstName == doc[20] && d.LastName == doc[17]);
-            if (document != null)
+            Organization? org = Organizations.FirstOrDefault(o => o.OrganizationId == orgId);
+            Organization? parent = Organizations.FirstOrDefault(o => o.OrganizationId == org?.ParentId);
+            return $"{org?.OrganizationName} ({parent?.OrganizationName})";
+        }
+
+        public string GetOrganizationName(int index)
+        {
+            return ((Organization?)Organizations[index])?.OrganizationName ?? string.Empty;
+        }
+
+        public void AddOrganization(string[] orgArr)
+        {
+            try
             {
-                document.Processed = processed;
+                Organization newOrganization = new Organization(orgArr);
+                Organizations.Add(newOrganization);
+                Context.Organizations.Add(newOrganization);
                 Context.SaveChanges();
+                OnOrganizationsChanged?.Invoke(this, EventArgs.Empty);
             }
-        }
-
-        public string GetOrganizationName(Organization o)
-        {
-            Organization? parent = Organizations.FirstOrDefault(or => or.OrganizationId == o.ParentId);
-            return $"{o.OrganizationName} ({parent?.OrganizationName})";
-        }
-
-        public string[] GetDocumentArray(int docId)
-        {
-            return docId >= 0 && docId < Documents.Count ? Documents[docId].ToArray() : Array.Empty<string>();
-        }
-
-        public bool SaveDocuments()
-        {
-            List<string> exportDocuments = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportDocumentsHeader) };
-            exportDocuments.AddRange(Documents.Select(d => d.ToString()));
-            return FileHandler.WriteAllLines(Settings.Instance.DataSetFilePath, exportDocuments);
-        }
-
-        public bool AddOrganization(int organizationId, string organizationName, int parentOrganizationId)
-        {
-            Organizations.Add(new Organization(organizationId, organizationName, parentOrganizationId));
-            OnOrganizationsChanged?.Invoke(this, EventArgs.Empty);
-            return SaveOrganizations();
-        }
-
-        public bool SaveOrganizations()
-        {
-            List<string> exportOrganizations = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportOrganizationsHeader) };
-            exportOrganizations.AddRange(Organizations.Select(o => o.ToString()));
-            return FileHandler.WriteAllLines(Settings.Instance.OrganizationsFilePath, exportOrganizations);
-        }
-
-        public int GetPersonId(string firstName, string lastName)
-        {
-            Person? findPerson = People.Find(p => p.FirstName == firstName && p.LastName == lastName);
-            return findPerson?.PersonId ?? (People.Count == 0 ? 1 : People.OrderBy(p => p.PersonId).Last().PersonId + 1);
-        }
-
-        public void AddPerson(int personId, string firstName, string lastName, int orgId, string docId, int seqNo)
-        {
-            string[] lineArr = new string[] { $"{personId}", firstName, lastName, $"{orgId}", docId, $"{seqNo}", string.Empty, string.Empty, string.Empty, string.Empty };
-            Person newPerson = new Person(lineArr);
-            People.Add(newPerson);
-            Context.People.Add(newPerson);
-            Context.SaveChanges();
-            OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        public bool ExportPeople()
-        {
-            List<string> exportPeople = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportPeopleHeader) };
-            exportPeople.AddRange(People.Select(p => p.ToString()));
-            if (string.IsNullOrEmpty(Settings.Instance.PeopleFilePath))
+            catch
             {
-                if (!FileDialogHandler.ShowSaveFileDialog("Save People", out string filePath)) return false;
-                Settings.Instance.PeopleFilePath = filePath;
+                PromptBox.Error($"Failed to Add Organization: {orgArr[1]}!");
             }
-            return FileHandler.WriteAllLines(Settings.Instance.PeopleFilePath, exportPeople);
         }
+
+        public int? GetOrganizationId(string organizationName)
+        {
+            return Context.Organizations.FirstOrDefault(o => o.OrganizationName == organizationName)?.OrganizationId;
+        }
+
+        public int GetPersonId(string firstName, string lastName, int orgId)
+        {
+            Person? findPerson = Context.People.FirstOrDefault(p => p.FirstName == firstName && p.LastName == lastName && p.OrgId == orgId);
+            return findPerson?.PersonId ?? (Context.People.Count() == 0 ? 1 : Context.People.OrderBy(p => p.PersonId).Last().PersonId + 1);
+        }
+
+        public void AddPerson(string[] personArray)
+        {
+            try
+            {
+                Person newPerson = new Person(personArray);
+                People.Add(newPerson);
+                Context.People.Add(newPerson);
+                Context.SaveChanges();
+                OnPeopleChanged?.Invoke(this, EventArgs.Empty);
+            }
+            catch
+            {
+                PromptBox.Error($"Failed to Save Person: {personArray[1]} {personArray[2]}!");
+            }
+        }
+
     }
 }
