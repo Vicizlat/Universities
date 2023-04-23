@@ -82,7 +82,7 @@ namespace Universities
 
         private async Task CheckForUpdate()
         {
-            UpdateManager manager = await UpdateManager.GitHubUpdateManager(@"https://github.com/Vicizlat/Universities");
+            using UpdateManager manager = await UpdateManager.GitHubUpdateManager(@"https://github.com/Vicizlat/Universities");
             installedVersion = manager.CurrentlyInstalledVersion()?.ToString() ?? "Debug";
             if (installedVersion == "Debug") return;
             UpdateInfo updateInfo = await manager.CheckForUpdate();

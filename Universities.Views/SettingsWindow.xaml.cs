@@ -31,7 +31,7 @@ namespace Universities.Views
             Settings.Instance.PeopleStartId = int.Parse(PeopleStartId.Text);
             Settings.Instance.OrgaStartId = int.Parse(OrgaStartId.Text);
             DialogResult = Settings.Instance.WriteSettingsFile();
-           Close();
+            Close();
         }
 
         private void ChangePasswordButton_Click(object sender, RoutedEventArgs e)
