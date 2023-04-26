@@ -7,8 +7,8 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using Universities.Controller;
-using Universities.Data.Models;
 using Universities.Handlers;
+using Universities.Utils;
 
 namespace Universities.Views
 {
@@ -28,9 +28,9 @@ namespace Universities.Views
             controller.Documents = controller.Context.Documents.ToList();
             UpdateDocumentsView();
             lvOrganizations.ItemsSource = controller.Organizations.Select(o => o.ToArray());
-            lvPeople.ItemsSource = controller.People.Select(o => o.ToArray());
-            lvDuplicateDocuments.ItemsSource = controller.DuplicateDocuments.Select(d => d.ToArray());
-            lvIncompleteDocuments.ItemsSource = controller.IncompleteDocuments.Select(d => d.ToArray());
+            lvPeople.ItemsSource = controller.People.Select(p => p.ToArray());
+            lvDuplicateDocuments.ItemsSource = controller.DuplicateDocuments.Select(dd => dd.ToArray());
+            lvIncompleteDocuments.ItemsSource = controller.IncompleteDocuments.Select(id => id.ToArray());
             Users.ItemsSource = SqlCommands.GetUsers().Where(u => u != "root");
             controller.OnDocumentsChanged += Controller_OnDocumentsChanged;
             controller.OnOrganizationsChanged += Controller_OnOrganizationsChanged;
@@ -106,6 +106,11 @@ namespace Universities.Views
             if (PeopleTab.IsSelected) ImportExport.ImportPeople();
         }
 
+        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateDocumentsView();
+        }
+
         private void ExportButton_Click(object sender, RoutedEventArgs e)
         {
             if (DocumentsTab.IsSelected) ImportExport.ExportDocuments();
@@ -135,13 +140,50 @@ namespace Universities.Views
 
         private void ShiftIdsButton_Click(object sender, RoutedEventArgs e)
         {
-            List<Person> shiftedPeople = new List<Person>();
-            foreach (Person person in controller.People)
+            //List<Person> shiftedPeople = new List<Person>();
+            //foreach (Person person in controller.People)
+            //{
+            //    Person? findPerson = shiftedPeople.Find(p => p.LastPersonId == person.PersonId);
+            //    person.LastPersonId = person.PersonId;
+            //    person.PersonId = findPerson?.PersonId ?? (shiftedPeople.Count == 0 ? newStartId : shiftedPeople.Last().PersonId + 1);
+            //    shiftedPeople.Add(new Person(person.ToArray()) { LastPersonId = person.LastPersonId });
+            //}
+            //MessageBox.Show("All done!");
+        }
+
+        private void SetIdsInOrder_Click(object sender, RoutedEventArgs e)
+        {
+            //List<string[]> sortedPeople = lvPeople.SelectedItems.Cast<string[]>().ToList();
+            //sortedPeople.ForEach(p => p[0] += "0000");
+            //int currentId = Settings.Instance.PeopleStartId;
+            //int nextId = DBAccess.GetNextFreePersonId(currentId);
+            //int lastPersonId = 0;
+            //foreach (string[] sortedPerson in sortedPeople)
+            //{
+            //    if (int.Parse(sortedPerson[0]) == lastPersonId)
+            //    {
+            //        sortedPerson[0] = $"{currentId}";
+            //    }
+            //    else
+            //    {
+            //        lastPersonId = int.Parse(sortedPerson[0]);
+            //        sortedPerson[0] = $"{nextId}";
+            //        currentId = nextId;
+            //        nextId = DBAccess.GetNextFreePersonId(currentId + 1);
+            //    }
+            //    DBAccess.EditPersonId(sortedPerson);
+            //}
+            //MessageBox.Show("All done!");
+        }
+
+        private void DeleteSelected_Click(object sender, RoutedEventArgs e)
+        {
+            if (!PromptBox.Question("Are you sure you want to permanently remove all selected items?")) return;
+            List<string[]> selectedPeople = lvPeople.SelectedItems.Cast<string[]>().ToList();
+            Logging.Instance.WriteLine("People removed from DB:");
+            foreach (string[] person in selectedPeople)
             {
-                Person? findPerson = shiftedPeople.Find(p => p.LastPersonId == person.PersonId);
-                person.LastPersonId = person.PersonId;
-                person.PersonId = findPerson?.PersonId ?? (shiftedPeople.Count == 0 ? newStartId : shiftedPeople.Last().PersonId + 1);
-                shiftedPeople.Add(new Person(person.ToArray()) { LastPersonId = person.LastPersonId });
+                DBAccess.DeletePerson(person);
             }
             MessageBox.Show("All done!");
         }
@@ -164,17 +206,6 @@ namespace Universities.Views
             foreach (string[] item in lvDocuments.SelectedItems) selectedItems.Add(item);
             selectedItems.ForEach(i => controller.UpdateDocument(i, (string)Users.SelectedItem));
             lvDocuments.SelectedItems.Clear();
-            //UpdateDocumentsView();
-        }
-
-        private void DataManageWindow_Closing(object sender, CancelEventArgs e)
-        {
-            controller.UpdateDocuments();
-        }
-
-        private void CheckBox_Click(object sender, RoutedEventArgs e)
-        {
-            UpdateDocumentsView();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -185,7 +216,21 @@ namespace Universities.Views
             foreach (string[] item in lvDocuments.SelectedItems) selectedItems.Add(item);
             selectedItems.ForEach(i => controller.UpdateDocument(i, processed));
             lvDocuments.SelectedItems.Clear();
-            //UpdateDocumentsView();
+        }
+
+        private void DataManageWindow_Closing(object sender, CancelEventArgs e)
+        {
+            controller.UpdateDocuments();
+        }
+
+        private void lvPeople_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SetIdsInOrder.IsEnabled = lvPeople.SelectedItems.Count > 0;
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            lvPeople.ItemsSource = controller.People.Where(p => p.ToString().ToLower().Contains(SearchBox.Text.ToLower())).Select(p => p.ToArray());
         }
     }
 }

@@ -23,7 +23,15 @@ namespace Universities
             await CheckForUpdate();
             UniversitiesContext context = null;
 
-            if (!FileHandler.FileExists(Constants.SettingsFilePath)) Settings.Instance.WriteSettingsFile();
+            if (!FileHandler.FileExists(Constants.SettingsFilePath))
+            {
+                Settings.Instance.Database = "Universities";
+                Settings.Instance.Separator = ',';
+                Settings.Instance.PeopleStartId = 2000;
+                Settings.Instance.OrgaStartId = 1000;
+                Settings.Instance.WriteSettingsFile();
+            }
+
             if (!Settings.Instance.ReadSettingsFile() || !TryGetContext(out context))
             {
                 if (!PromptForSettingsDetails(out context)) return;

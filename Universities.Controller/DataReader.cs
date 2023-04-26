@@ -80,7 +80,7 @@ namespace Universities.Controller
                 }
                 Settings.Instance.Separator = lines[0][8];
                 Settings.Instance.WriteSettingsFile();
-                foreach (string line in lines)
+                foreach (string line in lines.Skip(1))
                 {
                     string[] lineArr = StringSplit.SkipStrings(line, Settings.Instance.Separator, '\"');
                     OnPersonFound?.Invoke(lineArr, EventArgs.Empty);

@@ -93,13 +93,7 @@ namespace Universities.Data.Models
 
         public override string ToString()
         {
-            string[] documentArray = ToArray();
-            string[] docArray = new string[documentArray.Length];
-            for (int i = 0; i < documentArray.Length; i++)
-            {
-                docArray[i] = $"\"{documentArray[i]}\"";
-            }
-            return string.Join(Settings.Instance.Separator, docArray);
+            return string.Join(Settings.Instance.Separator, ToArray());
         }
     }
 }

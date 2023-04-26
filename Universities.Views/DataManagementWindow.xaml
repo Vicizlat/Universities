@@ -31,9 +31,15 @@
                 </MultiBinding>
             </Button.Visibility>
         </Button>
-        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Orientation="Horizontal">
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Orientation="Horizontal"
+                    Visibility="{Binding IsSelected, ElementName=DocumentsTab, Converter={StaticResource BoolToVisibilityConverter}}">
             <CheckBox x:Name="cbPrDocs" Margin="5" Content="Show Processed Documents" IsChecked="True" Click="CheckBox_Click"/>
             <CheckBox x:Name="cbAssDocs" Margin="5" Content="Show Documents Assigned to Everyone" IsChecked="True" Click="CheckBox_Click"/>
+        </StackPanel>
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal"
+                    Visibility="{Binding IsSelected, ElementName=PeopleTab, Converter={StaticResource BoolToVisibilityConverter}}">
+            <TextBlock Margin="5" Padding="2" Text="Search:"/>
+            <TextBox x:Name="SearchBox" Margin="5" Padding="2" Width="300" TextChanged="SearchBox_TextChanged"/>
         </StackPanel>
         <Button x:Name="ExportButton" Grid.Row="0" Padding="2" Margin="10, 4" Width="200" Content="Export"
                     HorizontalAlignment="Right" VerticalAlignment="Top" Click="ExportButton_Click"/>
@@ -100,7 +106,7 @@
                 </ListView>
             </TabItem>
             <TabItem x:Name="PeopleTab" Header="People" Width="180" FontSize="18">
-                <ListView x:Name="lvPeople" Margin="-3" SelectionMode="Extended" FontSize="12">
+                <ListView x:Name="lvPeople" Margin="-3" SelectionMode="Extended" FontSize="12" SelectionChanged="lvPeople_SelectionChanged">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn DisplayMemberBinding="{Binding [0]}">
@@ -117,9 +123,6 @@
                             </GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding [4]}">
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="DocId"/>
-                            </GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding [5]}">
-                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="SeqNo"/>
                             </GridViewColumn>
                         </GridView>
                     </ListView.View>
@@ -238,16 +241,11 @@
         </StackPanel>
         <StackPanel Grid.Row="2" Margin="200, 0, 0, 10" Orientation="Horizontal" VerticalAlignment="Bottom"
                     Visibility="{Binding IsSelected, ElementName=PeopleTab, Converter={StaticResource BoolToVisibilityConverter}}">
-            <!--<StackPanel.Visibility>
-                <MultiBinding Converter="{StaticResource MultiBoolToVisibilityConverter}">
-                    <Binding Path="IsSelected" ElementName="DocumentsTab"/>
-                    <Binding Path="IsSelected" ElementName="DuplicateDocumentsTab"/>
-                    <Binding Path="IsSelected" ElementName="IncompleteDocumentsTab"/>
-                </MultiBinding>
-            </StackPanel.Visibility>-->
             <TextBlock Margin="10, 0" Padding="2" Width="65" Text="Shift IDs by:"/>
             <TextBox x:Name="NewStartId" Margin="0, -3" Padding="2" Width="60" KeyDown="Numbers_OnKeyDown" TextChanged="ShiftId_TextChanged"/>
             <Button x:Name="ShiftIds" Margin="10, -3" Padding="2" Width="60" IsEnabled="False" Content="Apply" Click="ShiftIdsButton_Click"/>
+            <Button x:Name="SetIdsInOrder" Margin="10, -3" Padding="2" Width="130" IsEnabled="False" Content="Set Ids in Sorted Order" Click="SetIdsInOrder_Click"/>
+            <Button x:Name="DeleteSelected" Margin="10, -3" Padding="2" Width="100" Content="Remove Selected" Click="DeleteSelected_Click"/>
         </StackPanel>
     </Grid>
 </Window>

@@ -64,18 +64,25 @@ namespace Universities.Controller
 
         public static void UpdateUserPassword(string username, string password)
         {
-            if (Controller.IsAdmin || Controller.CurrentUser == username)
+            try
             {
-                string command = $"UPDATE mysql.user SET Password = '{password}' WHERE (`Host` = '%') and (`User` = '{username}');";
-                using (MySqlConnection Connection = new MySqlConnection(Settings.Instance.GetConnectionString()))
-                using (MySqlCommand Command = new MySqlCommand(command, Connection))
+                if (Controller.IsAdmin || Controller.CurrentUser == username)
                 {
-                    Connection.Open();
-                    Command.ExecuteNonQuery();
+                    string command = $"SET PASSWORD FOR '{username}'@'%' = PASSWORD('{password}');";
+                    using (MySqlConnection Connection = new MySqlConnection(Settings.Instance.GetConnectionString()))
+                    using (MySqlCommand Command = new MySqlCommand(command, Connection))
+                    {
+                        Connection.Open();
+                        Command.ExecuteNonQuery();
+                    }
+                    MessageBox.Show($"Password for User '{username}' changed successfully!", Controller.CurrentUser, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 }
-                MessageBox.Show($"Password for User '{username}' changed successfully!", Controller.CurrentUser, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                else MessageBox.Show($"Unable to change password for User '{username}'!", Controller.CurrentUser, MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            else MessageBox.Show($"Unable to change password for User '{username}'!", Controller.CurrentUser, MessageBoxButton.OK, MessageBoxImage.Error);
+            catch
+            {
+                PromptBox.Error("Can't change password when you are not logged in.");
+            }
         }
 
         public static List<string> GetUsers()

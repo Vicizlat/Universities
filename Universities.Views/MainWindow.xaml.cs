@@ -49,26 +49,22 @@ namespace Universities.Views
 
         private void AddUserIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            LoginWindow loginWindow = new LoginWindow(true);
-            if (loginWindow.ShowDialog() == true) SqlCommands.AddUser(loginWindow.UsernameText, loginWindow.PasswordText, loginWindow.SetAdmin);
+            new LoginWindow(true).ShowDialog();
         }
 
         private void ImportExportIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            DataManagementWindow dataManagementWindow = new DataManagementWindow(controller);
-            dataManagementWindow.ShowDialog();
+            new DataManagementWindow(controller).ShowDialog();
         }
 
         private void SettingsIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            SettingsWindow settingsWindow = new SettingsWindow();
-            settingsWindow.ShowDialog();
+            new SettingsWindow().ShowDialog();
         }
 
         private void AddOrganization_OnClick(object sender, RoutedEventArgs e)
         {
-            AddOrganization addOrganizationWindow = new AddOrganization(controller);
-            addOrganizationWindow.ShowDialog();
+            new AddOrganization(controller).ShowDialog();
         }
 
         private void PreviousButton_OnClick(object sender, RoutedEventArgs e)

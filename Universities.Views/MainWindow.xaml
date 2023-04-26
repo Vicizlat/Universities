@@ -65,7 +65,7 @@
                     <GridViewColumn DisplayMemberBinding="{Binding [0]}" Header="Person Id"/>
                     <GridViewColumn DisplayMemberBinding="{Binding [1]}" Header="Last Name"/>
                     <GridViewColumn DisplayMemberBinding="{Binding [2]}" Header="First Name"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding [10]}" Header="OrgaName (ParentOrgaName)"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [9]}" Header="OrgaName (ParentOrgaName)"/>
                     <GridViewColumn DisplayMemberBinding="{Binding [4]}" Header="Document Id"/>
                 </GridView>
             </ListView.View>

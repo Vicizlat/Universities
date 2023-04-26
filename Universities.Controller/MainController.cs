@@ -28,6 +28,7 @@ namespace Universities.Controller
             CollectionSorter.Controller = this;
             SqlCommands.Controller = this;
             ImportExport.Controller = this;
+            DBAccess.Controller = this;
             Context = context;
             CurrentUser = currentUser;
             IsAdmin = isAdmin;
@@ -45,16 +46,17 @@ namespace Universities.Controller
             DataReader.OnDocumentFound += DataReader_OnDocumentFound;
             DataReader.OnOrganizationFound += DataReader_OnOrganizationFound;
             DataReader.OnPersonFound += DataReader_OnPersonFound;
-            ImportExport.OnDocumentsChanged += ImportExport_OnDocumentsChanged;
-            ImportExport.OnOrganizationsChanged += ImportExport_OnOrganizationsChanged;
-            ImportExport.OnPeopleChanged += ImportExport_OnPeopleChanged;
+            ImportExport.OnDocumentsChanged += OnDocumentsChanged_Triggered;
+            ImportExport.OnOrganizationsChanged += OnOrganizationsChanged_Triggered;
+            ImportExport.OnPeopleChanged += OnPeopleChanged_Triggered;
+            DBAccess.OnPeopleChanged += OnPeopleChanged_Triggered;
         }
 
-        private void ImportExport_OnDocumentsChanged(object? sender, EventArgs e) => OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
+        private void OnDocumentsChanged_Triggered(object? sender, EventArgs e) => UpdateDocuments();
 
-        private void ImportExport_OnOrganizationsChanged(object? sender, EventArgs e) => OnOrganizationsChanged?.Invoke(this, EventArgs.Empty);
+        private void OnOrganizationsChanged_Triggered(object? sender, EventArgs e) => UpdateOrganizations();
 
-        private void ImportExport_OnPeopleChanged(object? sender, EventArgs e) => OnPeopleChanged?.Invoke(this, EventArgs.Empty);
+        private void OnPeopleChanged_Triggered(object? sender, EventArgs e) => UpdatePeople();
 
         private void DataReader_OnDocumentFound(object? sender, EventArgs e)
         {
@@ -101,7 +103,7 @@ namespace Universities.Controller
 
         public void UpdateDocuments()
         {
-            Documents = Context.Documents.Where(d => d.AssignedToUser == CurrentUser).Where(d => !d.Processed).ToList();
+            Documents = Context.Documents.Where(d => d.AssignedToUser == CurrentUser || CurrentUser == "root").Where(d => !d.Processed).ToList();
             OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -184,5 +186,46 @@ namespace Universities.Controller
             }
         }
 
+        public Person? FindPerson(string firstName, string lastName, string docId)
+        {
+            return Context.People.FirstOrDefault(p => p.FirstName == firstName && p.LastName == lastName && p.DocId == docId);
+        }
+    }
+
+    public static class DBAccess
+    {
+        public static MainController? Controller;
+        public static event EventHandler? OnPeopleChanged;
+
+        public static void EditPersonId(string[] personArr)
+        {
+            if (Controller == null) return;
+            Person? person = Controller.FindPerson(personArr[1], personArr[2], personArr[4]);
+            if (person == null) return;
+            person.PersonId = int.Parse(personArr[0]);
+            //Controller.Context.SaveChanges();
+            //OnPeopleChanged?.Invoke(personArr[0], EventArgs.Empty);
+        }
+
+        public static int GetNextFreePersonId(int startId)
+        {
+            if (Controller == null) return 0;
+            while (Controller.Context.People.Any(p => p.PersonId == startId))
+            {
+                startId++;
+            }
+            return startId;
+        }
+
+        public static void DeletePerson(string[] personArr)
+        {
+            if (Controller == null) return;
+            Person? person = Controller.Context.People.FirstOrDefault(p => p.Id == int.Parse(personArr[9]));
+            if (person == null) return;
+            Controller.Context.People.Remove(person);
+            Controller.Context.SaveChanges();
+            Logging.Instance.WriteLine(person.ToString(), true);
+            OnPeopleChanged?.Invoke(null, EventArgs.Empty);
+        }
     }
 }

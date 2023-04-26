@@ -11,7 +11,7 @@ namespace Universities.Views
         {
             InitializeComponent();
             Server.Text = Settings.Instance.Server;
-            Port.Text = Settings.Instance.Port;
+            Port.Text = $"{Settings.Instance.Port}";
             Database.Text = Settings.Instance.Database;
             Username.Text = Settings.Instance.Username;
             Password.PassBox.Password = Settings.Instance.Password;
@@ -23,7 +23,7 @@ namespace Universities.Views
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             Settings.Instance.Server = Server.Text;
-            Settings.Instance.Port = Port.Text;
+            Settings.Instance.Port = int.Parse(Port.Text);
             Settings.Instance.Database = Database.Text;
             Settings.Instance.Username = Username.Text;
             Settings.Instance.Password = Password.PassBox.Password;
@@ -36,12 +36,7 @@ namespace Universities.Views
 
         private void ChangePasswordButton_Click(object sender, RoutedEventArgs e)
         {
-            LoginWindow loginWindow = new LoginWindow(false);
-            if (loginWindow.ShowDialog() == true)
-            {
-                SqlCommands.UpdateUserPassword(loginWindow.UsernameText, loginWindow.PasswordText);
-                Settings.Instance.Password = loginWindow.PasswordText;
-            }
+            new LoginWindow(false).ShowDialog();
         }
 
         private void Window_KeyUp(object sender, KeyEventArgs e)

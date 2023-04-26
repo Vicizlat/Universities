@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Universities.Controller;
 using Universities.Utils;
 
 namespace Universities.Views
@@ -9,20 +10,19 @@ namespace Universities.Views
     {
         public bool SetAdmin { get; set; }
 
-        public string UsernameText = string.Empty;
-        public string PasswordText = string.Empty;
-
         public LoginWindow(bool addUser)
         {
             InitializeComponent();
             DataContext = this;
             if (addUser)
             {
+                AddUser.Visibility = Visibility.Visible;
                 SetAdminCheck.Visibility = Visibility.Visible;
                 Title.Content = "Create new User:";
             }
             else
             {
+                Confirm.Visibility = Visibility.Visible;
                 Title.Content = "Change password for User:";
                 SetAdminCheck.Visibility = Visibility.Hidden;
                 Username.IsEnabled = false;
@@ -41,12 +41,19 @@ namespace Universities.Views
             Confirm.IsEnabled = !string.IsNullOrEmpty(Username.Text) && !string.IsNullOrEmpty(Password.PassBox.Password);
         }
 
-        private void ConfirmButton_Click(object sender, RoutedEventArgs e)
+        private void AddUserButton_Click(object sender, RoutedEventArgs e)
         {
-            UsernameText = Username.Text;
-            PasswordText = Password.PassBox.Password;
+            SqlCommands.AddUser(Username.Text, Password.PassBox.Password, SetAdmin);
             SetAdmin = SetAdminCheck.IsChecked == true;
             DialogResult = true;
+            Close();
+        }
+
+        private void ConfirmButton_Click(object sender, RoutedEventArgs e)
+        {
+            SqlCommands.UpdateUserPassword(Username.Text, Password.PassBox.Password);
+            Settings.Instance.Password = Password.PassBox.Password;
+            DialogResult = Settings.Instance.WriteSettingsFile();
             Close();
         }
 

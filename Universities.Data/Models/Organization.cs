@@ -21,15 +21,14 @@ namespace Universities.Data.Models
             ParentId = int.TryParse(lineArr[2], out int pId) ? pId : null;
         }
 
-        public override string ToString()
-        {
-            char separator = Settings.Instance.Separator;
-            return $"\"{OrganizationId}\"{separator}\"{OrganizationName}\"{separator}\"{ParentId}\"";
-        }
-
         public string[] ToArray()
         {
             return new string[] { $"{OrganizationId}", OrganizationName, $"{ParentId}" };
+        }
+
+        public override string ToString()
+        {
+            return string.Join(Settings.Instance.Separator, ToArray());
         }
     }
 }

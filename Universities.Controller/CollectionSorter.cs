@@ -49,7 +49,6 @@ namespace Universities.Controller
                 "LastName" => direction == "Ascending" ? Controller.People.OrderBy(d => d.LastName) : Controller.People.OrderByDescending(d => d.LastName),
                 "OrgId" => direction == "Ascending" ? Controller.People.OrderBy(d => d.OrgId) : Controller.People.OrderByDescending(d => d.OrgId),
                 "DocId" => direction == "Ascending" ? Controller.People.OrderBy(d => d.DocId) : Controller.People.OrderByDescending(d => d.DocId),
-                "SeqNo" => direction == "Ascending" ? Controller.People.OrderBy(d => d.SeqNo) : Controller.People.OrderByDescending(d => d.SeqNo),
                 _ => Controller.People
             };
         }

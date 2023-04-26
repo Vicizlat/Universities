@@ -9,7 +9,7 @@ namespace Universities.Utils
         private static Settings thisInstance;
         public static Settings Instance => thisInstance ?? new Settings();
         public string Server { get; set; }
-        public string Port { get; set; }
+        public int Port { get; set; }
         public string Database { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
@@ -56,7 +56,7 @@ namespace Universities.Utils
 
         public string GetConnectionString()
         {
-            if (string.IsNullOrEmpty(Server) || string.IsNullOrEmpty(Port) || string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password)) return string.Empty;
+            if (string.IsNullOrEmpty(Server) || Port == 0 || string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password)) return string.Empty;
             return $"Server={Server};Port={Port};User={Username};Password={Password};";
         }
     }
