@@ -25,11 +25,29 @@ namespace Universities
 
             if (!FileHandler.FileExists(Constants.SettingsFilePath))
             {
-                Settings.Instance.Database = "Universities";
-                Settings.Instance.Separator = ',';
-                Settings.Instance.PeopleStartId = 2000;
-                Settings.Instance.OrgaStartId = 1000;
-                Settings.Instance.WriteSettingsFile();
+                string oldPath0 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, "net7.0-windows"), "Settings")).FullName;
+                string oldPath1 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, "app-0.1.3"), "Settings")).FullName;
+                string oldPath2 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, "app-0.1.2"), "Settings")).FullName;
+                if (FileHandler.FileExists(Path.Combine(oldPath0, "Settings.xml")))
+                {
+                    FileHandler.CopyFile(oldPath0, Constants.SettingsPath, "Settings.xml");
+                }
+                else if (FileHandler.FileExists(Path.Combine(oldPath1, "Settings.xml")))
+                {
+                    FileHandler.CopyFile(oldPath1, Constants.SettingsPath, "Settings.xml");
+                }
+                else if (FileHandler.FileExists(Path.Combine(oldPath2, "Settings.xml")))
+                {
+                    FileHandler.CopyFile(oldPath2, Constants.SettingsPath, "Settings.xml");
+                }
+                else
+                {
+                    Settings.Instance.Database = "Universities";
+                    Settings.Instance.Separator = ',';
+                    Settings.Instance.PeopleStartId = 2000;
+                    Settings.Instance.OrgaStartId = 1000;
+                    Settings.Instance.WriteSettingsFile();
+                }
             }
 
             if (!Settings.Instance.ReadSettingsFile() || !TryGetContext(out context))

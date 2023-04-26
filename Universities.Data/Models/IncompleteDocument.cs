@@ -56,7 +56,7 @@ namespace Universities.Data.Models
             LastName = lineArr[17];
             Display_name = lineArr[18];
             Wos_standard = lineArr[19];
-            FirstName = string.IsNullOrEmpty(lineArr[20]) ? lineArr[19].Split(',')[1].Trim() : lineArr[20].Trim();
+            FirstName = lineArr[20];
             AssignedToUser = string.Empty;
             Processed = false;
         }

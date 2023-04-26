@@ -19,7 +19,7 @@ namespace Universities.Data.Models
         public string OrgaName3 { get; set; }
         public string OrgaName4 { get; set; }
         public string SubOrgaName { get; set; }
-        public int SeqNo { get; set; }
+        public int? SeqNo { get; set; }
         public string Full_name { get; set; }
         public string Role { get; set; }
         public string LastName { get; set; }
@@ -50,7 +50,7 @@ namespace Universities.Data.Models
             OrgaName3 = lineArr[11];
             OrgaName4 = lineArr[12];
             SubOrgaName = lineArr[13];
-            SeqNo = int.Parse(lineArr[14]);
+            SeqNo = int.TryParse(lineArr[14], out int seqNo) ? seqNo : null;
             Full_name = lineArr[15];
             Role = lineArr[16];
             LastName = lineArr[17];

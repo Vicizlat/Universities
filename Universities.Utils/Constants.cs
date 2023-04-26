@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 
 namespace Universities.Utils
 {
     public static class Constants
     {
-        private static readonly string WorkingFolder = Environment.CurrentDirectory;
+        public static readonly string WorkingFolder = string.Join('\\', Environment.CurrentDirectory.Split('\\').ToList().SkipLast(1));
         public static readonly string DocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         public static readonly string SettingsPath = Directory.CreateDirectory(Path.Combine(WorkingFolder, "Settings")).FullName;
         public static readonly string SettingsFilePath = Path.Combine(SettingsPath, "Settings.xml");

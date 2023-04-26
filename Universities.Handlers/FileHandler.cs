@@ -43,5 +43,12 @@ namespace Universities.Handlers
             string fullPath = Path.Combine(path, fileName);
             return File.Exists(fullPath);
         }
+
+        public static void CopyFile(string path1, string path2, string fileName)
+        {
+            string fullPath1 = Path.Combine(path1, fileName);
+            string fullPath2 = Path.Combine(path2, fileName);
+            File.Copy(fullPath1, fullPath2);
+        }
     }
 }
