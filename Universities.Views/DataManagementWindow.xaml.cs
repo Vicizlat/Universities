@@ -31,7 +31,7 @@ namespace Universities.Views
             lvPeople.ItemsSource = controller.People.Select(p => p.ToArray());
             lvDuplicateDocuments.ItemsSource = controller.DuplicateDocuments.Select(dd => dd.ToArray());
             lvIncompleteDocuments.ItemsSource = controller.IncompleteDocuments.Select(id => id.ToArray());
-            Users.ItemsSource = SqlCommands.GetUsers().Where(u => u != "root");
+            Users.ItemsSource = SqlCommands.GetUsers();
             controller.OnDocumentsChanged += Controller_OnDocumentsChanged;
             controller.OnOrganizationsChanged += Controller_OnOrganizationsChanged;
             controller.OnPeopleChanged += Controller_OnPeopleChanged;

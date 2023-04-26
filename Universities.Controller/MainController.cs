@@ -135,7 +135,9 @@ namespace Universities.Controller
         {
             Organization? org = Organizations.FirstOrDefault(o => o.OrganizationId == orgId);
             Organization? parent = Organizations.FirstOrDefault(o => o.OrganizationId == org?.ParentId);
-            return $"{org?.OrganizationName} ({parent?.OrganizationName})";
+            string orgName = org?.OrganizationName;
+            string parentName = Settings.Instance.ShowParentOrganization ? $" ({parent?.OrganizationName})" : string.Empty;
+            return orgName + parentName;
         }
 
         public string GetOrganizationName(int index)

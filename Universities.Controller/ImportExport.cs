@@ -89,7 +89,7 @@ namespace Universities.Controller
             if (FileDialogHandler.ShowSaveFileDialog("Export Organizations", out string filePath))
             {
                 List<string> exportOrganizations = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportOrganizationsHeader) };
-                exportOrganizations.AddRange(Controller.Context.Organizations.Select(d => d.ToString()));
+                exportOrganizations.AddRange(Controller.Context.Organizations.Select(o => o.ToString()));
                 if (FileHandler.WriteAllLines(filePath, exportOrganizations))
                 {
                     string message = $"Successfully exported all Organizations to {filePath}.";
@@ -106,7 +106,7 @@ namespace Universities.Controller
             if (FileDialogHandler.ShowSaveFileDialog("Export People", out string filePath))
             {
                 List<string> exportPeople = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportPeopleHeader) };
-                exportPeople.AddRange(Controller.Context.People.Select(d => d.ToString()));
+                exportPeople.AddRange(Controller.Context.People.Select(p => p.ToExportString()));
                 if (FileHandler.WriteAllLines(filePath, exportPeople))
                 {
                     string message = $"Successfully exported all People to {filePath}.";

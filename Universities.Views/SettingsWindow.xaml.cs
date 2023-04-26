@@ -12,25 +12,29 @@ namespace Universities.Views
             InitializeComponent();
             Server.Text = Settings.Instance.Server;
             Port.Text = $"{Settings.Instance.Port}";
-            Database.Text = Settings.Instance.Database;
+            Databases.ItemsSource = SqlCommands.GetDatabases();
+            Databases.SelectedItem = Settings.Instance.Database;
             Username.Text = Settings.Instance.Username;
             Password.PassBox.Password = Settings.Instance.Password;
             Separator.Text = Settings.Instance.Separator.ToString();
             PeopleStartId.Text = $"{Settings.Instance.PeopleStartId}";
             OrgaStartId.Text = $"{Settings.Instance.OrgaStartId}";
+            cbShowParOrg.IsChecked = Settings.Instance.ShowParentOrganization;
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             Settings.Instance.Server = Server.Text;
             Settings.Instance.Port = int.Parse(Port.Text);
-            Settings.Instance.Database = Database.Text;
+            Settings.Instance.Database = (string)Databases.SelectedItem;
             Settings.Instance.Username = Username.Text;
             Settings.Instance.Password = Password.PassBox.Password;
             Settings.Instance.Separator = Separator.Text[0];
             Settings.Instance.PeopleStartId = int.Parse(PeopleStartId.Text);
             Settings.Instance.OrgaStartId = int.Parse(OrgaStartId.Text);
+            Settings.Instance.ShowParentOrganization = cbShowParOrg.IsChecked == true;
             DialogResult = Settings.Instance.WriteSettingsFile();
+            MessageBox.Show("All settings saved successfully. Please note that most settings require a restart to take effect.");
             Close();
         }
 

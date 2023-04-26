@@ -16,6 +16,7 @@ namespace Universities.Utils
         public char Separator { get; set; }
         public int PeopleStartId { get; set; }
         public int OrgaStartId { get; set; }
+        public bool ShowParentOrganization { get; set; }
         private XmlSerializer Serializer { get; }
 
         public Settings()

@@ -17,7 +17,7 @@ namespace Universities.Controller
             {
                 string? currentUser;
                 using (MySqlConnection Connection = new MySqlConnection(Settings.Instance.GetConnectionString()))
-                using (MySqlCommand Command = new MySqlCommand("select current_user;", Connection))
+                using (MySqlCommand Command = new MySqlCommand("SELECT CURRENT_USER;", Connection))
                 {
                     Connection.Open();
                     currentUser = (string?)Command.ExecuteScalar();
@@ -97,7 +97,9 @@ namespace Universities.Controller
                     MySqlDataReader reader = Command.ExecuteReader();
                     while (reader.Read())
                     {
-                        users.Add((string)reader.GetValue("User"));
+                        string user = (string)reader.GetValue("User");
+                        if (user == "root") continue;
+                        users.Add(user);
                     }
                 }
                 return users;
@@ -105,6 +107,31 @@ namespace Universities.Controller
             catch
             {
                 return new List<string>() { "Unable to get Users" };
+            }
+        }
+
+        public static List<string> GetDatabases()
+        {
+            try
+            {
+                List<string> databases = new List<string>();
+                using (MySqlConnection Connection = new MySqlConnection(Settings.Instance.GetConnectionString()))
+                using (MySqlCommand Command = new MySqlCommand("SHOW SCHEMAS", Connection))
+                {
+                    Connection.Open();
+                    MySqlDataReader reader = Command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        string database = (string)reader.GetValue("Database");
+                        if (!database.Contains("univ")) continue;
+                        databases.Add(database);
+                    }
+                }
+                return databases;
+            }
+            catch
+            {
+                return new List<string>() { "Unable to get Databases" };
             }
         }
     }

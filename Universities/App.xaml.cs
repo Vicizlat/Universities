@@ -21,18 +21,14 @@ namespace Universities
             Logging.Instance.WriteLine("Logging started");
             ManageLogFiles(Constants.LogsPath);
             await CheckForUpdate();
-            UniversitiesContext context = null;
 
-            if (!FileHandler.FileExists(Constants.SettingsFilePath))
+            if (!FileHandler.FileExists(Constants.SettingsFilePath) && installedVersion != "Debug")
             {
-                string oldPath0 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, "net7.0-windows"), "Settings")).FullName;
-                string oldPath1 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, "app-0.1.3"), "Settings")).FullName;
-                string oldPath2 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, "app-0.1.2"), "Settings")).FullName;
-                if (FileHandler.FileExists(Path.Combine(oldPath0, "Settings.xml")))
-                {
-                    FileHandler.CopyFile(oldPath0, Constants.SettingsPath, "Settings.xml");
-                }
-                else if (FileHandler.FileExists(Path.Combine(oldPath1, "Settings.xml")))
+                double previousVersion = ((double)(double.Parse(installedVersion.Substring(2)) * 10) - 1) / 10;
+                string oldPath1 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, $"app-0.{previousVersion}"), "Settings")).FullName;
+                string oldPath2 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, "app-0.1.3"), "Settings")).FullName;
+                string oldPath3 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, "app-0.1.2"), "Settings")).FullName;
+                if (FileHandler.FileExists(Path.Combine(oldPath1, "Settings.xml")))
                 {
                     FileHandler.CopyFile(oldPath1, Constants.SettingsPath, "Settings.xml");
                 }
@@ -40,9 +36,13 @@ namespace Universities
                 {
                     FileHandler.CopyFile(oldPath2, Constants.SettingsPath, "Settings.xml");
                 }
+                else if (FileHandler.FileExists(Path.Combine(oldPath3, "Settings.xml")))
+                {
+                    FileHandler.CopyFile(oldPath3, Constants.SettingsPath, "Settings.xml");
+                }
                 else
                 {
-                    Settings.Instance.Database = "Universities";
+                    Settings.Instance.Database = "sofia_univ";
                     Settings.Instance.Separator = ',';
                     Settings.Instance.PeopleStartId = 2000;
                     Settings.Instance.OrgaStartId = 1000;
@@ -50,6 +50,7 @@ namespace Universities
                 }
             }
 
+            UniversitiesContext context = null;
             if (!Settings.Instance.ReadSettingsFile() || !TryGetContext(out context))
             {
                 if (!PromptForSettingsDetails(out context)) return;

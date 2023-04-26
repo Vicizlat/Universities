@@ -50,6 +50,11 @@ namespace Universities.Data.Models
             };
         }
 
+        public string ToExportString()
+        {
+            return string.Join(Settings.Instance.Separator, ToArray().SkipLast(1));
+        }
+
         public override string ToString()
         {
             return string.Join(Settings.Instance.Separator, ToArray());
