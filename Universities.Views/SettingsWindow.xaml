@@ -2,9 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:uc="clr-namespace:Universities.Views.UserControls"
-        x:Class="Universities.Views.SettingsWindow" mc:Ignorable="d"
-        Width="500" Height="340" ShowInTaskbar="True" ResizeMode="NoResize" WindowStyle="None"
+        x:Class="Universities.Views.SettingsWindow" mc:Ignorable="d" FontSize="13"
+        Width="540" Height="330" ShowInTaskbar="True" ResizeMode="NoResize" WindowStyle="None"
         WindowStartupLocation="CenterScreen" BorderThickness="1" KeyUp="Window_KeyUp">
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -12,9 +11,9 @@
             <RowDefinition Height="50"/>
             <RowDefinition Height="50"/>
             <RowDefinition Height="20"/>
+            <RowDefinition Height="50"/>
             <RowDefinition Height="30"/>
             <RowDefinition Height="50"/>
-            <RowDefinition Height="60"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"/>
@@ -23,26 +22,26 @@
         </Grid.ColumnDefinitions>
         <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Padding="2" FontSize="22"
                        Text="Settings" HorizontalAlignment="Center" VerticalAlignment="Top" FontWeight="Bold"/>
-        <uc:TextBoxLabeled x:Name="Server" Grid.Row="1" Grid.Column="0" Margin="10, 0" Label="Server:"/>
-        <TextBlock  Grid.Row="1" Grid.Column="1" Margin="10, 0, 10, 30" Padding="2" Text="Database:"/>
-        <ComboBox x:Name="Databases" Grid.Row="1" Grid.Column="1" Margin="10, 20, 10, 0" Padding="2"/>
-        <uc:TextBoxLabeled x:Name="Port" Grid.Row="1" Grid.Column="2" Margin="10, 0" Label="Port:"/>
-        <uc:TextBoxLabeled x:Name="Username" Grid.Row="2" Grid.Column="0" Margin="10, 0" Label="Username:"/>
-        <uc:PasswordBoxLabeled x:Name="Password" Grid.Row="2" Grid.Column="1" Margin="10, 0" Label="Password:"/>
-        <Button Grid.Row="2" Grid.Column="2" Padding="2" Margin="10, 20, 10, 0" Content="Change password" Click="ChangePasswordButton_Click"/>
-        <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Padding="2" Margin="10, 0" FontSize="16" Text="Set Separator for CSV export:"/>
-        <TextBox x:Name="Separator" Grid.Row="4" Grid.Column="2" Padding="2" Margin="10, 0" MaxLength="1" VerticalContentAlignment="Center"/>
-        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="2*"/>
-            </Grid.ColumnDefinitions>
-            <uc:TextBoxLabeled x:Name="PeopleStartId" Grid.Column="0" Margin="10, 0" Label="People Start Id:"/>
-            <uc:TextBoxLabeled x:Name="OrgaStartId" Grid.Column="2" Margin="10, 0" Label="Organizations Start Id:"/>
-        </Grid>
-        <CheckBox x:Name="cbShowParOrg" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Margin="10, 5"
-                  Content="Show Parent Organization Name in suggested preview"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="10, 0" Padding="2" Text="Server:"/>
+        <TextBox Grid.Row="1" Grid.Column="0" Margin="10, 20, 10, 0" Padding="5" Text="{Binding Path=Server}"/>
+        <TextBlock  Grid.Row="1" Grid.Column="1" Margin="10, 0" Padding="2" Text="Database:"/>
+        <ComboBox x:Name="Databases" Grid.Row="1" Grid.Column="1" Margin="10, 20, 10, 0" Padding="5"
+                  ItemsSource="{Binding Path=Databases}" SelectedValue="{Binding Path=Database}"/>
+        <TextBlock Grid.Row="1" Grid.Column="2" Margin="10, 0" Padding="5" Text="Port:"/>
+        <TextBox Grid.Row="1" Grid.Column="2" Margin="10, 20, 10, 0" Padding="5" Text="{Binding Path=Port}"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="10, 0" Padding="2" Text="Username:"/>
+        <TextBox Grid.Row="2" Grid.Column="0" Margin="10, 20, 10, 0" Padding="5" Text="{Binding Path=Username}"/>
+        <TextBlock Grid.Row="2" Grid.Column="1" Margin="10, 0" Padding="2" Text="Password:"/>
+        <TextBox x:Name="Password" Grid.Row="2" Grid.Column="1" Margin="10, 20, 10, 0" Padding="5" Text="{Binding Path=Password}"/>
+        <Button x:Name="EditUserButton" Grid.Row="2" Grid.Column="2" Margin="10, 20, 10, 0" Click="ChangePasswordButton_Click"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="10, 0" Padding="2" Text="People Start Id:"/>
+        <TextBox Grid.Row="4" Grid.Column="0" Margin="10, 20, 10, 0" Padding="5" Text="{Binding Path=PeopleStartId}"/>
+        <TextBlock Grid.Row="4" Grid.Column="1" Margin="10, 0" Padding="2" Text="Organizations Start Id:"/>
+        <TextBox Grid.Row="4" Grid.Column="1" Margin="10, 20, 10, 0" Padding="5" Text="{Binding Path=OrgaStartId}"/>
+        <TextBlock Grid.Row="4" Grid.Column="2" Margin="10, 0" Padding="0, 2" Text="Export Separator:"/>
+        <TextBox Grid.Row="4" Grid.Column="2" Margin="40, 20, 40, 0" Padding="15, 0" MaxLength="1" FontSize="20" Text="{Binding Path=Separator}"/>
+        <CheckBox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="10, 0" VerticalAlignment="Bottom"
+                  Content="Show Parent Organization Name in suggested preview" IsChecked="{Binding Path=ShowParentOrganization}"/>
         <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Height="30" VerticalAlignment="Bottom">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>

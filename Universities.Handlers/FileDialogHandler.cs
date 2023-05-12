@@ -1,10 +1,12 @@
 ﻿using Microsoft.Win32;
-using Universities.Utils;
+using System;
 
 namespace Universities.Handlers
 {
     public static class FileDialogHandler
     {
+        public static readonly string DocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
         public static bool ShowOpenFileDialog(string title, out string filePath)
         {
             OpenFileDialog openDlg = new OpenFileDialog
@@ -27,7 +29,7 @@ namespace Universities.Handlers
             {
                 Filter = "Comma Separated Value | *.csv",
                 AddExtension = true,
-                InitialDirectory = Constants.DocumentsFolder,
+                InitialDirectory = DocumentsFolder,
                 Title = title
             };
             if (saveDlg.ShowDialog() == true)

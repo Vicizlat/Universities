@@ -10,7 +10,7 @@
             <RowDefinition Height="20"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" Padding="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" Text="{Binding (local:TextBoxLabeled.Label)}"/>
-        <TextBox x:Name="TextBox" Grid.Row="1" Padding="2" VerticalContentAlignment="Top" Text="{Binding (local:TextBoxLabeled.Text)}" TextChanged="TextBox_TextChanged"/>
+        <TextBlock Grid.Row="0" Padding="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" Text="{Binding Label}"/>
+        <TextBox x:Name="TextBox" Grid.Row="1" Padding="2" VerticalContentAlignment="Top" Text="{Binding CustomText}" TextChanged="TextBox_TextChanged"/>
     </Grid>
 </UserControl>

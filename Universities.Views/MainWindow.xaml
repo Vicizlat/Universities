@@ -6,7 +6,7 @@
         xmlns:uc="clr-namespace:Universities.Views.UserControls"
         xmlns:images="clr-namespace:Universities.Views.Images"
         xmlns:local="clr-namespace:Universities.Views"
-        mc:Ignorable="d" FontSize="18" Title="MainWindow" MinHeight="700" MinWidth="900" WindowState="Maximized">
+        mc:Ignorable="d" FontSize="18" MinHeight="700" MinWidth="900" WindowState="Maximized">
     <Grid Margin="10, 0, 10, 20">
         <Grid.RowDefinitions>
             <RowDefinition Height="60"/>

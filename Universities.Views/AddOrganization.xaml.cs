@@ -24,7 +24,7 @@ namespace Universities.Views
 
         private void ParentOrganization_OnLoaded(object sender, RoutedEventArgs e)
         {
-            ParentOrganization.ItemsSource = controller.Organizations.Select(o => controller.GetOrganizationDisplayName(o.OrganizationId));
+            ParentOrganization.ItemsSource = controller.OrganizationsDisplayNames;
         }
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
@@ -43,11 +43,11 @@ namespace Universities.Views
         {
             if (ParentOrganization.SelectedItem == null)
             {
-                string message = "Are you sure you want to save without a Parent Organization?";
-                if (!PromptBox.Question(message)) return;
+                if (!PromptBox.Question("Are you sure you want to save without a Parent Organization?")) return;
             }
+            controller.UpdateOrganizations();
             int orgId = controller.Organizations.Last()?.OrganizationId + 1 ?? Settings.Instance.OrgaStartId;
-            int? parOrgId = controller.GetOrganizationId(controller.GetOrganizationName(ParentOrganization.SelectedIndex));
+            int? parOrgId = controller.GetOrganizationByIndex(ParentOrganization.SelectedIndex)?.OrganizationId;
             controller.AddOrganization(new string[] { $"{orgId}", OrganizationName.Text, $"{parOrgId}" });
             Close();
         }

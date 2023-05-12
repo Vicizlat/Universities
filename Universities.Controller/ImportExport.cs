@@ -72,7 +72,7 @@ namespace Universities.Controller
             if (FileDialogHandler.ShowSaveFileDialog("Export Documents", out string filePath))
             {
                 List<string> exportDocuments = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportDocumentsHeader) };
-                exportDocuments.AddRange(Controller.Context.Documents.Select(d => d.ToString()));
+                exportDocuments.AddRange(DBAccess.Context.Documents.Select(d => d.ToString()));
                 if (FileHandler.WriteAllLines(filePath, exportDocuments))
                 {
                     string message = $"Successfully exported all Documents to {filePath}.";
@@ -89,7 +89,7 @@ namespace Universities.Controller
             if (FileDialogHandler.ShowSaveFileDialog("Export Organizations", out string filePath))
             {
                 List<string> exportOrganizations = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportOrganizationsHeader) };
-                exportOrganizations.AddRange(Controller.Context.Organizations.Select(o => o.ToString()));
+                exportOrganizations.AddRange(DBAccess.Context.Organizations.Select(o => o.ToString()));
                 if (FileHandler.WriteAllLines(filePath, exportOrganizations))
                 {
                     string message = $"Successfully exported all Organizations to {filePath}.";
@@ -106,7 +106,7 @@ namespace Universities.Controller
             if (FileDialogHandler.ShowSaveFileDialog("Export People", out string filePath))
             {
                 List<string> exportPeople = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportPeopleHeader) };
-                exportPeople.AddRange(Controller.Context.People.Select(p => p.ToExportString()));
+                exportPeople.AddRange(DBAccess.Context.People.Select(p => p.ToExportString()));
                 if (FileHandler.WriteAllLines(filePath, exportPeople))
                 {
                     string message = $"Successfully exported all People to {filePath}.";

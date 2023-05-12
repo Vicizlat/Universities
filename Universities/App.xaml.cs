@@ -6,25 +6,22 @@ using Universities.Controller;
 using Universities.Handlers;
 using Universities.Utils;
 using Universities.Views;
-using Universities.Data;
 
 namespace Universities
 {
     public partial class App
     {
         private string installedVersion;
-        private string currentUser;
-        private bool isAdmin;
 
         private async void Application_Startup(object sender, StartupEventArgs e)
         {
             Logging.Instance.WriteLine("Logging started");
-            ManageLogFiles(Constants.LogsPath);
+            FileHandler.ManageLogFiles();
             await CheckForUpdate();
 
             if (!FileHandler.FileExists(Constants.SettingsFilePath) && installedVersion != "Debug")
             {
-                double previousVersion = ((double)(double.Parse(installedVersion.Substring(2)) * 10) - 1) / 10;
+                double previousVersion = ((double)(double.Parse(installedVersion[2..]) * 10) - 1) / 10;
                 string oldPath1 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, $"app-0.{previousVersion}"), "Settings")).FullName;
                 string oldPath2 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, "app-0.1.3"), "Settings")).FullName;
                 string oldPath3 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, "app-0.1.2"), "Settings")).FullName;
@@ -42,69 +39,32 @@ namespace Universities
                 }
                 else
                 {
-                    Settings.Instance.Database = "sofia_univ";
-                    Settings.Instance.Separator = ',';
-                    Settings.Instance.PeopleStartId = 2000;
-                    Settings.Instance.OrgaStartId = 1000;
                     Settings.Instance.WriteSettingsFile();
                 }
             }
 
-            UniversitiesContext context = null;
-            if (!Settings.Instance.ReadSettingsFile() || !TryGetContext(out context))
+            if (!Settings.Instance.ReadSettingsFile() || !DBAccess.Context.Database.CanConnect())
             {
-                if (!PromptForSettingsDetails(out context)) return;
+                if (!PromptForSettingsDetails()) return;
             }
-            MainController controller = new MainController(context, currentUser, isAdmin, installedVersion);
-            MainWindow = new MainWindow(controller);
+            MainController controller = new MainController();
+            MainWindow = new MainWindow(controller) { Title = $"Universities v. {installedVersion}     Current user: {SqlCommands.CurrentUser.Item1}" };
             MainWindow.Show();
             MainWindow.Closed += delegate { Shutdown(); };
         }
 
-        public bool PromptForSettingsDetails(out UniversitiesContext context)
+        public bool PromptForSettingsDetails()
         {
             PromptBox.Warning(Constants.ConnectionDetailsWarning);
-            while (true)
+            while (new SettingsWindow().ShowDialog().Value)
             {
-                if (new SettingsWindow().ShowDialog().Value)
+                if (DBAccess.Context.Database.CanConnect())
                 {
-                    if (TryGetContext(out context))
-                    {
-                        PromptBox.Information("Connected to Database", currentUser);
-                        return true;
-                    }
-                }
-                else
-                {
-                    PromptBox.Error("Can't connect to Database");
-                    context = null;
-                    Shutdown();
-                    return false;
+                    return PromptBox.Information("Connected to Database");
                 }
             }
-        }
-
-        private bool TryGetContext(out UniversitiesContext context)
-        {
-            string server = $"Server={Settings.Instance.Server};";
-            string port = $"Port={Settings.Instance.Port};";
-            string database = $"Database={Settings.Instance.Database};";
-            string user = $"User={Settings.Instance.Username};";
-            string pass = $"Password={Settings.Instance.Password};";
-            string connectionString = $"{server}{port}{database}{user}{pass}";
-            context = new UniversitiesContext(connectionString);
-            currentUser = SqlCommands.GetCurrentUser(out isAdmin);
-            return context.Database.CanConnect();
-        }
-
-        private void ManageLogFiles(string logsPath)
-        {
-            string[] files = Directory.GetFiles(logsPath);
-            while (files.Length > 50)
-            {
-                File.Delete(files[0]);
-                files = Directory.GetFiles(logsPath);
-            }
+            Shutdown();
+            return !PromptBox.Error("Can't connect to Database");
         }
 
         private async Task CheckForUpdate()

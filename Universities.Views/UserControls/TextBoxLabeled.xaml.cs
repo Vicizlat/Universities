@@ -6,7 +6,7 @@ namespace Universities.Views.UserControls
     public partial class TextBoxLabeled
     {
         public string Label { get; set; }
-        public string Text { get; set; }
+        public string CustomText { get; set; }
         public event EventHandler<TextChangedEventArgs> TextChanged;
 
         public TextBoxLabeled()

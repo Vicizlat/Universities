@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Windows;
 using Universities.Handlers;
 using Universities.Utils;
 
@@ -17,16 +16,10 @@ namespace Universities.Controller
             try
             {
                 if (!ReadLines(filePath, out string[] lines, out message)) return false;
-                if (!lines[0].StartsWith("UT"))
-                {
-                    message = Constants.MissmatchData;
-                    return false;
-                }
-                Settings.Instance.Separator = lines[0][2];
-                Settings.Instance.WriteSettingsFile();
+                if (!CheckFileData(lines[0], "UT", out message)) return false;
                 foreach (string line in lines.Skip(1))
                 {
-                    string[] lineArr = StringSplit.SkipStrings(line, Settings.Instance.Separator, '\"');
+                    string[] lineArr = line.Split(lines[0][2], StringSplitOptions.TrimEntries);
                     OnDocumentFound?.Invoke(lineArr, EventArgs.Empty);
                 }
                 Logging.Instance.WriteLine($"Finished processing {lines.Length - 1} Documents.");
@@ -45,16 +38,10 @@ namespace Universities.Controller
             try
             {
                 if (!ReadLines(filePath, out string[] lines, out message)) return false;
-                if (!lines[0].StartsWith("OrganizationID"))
-                {
-                    message = Constants.MissmatchData;
-                    return false;
-                }
-                Settings.Instance.Separator = lines[0][14];
-                Settings.Instance.WriteSettingsFile();
+                if (!CheckFileData(lines[0], "OrganizationID", out message)) return false;
                 foreach (string line in lines.Skip(1))
                 {
-                    string[] lineArr = StringSplit.SkipStrings(line, Settings.Instance.Separator, '\"');
+                    string[] lineArr = line.Split(lines[0][14], StringSplitOptions.TrimEntries);
                     OnOrganizationFound?.Invoke(lineArr, EventArgs.Empty);
                 }
                 Logging.Instance.WriteLine($"Finished processing {lines.Length - 1} Organizations.");
@@ -73,16 +60,10 @@ namespace Universities.Controller
             try
             {
                 if (!ReadLines(filePath, out string[] lines, out message)) return false;
-                if (!lines[0].StartsWith("PersonID"))
-                {
-                    message = Constants.MissmatchData;
-                    return false;
-                }
-                Settings.Instance.Separator = lines[0][8];
-                Settings.Instance.WriteSettingsFile();
+                if (!CheckFileData(lines[0], "PersonID", out message)) return false;
                 foreach (string line in lines.Skip(1))
                 {
-                    string[] lineArr = StringSplit.SkipStrings(line, Settings.Instance.Separator, '\"');
+                    string[] lineArr = line.Split(lines[0][8], StringSplitOptions.TrimEntries);
                     OnPersonFound?.Invoke(lineArr, EventArgs.Empty);
                 }
                 Logging.Instance.WriteLine($"Finished processing {lines.Length - 1} People.");
@@ -96,12 +77,19 @@ namespace Universities.Controller
             }
         }
 
+        private static bool CheckFileData(string text, string startsWith, out string message)
+        {
+            message = string.Empty;
+            if (text.StartsWith(startsWith)) return true;
+            message = "Data does not match expectations. Did you load the wrong file?";
+            return false;
+        }
+
         private static bool ReadLines(string filePath, out string[] lines, out string message)
         {
             message = string.Empty;
             if (FileHandler.ReadAllLines(filePath, out lines)) return true;
             message = $"Error reading file {filePath}. The file is missing or may be in use by another program.";
-            MessageBox.Show(message);
             return false;
         }
     }

@@ -1,4 +1,4 @@
-﻿<Window x:Class="Universities.Views.LoginWindow"
+﻿<Window x:Class="Universities.Views.AddUserWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -19,15 +19,15 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Label x:Name="Title" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="10, 10, 0, 0" Padding="2" FontSize="12"
-               d:Content="Enter username and password for the new User"/>
+        <Label x:Name="Title" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="10, 10, 0, 0" Padding="2" FontSize="16" Content="Create new User"/>
         <uc:TextBoxLabeled x:Name="Username" Grid.Row="1" Grid.Column="0" Margin="10, 0" Label="Username:" TextChanged="Text_OnTextChanged"/>
-        <uc:PasswordBoxLabeled x:Name="Password" Grid.Row="1" Grid.Column="1" Margin="10, 0" Label="Password:" PasswordChanged="Password_PasswordChanged"/>
-        <CheckBox x:Name="SetAdminCheck" Grid.Row="2" Grid.Column="1" Margin="10, 0" FontSize="10" IsChecked="False" Content="Make new user an Admin"/>
-        <Button x:Name="AddUser" Grid.Row="3" Grid.Column="0" Margin="10, 0" Background="LightGreen" IsEnabled="False" Visibility="Hidden"
-                Content="Add User" Click="AddUserButton_Click"/>
-        <Button x:Name="Confirm" Grid.Row="3" Grid.Column="0" Margin="10, 0" Background="LightGreen" IsEnabled="False" Visibility="Hidden"
-                Content="Confirm" Click="ConfirmButton_Click"/>
+        <uc:TextBoxLabeled x:Name="Password" Grid.Row="1" Grid.Column="1" Margin="10, 0" Label="Password:" TextChanged="Text_OnTextChanged"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="10, 0" Padding="2" Text="Set new user priviliges:"/>
+        <ComboBox x:Name="cbSetAdmin" Grid.Row="2" Grid.Column="1" Margin="10, 0, 10, 10" Padding="2">
+            <ComboBoxItem IsSelected="True" Content="Not Admin"/>
+            <ComboBoxItem Content="Admin"/>
+        </ComboBox>
+        <Button x:Name="AddUser" Grid.Row="3" Grid.Column="0" Margin="10, 0" Background="LightGreen" IsEnabled="False" Content="Add User" Click="AddUserButton_Click"/>
         <Button x:Name="Cancel" Grid.Row="3" Grid.Column="1" Margin="10, 0" Background="IndianRed" Content="Cancel" Click="Cancel_Click"/>
     </Grid>
 </Window>

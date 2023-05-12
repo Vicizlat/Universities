@@ -21,6 +21,13 @@ namespace Universities.Data.Models
             ParentId = int.TryParse(lineArr[2], out int pId) ? pId : null;
         }
 
+        public string GetDisplayName(IEnumerable<Organization> organizations)
+        {
+            string? parent = organizations.FirstOrDefault(o => o.OrganizationId == ParentId)?.OrganizationName ?? null;
+            string parentName = Settings.Instance.ShowParentOrganization && parent != null ? $" (parentName)" : string.Empty;
+            return OrganizationName + parent;
+        }
+
         public string[] ToArray()
         {
             return new string[] { $"{OrganizationId}", OrganizationName, $"{ParentId}" };

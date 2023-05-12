@@ -50,5 +50,15 @@ namespace Universities.Handlers
             string fullPath2 = Path.Combine(path2, fileName);
             File.Copy(fullPath1, fullPath2);
         }
+
+        public static void ManageLogFiles()
+        {
+            string[] files = Directory.GetFiles(Constants.LogsPath);
+            while (files.Length > 50)
+            {
+                File.Delete(files[0]);
+                files = Directory.GetFiles(Constants.LogsPath);
+            }
+        }
     }
 }

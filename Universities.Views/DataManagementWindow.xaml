@@ -58,7 +58,7 @@
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Street"/>
                             </GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding [6]}">
-                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AddrNo"/>
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Addr_no"/>
                             </GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding [8]}">
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="OrgaName"/>
@@ -79,7 +79,7 @@
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="FirstName"/>
                             </GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding [21]}">
-                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AssignedTo"/>
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AssignedToUser"/>
                             </GridViewColumn>
                             <GridViewColumn CellTemplate="{StaticResource ProcessedColumnDataTemplate}">
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Processed"/>
@@ -154,7 +154,7 @@
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Street"/>
                             </GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding [6]}">
-                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AddrNo"/>
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Addr_no"/>
                             </GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding [8]}">
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="OrgaName"/>
@@ -175,7 +175,7 @@
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="FirstName"/>
                             </GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding [21]}">
-                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AssignedTo"/>
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AssignedToUser"/>
                             </GridViewColumn>
                             <GridViewColumn CellTemplate="{StaticResource ProcessedColumnDataTemplate}">
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Processed"/>
@@ -198,7 +198,7 @@
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Street"/>
                             </GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding [6]}">
-                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AddrNo"/>
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Addr_no"/>
                             </GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding [8]}">
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="OrgaName"/>
@@ -219,7 +219,7 @@
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="FirstName"/>
                             </GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding [21]}">
-                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AssignedTo"/>
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AssignedToUser"/>
                             </GridViewColumn>
                             <GridViewColumn CellTemplate="{StaticResource ProcessedColumnDataTemplate}">
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Processed"/>

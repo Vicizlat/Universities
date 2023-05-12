@@ -25,13 +25,13 @@ namespace Universities.Views
             InitializeComponent();
             DataContext = this;
             this.controller = controller;
-            controller.Documents = controller.Context.Documents.ToList();
+            controller.Documents = DBAccess.Context.Documents.ToList();
             UpdateDocumentsView();
             lvOrganizations.ItemsSource = controller.Organizations.Select(o => o.ToArray());
             lvPeople.ItemsSource = controller.People.Select(p => p.ToArray());
             lvDuplicateDocuments.ItemsSource = controller.DuplicateDocuments.Select(dd => dd.ToArray());
             lvIncompleteDocuments.ItemsSource = controller.IncompleteDocuments.Select(id => id.ToArray());
-            Users.ItemsSource = SqlCommands.GetUsers();
+            Users.ItemsSource = SqlCommands.GetUsers().Select(t => t.Item1);
             controller.OnDocumentsChanged += Controller_OnDocumentsChanged;
             controller.OnOrganizationsChanged += Controller_OnOrganizationsChanged;
             controller.OnPeopleChanged += Controller_OnPeopleChanged;
@@ -54,12 +54,12 @@ namespace Universities.Views
             {
                 if (cbPrDocs.IsChecked == true)
                 {
-                    lvDocuments.ItemsSource = controller.Documents.Where(d => d.AssignedToUser == controller.CurrentUser).Select(d => d.ToArray());
+                    lvDocuments.ItemsSource = controller.Documents.Where(d => d.AssignedToUser == SqlCommands.CurrentUser.Item1).Select(d => d.ToArray());
                 }
                 else
                 {
                     lvDocuments.ItemsSource = controller.Documents
-                        .Where(d => d.AssignedToUser == controller.CurrentUser)
+                        .Where(d => d.AssignedToUser == SqlCommands.CurrentUser.Item1)
                         .Where(d => !d.Processed)
                         .Select(d => d.ToArray());
                 }
@@ -91,11 +91,11 @@ namespace Universities.Views
             }
             else if (OrganizationsTab.IsSelected)
             {
-                lvOrganizations.ItemsSource = CollectionSorter.GetOrganizationsOrderedBy(sortBy, direction).Select(d => d.ToArray());
+                lvOrganizations.ItemsSource = CollectionSorter.GetOrganizationsOrderedBy(sortBy, direction).Select(o => o.ToArray());
             }
             else if (PeopleTab.IsSelected)
             {
-                lvPeople.ItemsSource = CollectionSorter.GetPeopleOrderedBy(sortBy, direction).Select(d => d.ToArray());
+                lvPeople.ItemsSource = CollectionSorter.GetPeopleOrderedBy(sortBy, direction).Select(p => p.ToArray());
             }
         }
 

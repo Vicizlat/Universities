@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Universities.Controller;
+using Universities.Utils;
 
 namespace Universities.Views
 {
@@ -20,15 +21,14 @@ namespace Universities.Views
             InitializeComponent();
             DataContext = this;
             this.controller = controller;
-            Title = $"Universities v. {controller.InstalledVersion}     Current user: {controller.CurrentUser}";
-            if (!controller.IsAdmin)
+            if (!SqlCommands.CurrentUser.Item2)
             {
                 AddUser.Visibility = Visibility.Hidden;
                 DataManage.Visibility = Visibility.Hidden;
             }
             if (controller.Organizations.Count > 0)
             {
-                SelectOrganization.ItemsSource = controller.Organizations.Select(o => controller.GetOrganizationDisplayName(o.OrganizationId));
+                SelectOrganization.ItemsSource = controller.OrganizationsDisplayNames;
             }
             PopulateFields();
             controller.OnDocumentsChanged += OnDocumentsChanged;
@@ -42,14 +42,14 @@ namespace Universities.Views
 
         private void OnOrganizationsChanged(object? sender, EventArgs e)
         {
-            SelectOrganization.ItemsSource = controller.Organizations.Select(o => controller.GetOrganizationDisplayName(o.OrganizationId));
+            SelectOrganization.ItemsSource = controller.OrganizationsDisplayNames;
             SelectOrganization.SelectedIndex = -1;
             SaveButton.IsEnabled = IsSaveEnabled();
         }
 
         private void AddUserIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            new LoginWindow(true).ShowDialog();
+            new AddUserWindow().ShowDialog();
         }
 
         private void ImportExportIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -146,7 +146,8 @@ namespace Universities.Views
                 List<string[]> similarProcessedAuthors = new List<string[]>();
                 foreach (string[] author in controller.People.Where(p => p.LastName == docArray[17]).Select(p => p.ToArray()))
                 {
-                    similarProcessedAuthors.Add(author.Append(controller.GetOrganizationDisplayName(int.Parse(author[3]))).ToArray());
+                    similarProcessedAuthors.Add(author.Append(DBAccess.GetOrganization(int.Parse(author[3])).GetDisplayName(controller.Organizations)).ToArray());
+                    //similarProcessedAuthors.Add(author.Append(controller.GetOrganizationDisplayName(int.Parse(author[3]))).ToArray());
                 }
                 lvSimilarProcessedAuthors.ItemsSource = similarProcessedAuthors;
             }

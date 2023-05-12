@@ -6,7 +6,7 @@ namespace Universities.Utils
     {
         public static bool Information(string message, string caption = "Information!")
         {
-            return MessageBox.Show(message, caption, MessageBoxButton.OK, MessageBoxImage.Exclamation) == MessageBoxResult.Yes;
+            return MessageBox.Show(message, caption, MessageBoxButton.OK, MessageBoxImage.Exclamation) == MessageBoxResult.OK;
         }
 
         public static bool Question(string message)
@@ -16,12 +16,12 @@ namespace Universities.Utils
 
         public static bool Warning(string message)
         {
-            return MessageBox.Show(message, "Attention!", MessageBoxButton.OK, MessageBoxImage.Warning) == MessageBoxResult.Yes;
+            return MessageBox.Show(message, "Attention!", MessageBoxButton.OK, MessageBoxImage.Warning) == MessageBoxResult.OK;
         }
 
         public static bool Error(string message, string caption = "Error!")
         {
-            return MessageBox.Show(message, caption, MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.Yes;
+            return MessageBox.Show(message, caption, MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK;
         }
     }
 }

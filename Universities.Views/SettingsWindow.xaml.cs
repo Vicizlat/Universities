@@ -1,46 +1,32 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-using Universities.Controller;
 using Universities.Utils;
 
 namespace Universities.Views
 {
     public partial class SettingsWindow
     {
+        public string Database { get; set; }
+
         public SettingsWindow()
         {
             InitializeComponent();
-            Server.Text = Settings.Instance.Server;
-            Port.Text = $"{Settings.Instance.Port}";
-            Databases.ItemsSource = SqlCommands.GetDatabases();
-            Databases.SelectedItem = Settings.Instance.Database;
-            Username.Text = Settings.Instance.Username;
-            Password.PassBox.Password = Settings.Instance.Password;
-            Separator.Text = Settings.Instance.Separator.ToString();
-            PeopleStartId.Text = $"{Settings.Instance.PeopleStartId}";
-            OrgaStartId.Text = $"{Settings.Instance.OrgaStartId}";
-            cbShowParOrg.IsChecked = Settings.Instance.ShowParentOrganization;
+            DataContext = Settings.Instance;
+            EditUserButton.Content = SqlCommands.CurrentUser.Item2 ? "Edit Users" : "Change Password";
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            Settings.Instance.Server = Server.Text;
-            Settings.Instance.Port = int.Parse(Port.Text);
-            Settings.Instance.Database = (string)Databases.SelectedItem;
-            Settings.Instance.Username = Username.Text;
-            Settings.Instance.Password = Password.PassBox.Password;
-            Settings.Instance.Separator = Separator.Text[0];
-            Settings.Instance.PeopleStartId = int.Parse(PeopleStartId.Text);
-            Settings.Instance.OrgaStartId = int.Parse(OrgaStartId.Text);
-            Settings.Instance.ShowParentOrganization = cbShowParOrg.IsChecked == true;
-            DialogResult = Settings.Instance.WriteSettingsFile();
+            Settings.Instance.WriteSettingsFile();
             MessageBox.Show("All settings saved successfully. Please note that most settings require a restart to take effect.");
+            DialogResult = true;
             Close();
         }
 
         private void ChangePasswordButton_Click(object sender, RoutedEventArgs e)
         {
-            new LoginWindow(false).ShowDialog();
+            new EditUserWindow().ShowDialog();
+            Password.Text = Settings.Instance.Password;
         }
 
         private void Window_KeyUp(object sender, KeyEventArgs e)

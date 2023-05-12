@@ -42,7 +42,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="LoginWindow.xaml.cs">
+    <Compile Update="AddUserWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="EditUserWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="AddOrganization.xaml.cs">
@@ -51,7 +54,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="LoginWindow.xaml">
+    <Page Update="AddUserWindow.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="EditUserWindow.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
