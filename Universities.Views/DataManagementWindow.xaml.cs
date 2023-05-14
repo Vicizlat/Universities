@@ -133,47 +133,28 @@ namespace Universities.Views
             lvPeople.ItemsSource = controller.People.Select(o => o.ToArray());
         }
 
-        private void ShiftId_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ShiftIds.IsEnabled = !string.IsNullOrEmpty(NewStartId.Text) && int.TryParse(NewStartId.Text, out newStartId);
-        }
-
-        private void ShiftIdsButton_Click(object sender, RoutedEventArgs e)
-        {
-            //List<Person> shiftedPeople = new List<Person>();
-            //foreach (Person person in controller.People)
-            //{
-            //    Person? findPerson = shiftedPeople.Find(p => p.LastPersonId == person.PersonId);
-            //    person.LastPersonId = person.PersonId;
-            //    person.PersonId = findPerson?.PersonId ?? (shiftedPeople.Count == 0 ? newStartId : shiftedPeople.Last().PersonId + 1);
-            //    shiftedPeople.Add(new Person(person.ToArray()) { LastPersonId = person.LastPersonId });
-            //}
-            //MessageBox.Show("All done!");
-        }
-
         private void SetIdsInOrder_Click(object sender, RoutedEventArgs e)
         {
-            //List<string[]> sortedPeople = lvPeople.SelectedItems.Cast<string[]>().ToList();
-            //sortedPeople.ForEach(p => p[0] += "0000");
-            //int currentId = Settings.Instance.PeopleStartId;
-            //int nextId = DBAccess.GetNextFreePersonId(currentId);
-            //int lastPersonId = 0;
-            //foreach (string[] sortedPerson in sortedPeople)
-            //{
-            //    if (int.Parse(sortedPerson[0]) == lastPersonId)
-            //    {
-            //        sortedPerson[0] = $"{currentId}";
-            //    }
-            //    else
-            //    {
-            //        lastPersonId = int.Parse(sortedPerson[0]);
-            //        sortedPerson[0] = $"{nextId}";
-            //        currentId = nextId;
-            //        nextId = DBAccess.GetNextFreePersonId(currentId + 1);
-            //    }
-            //    DBAccess.EditPersonId(sortedPerson);
-            //}
-            //MessageBox.Show("All done!");
+            if (!PromptBox.Question("Warning! This will take a long time. Are you sure you want to start the process now?")) return;
+            List<string[]> sortedPeople = lvPeople.Items.Cast<string[]>().ToList();
+            string lastProcessedId = "0";
+            int currentId = Settings.Instance.PeopleStartId;
+            foreach (string[] person in sortedPeople)
+            {
+                if (person[0] != lastProcessedId)
+                {
+                    lastProcessedId = person[0];
+                    currentId++;
+                }
+                DBAccess.EditPersonId(person, currentId);
+            }
+            MessageBox.Show("All done!");
+        }
+
+        private void EditSelected_Click(object sender, RoutedEventArgs e)
+        {
+            string[] person = lvPeople.SelectedItem as string[];
+            new EditPersonWindow(person, controller).ShowDialog();
         }
 
         private void DeleteSelected_Click(object sender, RoutedEventArgs e)
@@ -225,7 +206,9 @@ namespace Universities.Views
 
         private void lvPeople_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SetIdsInOrder.IsEnabled = lvPeople.SelectedItems.Count > 0;
+            SetIdsInOrder.IsEnabled = lvPeople.SelectedItems.Count == 0;
+            DeleteSelected.IsEnabled = lvPeople.SelectedItems.Count > 0;
+            EditSelected.IsEnabled = lvPeople.SelectedItems.Count == 1;
         }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)

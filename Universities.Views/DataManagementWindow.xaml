@@ -241,11 +241,12 @@
         </StackPanel>
         <StackPanel Grid.Row="2" Margin="200, 0, 0, 10" Orientation="Horizontal" VerticalAlignment="Bottom"
                     Visibility="{Binding IsSelected, ElementName=PeopleTab, Converter={StaticResource BoolToVisibilityConverter}}">
-            <TextBlock Margin="10, 0" Padding="2" Width="65" Text="Shift IDs by:"/>
-            <TextBox x:Name="NewStartId" Margin="0, -3" Padding="2" Width="60" KeyDown="Numbers_OnKeyDown" TextChanged="ShiftId_TextChanged"/>
-            <Button x:Name="ShiftIds" Margin="10, -3" Padding="2" Width="60" IsEnabled="False" Content="Apply" Click="ShiftIdsButton_Click"/>
-            <Button x:Name="SetIdsInOrder" Margin="10, -3" Padding="2" Width="130" IsEnabled="False" Content="Set Ids in Sorted Order" Click="SetIdsInOrder_Click"/>
-            <Button x:Name="DeleteSelected" Margin="10, -3" Padding="2" Width="100" Content="Remove Selected" Click="DeleteSelected_Click"/>
+            <!--<TextBlock Margin="10, 0" Padding="2" Width="65" Text="Shift IDs by:"/>-->
+            <!--<TextBox x:Name="NewStartId" Margin="0, -3" Padding="2" Width="60" KeyDown="Numbers_OnKeyDown" TextChanged="ShiftId_TextChanged"/>
+            <Button x:Name="ShiftIds" Margin="10, -3" Padding="2" Width="60" IsEnabled="False" Content="Apply" Click="ShiftIdsButton_Click"/>-->
+            <Button x:Name="SetIdsInOrder" Margin="10, -3" Padding="2" Width="130" Content="Set Ids in Sorted Order" Click="SetIdsInOrder_Click"/>
+            <Button x:Name="EditSelected" Margin="10, -3" Padding="2" Width="100" IsEnabled="False" Content="Edit Selected" Click="EditSelected_Click"/>
+            <Button x:Name="DeleteSelected" Margin="10, -3" Padding="2" Width="100" IsEnabled="False" Content="Remove Selected" Click="DeleteSelected_Click"/>
         </StackPanel>
     </Grid>
 </Window>

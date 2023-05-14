@@ -35,24 +35,26 @@ namespace Universities.Controller
             return Context.Organizations.FirstOrDefault(o => o.OrganizationName == organizationName)?.OrganizationId;
         }
 
-        public static void EditPersonId(string[] personArr, int newPersonId)
+        public static bool EditPersonId(string[] personArr, int newPersonId)
         {
-            if (Context == null) return;
+            if (Context == null) return false;
             Person? person = Context.People.FirstOrDefault(p => p.Id == int.Parse(personArr[9]));
-            if (person == null) return;
+            if (person == null) return false;
             person.PersonId = newPersonId;
             Context.SaveChanges();
             OnPeopleChanged?.Invoke(person, EventArgs.Empty);
+            return true;
         }
 
-        public static void EditPersonOrgId(string[] personArr, int newOrgId)
+        public static bool EditPersonOrgId(string[] personArr, int newOrgId)
         {
-            if (Context == null) return;
+            if (Context == null) return false;
             Person? person = Context.People.FirstOrDefault(p => p.Id == int.Parse(personArr[9]));
-            if (person == null) return;
+            if (person == null) return false;
             person.OrgId = newOrgId;
             Context.SaveChanges();
             OnPeopleChanged?.Invoke(person, EventArgs.Empty);
+            return true;
         }
 
         public static int GetNextFreePersonId(int startId)
@@ -72,7 +74,7 @@ namespace Universities.Controller
             if (person == null) return;
             Context.People.Remove(person);
             Context.SaveChanges();
-            Logging.Instance.WriteLine(person.ToString(), true);
+            Logging.Instance.WriteLine(person.ToExportString(), true);
             OnPeopleChanged?.Invoke(null, EventArgs.Empty);
         }
     }

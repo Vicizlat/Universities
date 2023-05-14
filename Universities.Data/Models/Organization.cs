@@ -25,7 +25,7 @@ namespace Universities.Data.Models
         {
             string? parent = organizations.FirstOrDefault(o => o.OrganizationId == ParentId)?.OrganizationName ?? null;
             string parentName = Settings.Instance.ShowParentOrganization && parent != null ? $" (parentName)" : string.Empty;
-            return OrganizationName + parent;
+            return OrganizationName + parentName;
         }
 
         public string[] ToArray()
