@@ -150,7 +150,7 @@ namespace Universities.Views
                     string orgDisplayName = controller.Organizations.FirstOrDefault(o => o.OrganizationId == int.Parse(author[3])).GetDisplayName(controller.Organizations);
                     similarProcessedAuthors.Add(author.Append(orgDisplayName).ToArray());
                 }
-                lvSimilarProcessedAuthors.ItemsSource = similarProcessedAuthors;
+                lvSimilarProcessedAuthors.ItemsSource = similarProcessedAuthors.OrderBy(a => a[2]).ThenBy(a => a[1]);
             }
         }
 
