@@ -26,8 +26,9 @@ namespace Universities.Controller
             }
         }
 
-        public static Organization? GetOrganization(int id)
+        public static Organization? GetOrganization(int? id)
         {
+            if (id == null) return null;
             return Context.Organizations.FirstOrDefault(o => o.OrganizationId == id);
         }
 

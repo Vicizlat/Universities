@@ -191,7 +191,7 @@ namespace Universities.Views
             List<string[]> selectedItems = new List<string[]>();
             foreach (string[] item in lvDocuments.SelectedItems) selectedItems.Add(item);
             string selectedUser = Users.SelectedItem.ToString().StartsWith("Unassign") ? string.Empty : Users.SelectedItem.ToString();
-            selectedItems.ForEach(i => controller.UpdateDocument(i, selectedUser));
+            selectedItems.ForEach(d => controller.UpdateDocument(d, selectedUser));
             lvDocuments.SelectedItems.Clear();
         }
 
@@ -201,7 +201,7 @@ namespace Universities.Views
             bool processed = senderButton == "Processed";
             List<string[]> selectedItems = new List<string[]>();
             foreach (string[] item in lvDocuments.SelectedItems) selectedItems.Add(item);
-            selectedItems.ForEach(i => controller.UpdateDocument(i, processed));
+            selectedItems.ForEach(d => controller.UpdateDocument(d, processed));
             lvDocuments.SelectedItems.Clear();
         }
 

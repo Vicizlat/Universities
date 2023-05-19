@@ -24,7 +24,7 @@ namespace Universities.Data.Models
         public string GetDisplayName(IEnumerable<Organization> organizations)
         {
             string? parent = organizations.FirstOrDefault(o => o.OrganizationId == ParentId)?.OrganizationName ?? null;
-            string parentName = Settings.Instance.ShowParentOrganization && parent != null ? $" (parentName)" : string.Empty;
+            string parentName = Settings.Instance.ShowParentOrganization && parent != null ? $" ({parent})" : string.Empty;
             return OrganizationName + parentName;
         }
 

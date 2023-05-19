@@ -20,13 +20,13 @@
         </Grid.ColumnDefinitions>
         <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="10, 0" Padding="2" FontSize="20" HorizontalAlignment="Center" Text="Edit Person"/>
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="10, 0" Padding="2" Text="First Name:"/>
-        <TextBox Grid.Row="1" Grid.Column="0" Margin="10, 20, 10, 5" Padding="5" IsEnabled="False" Text="{Binding Person[1]}"/>
+        <TextBox Grid.Row="1" Grid.Column="0" Margin="10, 20, 10, 5" Padding="4" IsEnabled="False" Text="{Binding Person[1]}"/>
         <TextBlock Grid.Row="1" Grid.Column="1" Text="Last Name:" Margin="10, 0" Padding="2"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Margin="10, 20, 10, 5" Padding="5" IsEnabled="False" Text="{Binding Person[2]}"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Margin="10, 20, 10, 5" Padding="4" IsEnabled="False" Text="{Binding Person[2]}"/>
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Person Id:" Margin="10, 0" Padding="2"/>
-        <TextBox x:Name="PersonId" Grid.Row="2" Grid.Column="0" Margin="10, 20, 10, 5" Padding="5" KeyDown="PersonId_KeyDown" TextChanged="TextBox_TextChanged"/>
+        <TextBox x:Name="PersonId" Grid.Row="2" Grid.Column="0" Margin="10, 20, 10, 5" Padding="4" KeyDown="PersonId_KeyDown" TextChanged="TextBox_TextChanged"/>
         <TextBlock Grid.Row="2" Grid.Column="1" Text="Organization:" Margin="10, 0" Padding="2"/>
-        <ComboBox x:Name="Organizations" Grid.Row="2" Grid.Column="1" Margin="10, 20, 10, 5" Padding="5" SelectionChanged="Organizations_SelectionChanged"/>
+        <ComboBox x:Name="Organizations" Grid.Row="2" Grid.Column="1" Margin="10, 20, 10, 5" Padding="4" SelectionChanged="Organizations_SelectionChanged"/>
         <Button x:Name="Save" Grid.Row="3" Grid.Column="0" Margin="10, 10" Background="LightGreen"
                 Content="Save" IsEnabled="False" Click="Save_Click"/>
         <Button x:Name="Cancel" Grid.Row="3" Grid.Column="1" Margin="10, 10" Background="IndianRed"

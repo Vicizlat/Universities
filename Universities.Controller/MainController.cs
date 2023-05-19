@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using Universities.Data.Models;
 using Universities.Utils;
 
@@ -82,10 +83,22 @@ namespace Universities.Controller
             AddOrganization((string[])sender);
         }
 
-        private void DataReader_OnPersonFound(object? sender, EventArgs e)
+        private async void DataReader_OnPersonFound(object? sender, EventArgs e)
         {
             if (sender == null) return;
-            AddPerson((string[])sender);
+            await AddPerson((string[])sender);
+        }
+
+        public void UpdateDocument(string[] doc, object updateData)
+        {
+            Document? document = DBAccess.Context.Documents.FirstOrDefault(d => d.Ut == doc[0] && d.FirstName == doc[20] && d.LastName == doc[17]);
+            if (document != null)
+            {
+                if (updateData is bool) document.Processed = (bool)updateData;
+                if (updateData is string) document.AssignedToUser = (string)updateData;
+                DBAccess.Context.SaveChanges();
+                OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         public void UpdateDocuments()
@@ -105,18 +118,6 @@ namespace Universities.Controller
         {
             People = DBAccess.Context.People.ToList();
             OnPeopleChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        public void UpdateDocument(string[] doc, object updateData)
-        {
-            Document? document = DBAccess.Context.Documents.FirstOrDefault(d => d.Ut == doc[0] && d.FirstName == doc[20] && d.LastName == doc[17]);
-            if (document != null)
-            {
-                if (updateData is bool) document.Processed = (bool)updateData;
-                if (updateData is string) document.AssignedToUser = (string)updateData;
-                DBAccess.Context.SaveChanges();
-                OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
-            }
         }
 
         public Organization? GetOrganizationByIndex(int index)
@@ -149,12 +150,12 @@ namespace Universities.Controller
             else return findPerson.PersonId;
         }
 
-        public void AddPerson(string[] personArray)
+        public async Task AddPerson(string[] personArray)
         {
             try
             {
-                DBAccess.Context.People.Add(new Person(personArray));
-                DBAccess.Context.SaveChanges();
+                await DBAccess.Context.People.AddAsync(new Person(personArray));
+                await DBAccess.Context.SaveChangesAsync();
                 UpdatePeople();
             }
             catch
