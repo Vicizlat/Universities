@@ -7,7 +7,6 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using Universities.Controller;
-using Universities.Handlers;
 using Universities.Utils;
 
 namespace Universities.Views
@@ -17,8 +16,6 @@ namespace Universities.Views
         private readonly MainController controller;
         private GridViewColumnHeader listViewSortCol = null;
         private SortAdorner listViewSortAdorner = null;
-        private int newStartId;
-        public event EventHandler<int>? OnShiftIdsClicked;
 
         public DataManagementWindow(MainController controller)
         {
@@ -31,7 +28,9 @@ namespace Universities.Views
             lvPeople.ItemsSource = controller.People.Select(p => p.ToArray());
             lvDuplicateDocuments.ItemsSource = controller.DuplicateDocuments.Select(dd => dd.ToArray());
             lvIncompleteDocuments.ItemsSource = controller.IncompleteDocuments.Select(id => id.ToArray());
-            Users.ItemsSource = SqlCommands.GetUsers().Select(t => t.Item1);
+            List<string> list = new List<string>(){ "Unassign (No User)" };
+            list.AddRange(SqlCommands.GetUsers().Select(t => t.Item1));
+            Users.ItemsSource = list;
             controller.OnDocumentsChanged += Controller_OnDocumentsChanged;
             controller.OnOrganizationsChanged += Controller_OnOrganizationsChanged;
             controller.OnPeopleChanged += Controller_OnPeopleChanged;
@@ -160,16 +159,22 @@ namespace Universities.Views
         private void DeleteSelected_Click(object sender, RoutedEventArgs e)
         {
             if (!PromptBox.Question("Are you sure you want to permanently remove all selected items?")) return;
-            List<string[]> selectedPeople = lvPeople.SelectedItems.Cast<string[]>().ToList();
-            Logging.Instance.WriteLine("People removed from DB:");
-            foreach (string[] person in selectedPeople)
+            if (DocumentsTab.IsSelected)
             {
-                DBAccess.DeletePerson(person);
+                List<string[]> selectedDocuments = lvDocuments.SelectedItems.Cast<string[]>().ToList();
+                Logging.Instance.WriteLine("Documents removed from DB:");
+                selectedDocuments.ForEach(DBAccess.DeleteDocument);
+                controller.Documents = DBAccess.Context.Documents.ToList();
+                UpdateDocumentsView();
+            }
+            if (PeopleTab.IsSelected)
+            {
+                List<string[]> selectedPeople = lvPeople.SelectedItems.Cast<string[]>().ToList();
+                Logging.Instance.WriteLine("People removed from DB:");
+                selectedPeople.ForEach(DBAccess.DeletePerson);
             }
             MessageBox.Show("All done!");
         }
-
-        private void Numbers_OnKeyDown(object sender, KeyEventArgs e) => e.Handled = KeyPressHandler.NotNumbers(e);
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
@@ -185,7 +190,8 @@ namespace Universities.Views
         {
             List<string[]> selectedItems = new List<string[]>();
             foreach (string[] item in lvDocuments.SelectedItems) selectedItems.Add(item);
-            selectedItems.ForEach(i => controller.UpdateDocument(i, (string)Users.SelectedItem));
+            string selectedUser = Users.SelectedItem.ToString().StartsWith("Unassign") ? string.Empty : Users.SelectedItem.ToString();
+            selectedItems.ForEach(i => controller.UpdateDocument(i, selectedUser));
             lvDocuments.SelectedItems.Clear();
         }
 
@@ -199,11 +205,6 @@ namespace Universities.Views
             lvDocuments.SelectedItems.Clear();
         }
 
-        private void DataManageWindow_Closing(object sender, CancelEventArgs e)
-        {
-            controller.UpdateDocuments();
-        }
-
         private void lvPeople_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SetIdsInOrder.IsEnabled = lvPeople.SelectedItems.Count == 0;
@@ -211,9 +212,19 @@ namespace Universities.Views
             EditSelected.IsEnabled = lvPeople.SelectedItems.Count == 1;
         }
 
+        private void lvDocuments_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            DeleteSelected.IsEnabled = lvDocuments.SelectedItems.Count > 0;
+        }
+
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             lvPeople.ItemsSource = controller.People.Where(p => p.ToString().ToLower().Contains(SearchBox.Text.ToLower())).Select(p => p.ToArray());
+        }
+
+        private void DataManageWindow_Closing(object sender, CancelEventArgs e)
+        {
+            controller.UpdateDocuments();
         }
     }
 }

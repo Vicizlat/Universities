@@ -97,7 +97,7 @@ namespace Universities.Views
             documents.AddRange(lvSimilarPendingAuthors.SelectedItems.OfType<string[]>());
             foreach (string[] doc in documents)
             {
-                controller.AddPerson(new string[] { $"{personId}", doc[20], doc[17], $"{orgId}", doc[0], doc[14], "", "", "", "" });
+                controller.AddPerson(new string[] { $"{personId}", doc[20], doc[17], $"{orgId}", doc[0], doc[14], "", "", "" });
                 controller.UpdateDocument(doc, true);
             }
             controller.UpdateDocuments();
@@ -146,8 +146,9 @@ namespace Universities.Views
                 List<string[]> similarProcessedAuthors = new List<string[]>();
                 foreach (string[] author in controller.People.Where(p => p.LastName == docArray[17]).Select(p => p.ToArray()))
                 {
-                    similarProcessedAuthors.Add(author.Append(DBAccess.GetOrganization(int.Parse(author[3])).GetDisplayName(controller.Organizations)).ToArray());
-                    //similarProcessedAuthors.Add(author.Append(controller.GetOrganizationDisplayName(int.Parse(author[3]))).ToArray());
+                    if (similarProcessedAuthors.Any(a => a[0] == author[0])) continue;
+                    string orgDisplayName = controller.Organizations.FirstOrDefault(o => o.OrganizationId == int.Parse(author[3])).GetDisplayName(controller.Organizations);
+                    similarProcessedAuthors.Add(author.Append(orgDisplayName).ToArray());
                 }
                 lvSimilarProcessedAuthors.ItemsSource = similarProcessedAuthors;
             }

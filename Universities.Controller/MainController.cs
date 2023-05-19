@@ -40,6 +40,7 @@ namespace Universities.Controller
             ImportExport.OnOrganizationsChanged += OnOrganizationsChanged_Triggered;
             ImportExport.OnPeopleChanged += OnPeopleChanged_Triggered;
             DBAccess.OnPeopleChanged += OnPeopleChanged_Triggered;
+            DBAccess.OnDocumentsChanged -= OnDocumentsChanged_Triggered;
         }
 
         private void OnDocumentsChanged_Triggered(object? sender, EventArgs e) => UpdateDocuments();

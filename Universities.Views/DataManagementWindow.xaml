@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Universities.Views"
         mc:Ignorable="d"
         x:Name="DataManageWindow" Title="Data Management" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow"
-        Height="400" MinHeight="400" Width="1132" MinWidth="962" KeyUp="Window_KeyUp" Closing="DataManageWindow_Closing">
+        Height="400" MinHeight="400" Width="1132" MinWidth="1022" KeyUp="Window_KeyUp" Closing="DataManageWindow_Closing">
     <Window.Resources>
         <local:MultiBoolToVisibilityConverter x:Key="MultiBoolToVisibilityConverter"/>
         <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
@@ -45,7 +45,7 @@
                     HorizontalAlignment="Right" VerticalAlignment="Top" Click="ExportButton_Click"/>
         <TabControl Grid.Row="1">
             <TabItem x:Name="DocumentsTab" Header="Documents" Width="180" FontSize="18">
-                <ListView x:Name="lvDocuments" Margin="-3" SelectionMode="Extended" FontSize="12">
+                <ListView x:Name="lvDocuments" Margin="-3" SelectionMode="Extended" FontSize="12" SelectionChanged="lvDocuments_SelectionChanged">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn DisplayMemberBinding="{Binding [0]}">
@@ -235,18 +235,17 @@
             <TextBlock Margin="10, 0" Padding="2" Width="90" Text="Assign to User:"/>
             <ComboBox x:Name="Users" Padding="2" Width="120" SelectionChanged="Users_SelectionChanged"/>
             <Button x:Name="Assign" Margin="10, -3" Padding="2" Width="120" IsEnabled="False" Content="Assign" Click="Assign_Click"/>
-            <TextBlock Margin="40, 0, 0, 0" Padding="2" Width="50" Text="Mark as:"/>
+            <TextBlock Margin="20, 0, 0, 0" Padding="2" Width="50" Text="Mark as:"/>
             <Button Margin="10, -3" Padding="2" Width="100" Background="LightGreen" Content="Processed" Click="Button_Click"/>
             <Button Margin="0, -3" Padding="2" Width="100" Background="Orange" Content="Not Processed" Click="Button_Click"/>
         </StackPanel>
         <StackPanel Grid.Row="2" Margin="200, 0, 0, 10" Orientation="Horizontal" VerticalAlignment="Bottom"
                     Visibility="{Binding IsSelected, ElementName=PeopleTab, Converter={StaticResource BoolToVisibilityConverter}}">
-            <!--<TextBlock Margin="10, 0" Padding="2" Width="65" Text="Shift IDs by:"/>-->
-            <!--<TextBox x:Name="NewStartId" Margin="0, -3" Padding="2" Width="60" KeyDown="Numbers_OnKeyDown" TextChanged="ShiftId_TextChanged"/>
-            <Button x:Name="ShiftIds" Margin="10, -3" Padding="2" Width="60" IsEnabled="False" Content="Apply" Click="ShiftIdsButton_Click"/>-->
             <Button x:Name="SetIdsInOrder" Margin="10, -3" Padding="2" Width="130" Content="Set Ids in Sorted Order" Click="SetIdsInOrder_Click"/>
             <Button x:Name="EditSelected" Margin="10, -3" Padding="2" Width="100" IsEnabled="False" Content="Edit Selected" Click="EditSelected_Click"/>
-            <Button x:Name="DeleteSelected" Margin="10, -3" Padding="2" Width="100" IsEnabled="False" Content="Remove Selected" Click="DeleteSelected_Click"/>
+            <!--<Button x:Name="DeleteSelected" Margin="10, -3" Padding="2" Width="100" IsEnabled="False" Content="Remove Selected" Click="DeleteSelected_Click"/>-->
         </StackPanel>
+        <Button x:Name="DeleteSelected" Grid.Row="2" Margin="10, 7" Width="100" Height="26" IsEnabled="False" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                Content="Remove Selected" Click="DeleteSelected_Click"/>
     </Grid>
 </Window>

@@ -9,6 +9,7 @@ namespace Universities.Controller
     public static class DBAccess
     {
         public static event EventHandler? OnPeopleChanged;
+        public static event EventHandler? OnDocumentsChanged;
         private static UniversitiesContext? context;
 
         public static UniversitiesContext Context
@@ -76,6 +77,17 @@ namespace Universities.Controller
             Context.SaveChanges();
             Logging.Instance.WriteLine(person.ToExportString(), true);
             OnPeopleChanged?.Invoke(null, EventArgs.Empty);
+        }
+
+        public static void DeleteDocument(string[] docArr)
+        {
+            if (Context == null) return;
+            Document? doc = Context.Documents.FirstOrDefault(d => d.Ut == docArr[0] && d.FirstName == docArr[20] && d.LastName == docArr[17]);
+            if (doc == null) return;
+            Context.Documents.Remove(doc);
+            Context.SaveChanges();
+            Logging.Instance.WriteLine(doc.ToString(), true);
+            OnDocumentsChanged?.Invoke(null, EventArgs.Empty);
         }
     }
 }
