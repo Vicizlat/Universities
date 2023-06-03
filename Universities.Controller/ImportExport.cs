@@ -52,13 +52,30 @@ namespace Universities.Controller
         public static bool ImportPeople()
         {
             if (Controller == null) return false;
-            if (FileDialogHandler.ShowOpenFileDialog("Open Organizations file", out string filePath))
+            if (FileDialogHandler.ShowOpenFileDialog("Open People file", out string filePath))
             {
                 if (DataReader.ReadPeopleFile(filePath, out string message))
                 {
                     OnPeopleChanged?.Invoke(null, EventArgs.Empty);
                     message = $"Successfully loaded {Controller.People.Count} People.";
                     MessageBox.Show(message);
+                    return true;
+                }
+                MessageBox.Show(message);
+            }
+            return false;
+        }
+
+        public static bool ImportAcadPersonnel()
+        {
+            if (Controller == null) return false;
+            if (FileDialogHandler.ShowOpenFileDialog("Open Acad. Personnel file", out string filePath))
+            {
+                if (DataReader.ReadAcadPersonnelFile(filePath, out string message))
+                {
+                    //OnPeopleChanged?.Invoke(null, EventArgs.Empty);
+                    //message = $"Successfully loaded {Controller.People.Count} People.";
+                    //MessageBox.Show(message);
                     return true;
                 }
                 MessageBox.Show(message);

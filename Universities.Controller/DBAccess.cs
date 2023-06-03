@@ -8,8 +8,9 @@ namespace Universities.Controller
 {
     public static class DBAccess
     {
-        public static event EventHandler? OnPeopleChanged;
         public static event EventHandler? OnDocumentsChanged;
+        public static event EventHandler? OnOrganizationsChanged;
+        public static event EventHandler? OnPeopleChanged;
         private static UniversitiesContext? context;
 
         public static UniversitiesContext Context
@@ -21,6 +22,7 @@ namespace Universities.Controller
                     string database = $"Database={Settings.Instance.Database};";
                     string connectionString = $"{SqlCommands.GetConnectionString()}{database}";
                     context = new UniversitiesContext(connectionString);
+                    context.Database.EnsureCreated();
                 }
                 return context;
             }
@@ -69,6 +71,28 @@ namespace Universities.Controller
             return startId;
         }
 
+        public static void DeleteDocument(string[] docArr)
+        {
+            if (Context == null) return;
+            Document? doc = Context.Documents.FirstOrDefault(d => d.Ut == docArr[0] && d.FirstName == docArr[20] && d.LastName == docArr[17]);
+            if (doc == null) return;
+            Context.Documents.Remove(doc);
+            Context.SaveChanges();
+            Logging.Instance.WriteLine(doc.ToString(), true);
+            OnDocumentsChanged?.Invoke(null, EventArgs.Empty);
+        }
+
+        public static void DeleteOrganization(string[] orgArr)
+        {
+            if (Context == null) return;
+            Organization? org = Context.Organizations.FirstOrDefault(o => o.Id == int.Parse(orgArr[3]));
+            if (org == null) return;
+            Context.Organizations.Remove(org);
+            Context.SaveChanges();
+            Logging.Instance.WriteLine(org.ToExportString(), true);
+            OnOrganizationsChanged?.Invoke(null, EventArgs.Empty);
+        }
+
         public static void DeletePerson(string[] personArr)
         {
             if (Context == null) return;
@@ -80,15 +104,13 @@ namespace Universities.Controller
             OnPeopleChanged?.Invoke(null, EventArgs.Empty);
         }
 
-        public static void DeleteDocument(string[] docArr)
+        public static AcadPerson? LastAcadPerson
         {
-            if (Context == null) return;
-            Document? doc = Context.Documents.FirstOrDefault(d => d.Ut == docArr[0] && d.FirstName == docArr[20] && d.LastName == docArr[17]);
-            if (doc == null) return;
-            Context.Documents.Remove(doc);
-            Context.SaveChanges();
-            Logging.Instance.WriteLine(doc.ToString(), true);
-            OnDocumentsChanged?.Invoke(null, EventArgs.Empty);
+            get
+            {
+                if (Context == null) return null;
+                return Context.AcadPersonnel.OrderBy(p => p.Id).LastOrDefault();
+            }
         }
     }
 }

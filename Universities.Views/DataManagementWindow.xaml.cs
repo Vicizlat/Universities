@@ -13,6 +13,7 @@ namespace Universities.Views
 {
     public partial class DataManagementWindow
     {
+        public WaitWindow WaitWindow { get; set; }
         private readonly MainController controller;
         private GridViewColumnHeader listViewSortCol = null;
         private SortAdorner listViewSortAdorner = null;
@@ -24,16 +25,18 @@ namespace Universities.Views
             this.controller = controller;
             controller.Documents = DBAccess.Context.Documents.ToList();
             UpdateDocumentsView();
-            lvOrganizations.ItemsSource = controller.Organizations.Select(o => o.ToArray());
-            lvPeople.ItemsSource = controller.People.Select(p => p.ToArray());
+            UpdateOrganizationsView();
+            UpdatePeopleView();
+            UpdateAcadPersonnelView();
             lvDuplicateDocuments.ItemsSource = controller.DuplicateDocuments.Select(dd => dd.ToArray());
             lvIncompleteDocuments.ItemsSource = controller.IncompleteDocuments.Select(id => id.ToArray());
-            List<string> list = new List<string>(){ "Unassign (No User)" };
+            List<string> list = new List<string>() { "Unassign (No User)" };
             list.AddRange(SqlCommands.GetUsers().Select(t => t.Item1));
             Users.ItemsSource = list;
             controller.OnDocumentsChanged += Controller_OnDocumentsChanged;
             controller.OnOrganizationsChanged += Controller_OnOrganizationsChanged;
             controller.OnPeopleChanged += Controller_OnPeopleChanged;
+            controller.OnAcadPersonnelChanged += Controller_OnAcadPersonnelChanged;
         }
 
         private void UpdateDocumentsView()
@@ -63,6 +66,25 @@ namespace Universities.Views
                         .Select(d => d.ToArray());
                 }
             }
+            UpdateDocumentsCount();
+        }
+
+        private void UpdateOrganizationsView()
+        {
+            lvOrganizations.ItemsSource = controller.Organizations.Select(o => o.ToArray());
+            UpdateOrganizationsCount();
+        }
+
+        private void UpdatePeopleView()
+        {
+            lvPeople.ItemsSource = controller.People.Select(p => p.ToArray());
+            UpdatePeopleCount();
+        }
+
+        private void UpdateAcadPersonnelView()
+        {
+            lvAcadPersonnel.ItemsSource = DBAccess.Context.AcadPersonnel.ToList().Select(p => p.ToArray());
+            UpdatePeopleCount();
         }
 
         private void ListViewColumnHeader_Click(object sender, RoutedEventArgs e)
@@ -100,9 +122,12 @@ namespace Universities.Views
 
         private void ImportButton_Click(object sender, RoutedEventArgs e)
         {
+            ShowWaitWindow();
             if (DocumentsTab.IsSelected) ImportExport.ImportDocuments();
             if (OrganizationsTab.IsSelected) ImportExport.ImportOrganizations();
             if (PeopleTab.IsSelected) ImportExport.ImportPeople();
+            if (AcadPersonnelTab.IsSelected) ImportExport.ImportAcadPersonnel();
+            CloseWaitWindow();
         }
 
         private void CheckBox_Click(object sender, RoutedEventArgs e)
@@ -124,12 +149,17 @@ namespace Universities.Views
 
         private void Controller_OnOrganizationsChanged(object? sender, EventArgs e)
         {
-            lvOrganizations.ItemsSource = controller.Organizations.Select(d => d.ToArray());
+            UpdateOrganizationsView();
         }
 
         private void Controller_OnPeopleChanged(object? sender, EventArgs e)
         {
-            lvPeople.ItemsSource = controller.People.Select(o => o.ToArray());
+            UpdatePeopleView();
+        }
+
+        private void Controller_OnAcadPersonnelChanged(object? sender, EventArgs e)
+        {
+            UpdateAcadPersonnelView();
         }
 
         private void SetIdsInOrder_Click(object sender, RoutedEventArgs e)
@@ -167,11 +197,21 @@ namespace Universities.Views
                 controller.Documents = DBAccess.Context.Documents.ToList();
                 UpdateDocumentsView();
             }
+            if (OrganizationsTab.IsSelected)
+            {
+                List<string[]> selectedOrganizations = lvOrganizations.SelectedItems.Cast<string[]>().ToList();
+                Logging.Instance.WriteLine("Organizations removed from DB:");
+                selectedOrganizations.ForEach(DBAccess.DeleteOrganization);
+                controller.Organizations = DBAccess.Context.Organizations.ToList();
+                UpdateOrganizationsView();
+            }
             if (PeopleTab.IsSelected)
             {
                 List<string[]> selectedPeople = lvPeople.SelectedItems.Cast<string[]>().ToList();
                 Logging.Instance.WriteLine("People removed from DB:");
                 selectedPeople.ForEach(DBAccess.DeletePerson);
+                controller.People = DBAccess.Context.People.ToList();
+                UpdatePeopleView();
             }
             MessageBox.Show("All done!");
         }
@@ -205,26 +245,80 @@ namespace Universities.Views
             lvDocuments.SelectedItems.Clear();
         }
 
+        private void lvDocuments_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            DeleteSelected.IsEnabled = lvDocuments.SelectedItems.Count > 0;
+            UpdateDocumentsCount();
+        }
+
+        private void lvOrganizations_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            DeleteSelected.IsEnabled = lvOrganizations.SelectedItems.Count > 0;
+            UpdateOrganizationsCount();
+        }
+
         private void lvPeople_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SetIdsInOrder.IsEnabled = lvPeople.SelectedItems.Count == 0;
             DeleteSelected.IsEnabled = lvPeople.SelectedItems.Count > 0;
             EditSelected.IsEnabled = lvPeople.SelectedItems.Count == 1;
-        }
-
-        private void lvDocuments_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            DeleteSelected.IsEnabled = lvDocuments.SelectedItems.Count > 0;
+            UpdatePeopleCount();
         }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             lvPeople.ItemsSource = controller.People.Where(p => p.ToString().ToLower().Contains(SearchBox.Text.ToLower())).Select(p => p.ToArray());
+            UpdatePeopleCount();
         }
 
         private void DataManageWindow_Closing(object sender, CancelEventArgs e)
         {
             controller.UpdateDocuments();
+        }
+
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateDocumentsCount();
+            UpdateOrganizationsCount();
+            UpdatePeopleCount();
+        }
+
+        private void UpdateDocumentsCount()
+        {
+            if (DocumentsTab.IsSelected)
+            {
+                TotalCount.Text = $"{lvDocuments.Items.Count}";
+                SelectedCount.Text = $"{lvDocuments.SelectedItems.Count}";
+            }
+        }
+
+        private void UpdateOrganizationsCount()
+        {
+            if (OrganizationsTab.IsSelected)
+            {
+                TotalCount.Text = $"{lvOrganizations.Items.Count}";
+                SelectedCount.Text = $"{lvOrganizations.SelectedItems.Count}";
+            }
+        }
+
+        private void UpdatePeopleCount()
+        {
+            if (PeopleTab.IsSelected)
+            {
+                TotalCount.Text = $"{lvPeople.Items.Count}";
+                SelectedCount.Text = $"{lvPeople.SelectedItems.Count}";
+            }
+        }
+
+        public void ShowWaitWindow(string text = null)
+        {
+            WaitWindow = new WaitWindow(text);
+            WaitWindow.Show();
+        }
+
+        public void CloseWaitWindow()
+        {
+            if (WaitWindow != null) WaitWindow.Close();
         }
     }
 }

@@ -119,6 +119,22 @@ namespace Universities.Utils
             else PromptBox.Error("You don't have permission to remove user!");
         }
 
+        public static void AddDatabase(string database)
+        {
+            if (CurrentUser.Item2)
+            {
+                string command = $"CREATE DATABASE `{database}` COLLATE 'utf8_general_ci';";
+                using (MySqlConnection Connection = new MySqlConnection(GetConnectionString()))
+                using (MySqlCommand Command = new MySqlCommand(command, Connection))
+                {
+                    Connection.Open();
+                    Command.ExecuteNonQuery();
+                }
+                PromptBox.Information($"Database '{database}' added successfully!", CurrentUser.Item1);
+            }
+            else PromptBox.Information("You don't have permission to add databases!");
+        }
+
         public static List<Tuple<string, bool>> GetUsers()
         {
             try

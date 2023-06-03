@@ -8,6 +8,7 @@ namespace Universities.Data
         public DbSet<Document> Documents { get; set; }
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Person> People { get; set; }
+        public DbSet<AcadPerson> AcadPersonnel { get; set; }
         public DbSet<DuplicateDocument> DuplicateDocuments { get; set; }
         public DbSet<IncompleteDocument> IncompleteDocuments { get; set; }
         public string ConnectionString { get; set; }

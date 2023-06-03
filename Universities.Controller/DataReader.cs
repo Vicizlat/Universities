@@ -10,6 +10,7 @@ namespace Universities.Controller
         public static event EventHandler? OnDocumentFound;
         public static event EventHandler? OnOrganizationFound;
         public static event EventHandler? OnPersonFound;
+        public static event EventHandler? OnAcadPersonFound;
 
         public static bool ReadDataSetFile(string filePath, out string message)
         {
@@ -17,10 +18,12 @@ namespace Universities.Controller
             {
                 if (!ReadLines(filePath, out string[] lines, out message)) return false;
                 if (!CheckFileData(lines[0], "UT", out message)) return false;
+                Logging.Instance.WriteLine("Documents added to DB:");
                 foreach (string line in lines.Skip(1))
                 {
                     string[] lineArr = line.Split(lines[0][2], StringSplitOptions.TrimEntries);
                     OnDocumentFound?.Invoke(lineArr, EventArgs.Empty);
+                    Logging.Instance.WriteLine(string.Join(";", lineArr));
                 }
                 Logging.Instance.WriteLine($"Finished processing {lines.Length - 1} Documents.");
                 return true;
@@ -72,6 +75,35 @@ namespace Universities.Controller
             catch (Exception e)
             {
                 message = "Error loading People File!";
+                Logging.Instance.WriteLine($"{message} {e.Message}");
+                return false;
+            }
+        }
+
+        public static bool ReadAcadPersonnelFile(string filePath, out string message)
+        {
+            try
+            {
+                if (!ReadLines(filePath, out string[] lines, out message)) return false;
+                if (!CheckFileData(lines[0], "Име", out message)) return false;
+                foreach (string line in lines.Skip(1))
+                {
+                    string[] lineArr = line.Split(lines[0][18], StringSplitOptions.TrimEntries);
+                    if (string.IsNullOrEmpty(lineArr[0]) && DBAccess.LastAcadPerson != null)
+                    {
+                        if (!string.IsNullOrEmpty(lineArr[2])) DBAccess.LastAcadPerson.FirstNames += $" | {lineArr[2]}";
+                        if (!string.IsNullOrEmpty(lineArr[3])) DBAccess.LastAcadPerson.LastNames += $" | {lineArr[3]}";
+                        if (!string.IsNullOrEmpty(lineArr[8])) DBAccess.LastAcadPerson.Notes += $" | {lineArr[8]}";
+                        if (!string.IsNullOrEmpty(lineArr[9])) DBAccess.LastAcadPerson.Comments += $" | {lineArr[9]}";
+                    }
+                    else OnAcadPersonFound?.Invoke(lineArr, EventArgs.Empty);
+                }
+                Logging.Instance.WriteLine($"Finished processing {lines.Length - 1} AcadPersonnel.");
+                return true;
+            }
+            catch (Exception e)
+            {
+                message = "Error loading AcadPersonnel File!";
                 Logging.Instance.WriteLine($"{message} {e.Message}");
                 return false;
             }

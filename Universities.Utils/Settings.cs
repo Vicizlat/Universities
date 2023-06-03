@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 
@@ -18,8 +17,6 @@ namespace Universities.Utils
         public int PeopleStartId { get; set; } = 2000;
         public int OrgaStartId { get; set; } = 1000;
         public bool ShowParentOrganization { get; set; } = false;
-        [XmlIgnore]
-        public IEnumerable<string> Databases { get; set; }
         private XmlSerializer Serializer = new XmlSerializer(typeof(Settings));
 
         public Settings()
@@ -33,7 +30,6 @@ namespace Universities.Utils
             {
                 using TextReader reader = new StreamReader(Constants.SettingsFilePath);
                 thisInstance = Serializer.Deserialize(reader) as Settings;
-                thisInstance.Databases = SqlCommands.GetDatabases();
                 return true;
             }
             catch (Exception e)

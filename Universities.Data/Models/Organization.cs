@@ -30,7 +30,12 @@ namespace Universities.Data.Models
 
         public string[] ToArray()
         {
-            return new string[] { $"{OrganizationId}", OrganizationName, $"{ParentId}" };
+            return new string[] { $"{OrganizationId}", OrganizationName, $"{ParentId}", $"{Id}" };
+        }
+
+        public string ToExportString()
+        {
+            return string.Join(Settings.Instance.Separator, ToArray().SkipLast(1));
         }
 
         public override string ToString()

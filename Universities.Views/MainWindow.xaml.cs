@@ -133,6 +133,7 @@ namespace Universities.Views
                 SubOrganizationName.TextBox.Text = string.Empty;
                 lvSimilarPendingAuthors.ItemsSource = new List<string[]>();
                 lvSimilarProcessedAuthors.ItemsSource = new List<string[]>();
+                lvAcadPersonnel.ItemsSource = new List<string[]>();
             }
             else
             {
@@ -165,6 +166,12 @@ namespace Universities.Views
                     similarProcessedAuthors.Add(author.Append(orgDisplayName).Append("").ToArray());
                 }
                 lvSimilarProcessedAuthors.ItemsSource = similarProcessedAuthors.OrderBy(a => a[2]).ThenBy(a => a[1]);
+                List<string[]> acadPersonnel = new List<string[]>();
+                foreach (string[] author in controller.AcadPersonnel.Where(p => p.LastNames.Contains(docArray[17])).Select(p => p.ToArray()))
+                {
+                    acadPersonnel.Add(author);
+                }
+                lvAcadPersonnel.ItemsSource = acadPersonnel.OrderBy(a => a[1]).ThenBy(a => a[0]);
             }
         }
 

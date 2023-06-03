@@ -19,6 +19,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
         <Button x:Name="ImportButton" Grid.Row="0" Padding="2" Margin="10, 4" Width="200" Content="Import"
@@ -28,6 +29,7 @@
                     <Binding Path="IsSelected" ElementName="DocumentsTab"/>
                     <Binding Path="IsSelected" ElementName="OrganizationsTab"/>
                     <Binding Path="IsSelected" ElementName="PeopleTab"/>
+                    <Binding Path="IsSelected" ElementName="AcadPersonnelTab"/>
                 </MultiBinding>
             </Button.Visibility>
         </Button>
@@ -43,7 +45,7 @@
         </StackPanel>
         <Button x:Name="ExportButton" Grid.Row="0" Padding="2" Margin="10, 4" Width="200" Content="Export"
                     HorizontalAlignment="Right" VerticalAlignment="Top" Click="ExportButton_Click"/>
-        <TabControl Grid.Row="1">
+        <TabControl Grid.Row="1" SelectionChanged="TabControl_SelectionChanged">
             <TabItem x:Name="DocumentsTab" Header="Documents" Width="180" FontSize="18">
                 <ListView x:Name="lvDocuments" Margin="-3" SelectionMode="Extended" FontSize="12" SelectionChanged="lvDocuments_SelectionChanged">
                     <ListView.View>
@@ -89,7 +91,7 @@
                 </ListView>
             </TabItem>
             <TabItem x:Name="OrganizationsTab" Header="Organizations" Width="180" FontSize="18">
-                <ListView x:Name="lvOrganizations" Margin="-3" SelectionMode="Extended" FontSize="12">
+                <ListView x:Name="lvOrganizations" Margin="-3" SelectionMode="Extended" FontSize="12" SelectionChanged="lvOrganizations_SelectionChanged">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn DisplayMemberBinding="{Binding [0]}">
@@ -128,19 +130,46 @@
                     </ListView.View>
                 </ListView>
             </TabItem>
-            <TabItem MinWidth="104" Visibility="Hidden">
+            <TabItem MinWidth="44" Visibility="Hidden">
                 <TabItem.Width>
                     <MultiBinding Converter="{StaticResource MultiWidthConverter}">
                         <Binding Path="ActualWidth" ElementName="DataManageWindow"/>
                         <Binding Path="Width" ElementName="DocumentsTab"/>
                         <Binding Path="Width" ElementName="OrganizationsTab"/>
                         <Binding Path="Width" ElementName="PeopleTab"/>
+                        <Binding Path="Width" ElementName="AcadPersonnelTab"/>
                         <Binding Path="Width" ElementName="DuplicateDocumentsTab"/>
                         <Binding Path="Width" ElementName="IncompleteDocumentsTab"/>
                     </MultiBinding>
                 </TabItem.Width>
             </TabItem>
-            <TabItem x:Name="DuplicateDocumentsTab" Header="Duplicate Documents" Width="140" Height="20" VerticalAlignment="Bottom">
+            <TabItem x:Name="AcadPersonnelTab" Header="Acad. Personnel" Width="90" Height="20" FontSize="10" VerticalAlignment="Bottom">
+                <ListView x:Name="lvAcadPersonnel" Margin="-3" SelectionMode="Extended" FontSize="12">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn DisplayMemberBinding="{Binding [0]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="FirstNames"/>
+                            </GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding [1]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="LastNames"/>
+                            </GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding [2]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Faculty"/>
+                            </GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding [3]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Department"/>
+                            </GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding [4]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Notes"/>
+                            </GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding [5]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Comments"/>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </TabItem>
+            <TabItem x:Name="DuplicateDocumentsTab" Header="Duplicate Docs" Width="80" Height="20" FontSize="10" VerticalAlignment="Bottom">
                 <ListView x:Name="lvDuplicateDocuments" Margin="-3" SelectionMode="Extended" FontSize="12">
                     <ListView.View>
                         <GridView>
@@ -184,7 +213,7 @@
                     </ListView.View>
                 </ListView>
             </TabItem>
-            <TabItem x:Name="IncompleteDocumentsTab" Header="Incomplete Documents" Width="140" Height="20" VerticalAlignment="Bottom">
+            <TabItem x:Name="IncompleteDocumentsTab" Header="Incomplete Docs" Width="90" Height="20" FontSize="10" VerticalAlignment="Bottom">
                 <ListView x:Name="lvIncompleteDocuments" Margin="-3" SelectionMode="Extended" FontSize="12">
                     <ListView.View>
                         <GridView>
@@ -229,8 +258,14 @@
                 </ListView>
             </TabItem>
         </TabControl>
-        <TextBlock Grid.Row="2" Margin="10" Padding="2" FontWeight="Bold" VerticalAlignment="Bottom" Text="Actions on selected items:"/>
-        <StackPanel Grid.Row="2" Margin="200, 0, 0, 10" Orientation="Horizontal" VerticalAlignment="Bottom"
+        <StackPanel Grid.Row="2" Margin="10, 0" Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBlock Grid.Row="2" Padding="2" Text="Selected count:"/>
+            <TextBlock x:Name="SelectedCount" Grid.Row="2" Padding="2" Width="60" d:Text="730"/>
+            <TextBlock Grid.Row="2" Padding="2" Text="Total count:"/>
+            <TextBlock x:Name="TotalCount" Grid.Row="2" Padding="2" Width="40" d:Text="730"/>
+        </StackPanel>
+        <TextBlock Grid.Row="3" Margin="10" Padding="2" FontWeight="Bold" VerticalAlignment="Bottom" Text="Actions on selected items:"/>
+        <StackPanel Grid.Row="3" Margin="200, 0, 0, 10" Orientation="Horizontal" VerticalAlignment="Bottom"
                     Visibility="{Binding IsSelected, ElementName=DocumentsTab, Converter={StaticResource BoolToVisibilityConverter}}">
             <TextBlock Margin="10, 0" Padding="2" Width="90" Text="Assign to User:"/>
             <ComboBox x:Name="Users" Padding="2" Width="120" SelectionChanged="Users_SelectionChanged"/>
@@ -239,13 +274,12 @@
             <Button Margin="10, -3" Padding="2" Width="100" Background="LightGreen" Content="Processed" Click="Button_Click"/>
             <Button Margin="0, -3" Padding="2" Width="100" Background="Orange" Content="Not Processed" Click="Button_Click"/>
         </StackPanel>
-        <StackPanel Grid.Row="2" Margin="200, 0, 0, 10" Orientation="Horizontal" VerticalAlignment="Bottom"
+        <StackPanel Grid.Row="3" Margin="200, 0, 0, 10" Orientation="Horizontal" VerticalAlignment="Bottom"
                     Visibility="{Binding IsSelected, ElementName=PeopleTab, Converter={StaticResource BoolToVisibilityConverter}}">
             <Button x:Name="SetIdsInOrder" Margin="10, -3" Padding="2" Width="130" Content="Set Ids in Sorted Order" Click="SetIdsInOrder_Click"/>
             <Button x:Name="EditSelected" Margin="10, -3" Padding="2" Width="100" IsEnabled="False" Content="Edit Selected" Click="EditSelected_Click"/>
-            <!--<Button x:Name="DeleteSelected" Margin="10, -3" Padding="2" Width="100" IsEnabled="False" Content="Remove Selected" Click="DeleteSelected_Click"/>-->
         </StackPanel>
-        <Button x:Name="DeleteSelected" Grid.Row="2" Margin="10, 7" Width="100" Height="26" IsEnabled="False" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+        <Button x:Name="DeleteSelected" Grid.Row="3" Margin="10, 7" Width="100" Height="26" IsEnabled="False" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                 Content="Remove Selected" Click="DeleteSelected_Click"/>
     </Grid>
 </Window>

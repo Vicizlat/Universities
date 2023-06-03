@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         x:Class="Universities.Views.SettingsWindow" mc:Ignorable="d" FontSize="13"
         Width="540" Height="330" ShowInTaskbar="True" ResizeMode="NoResize" WindowStyle="None"
-        WindowStartupLocation="CenterScreen" BorderThickness="1" KeyUp="Window_KeyUp">
+        WindowStartupLocation="CenterScreen" BorderThickness="1" KeyDown="Window_KeyDown">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -25,8 +25,10 @@
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="10, 0" Padding="2" Text="Server:"/>
         <TextBox Grid.Row="1" Grid.Column="0" Margin="10, 20, 10, 0" Padding="5" Text="{Binding Path=Server}"/>
         <TextBlock  Grid.Row="1" Grid.Column="1" Margin="10, 0" Padding="2" Text="Database:"/>
-        <ComboBox x:Name="Databases" Grid.Row="1" Grid.Column="1" Margin="10, 20, 10, 0" Padding="5"
-                  ItemsSource="{Binding Path=Databases}" SelectedValue="{Binding Path=Database}"/>
+        <ComboBox x:Name="Databases" Grid.Row="1" Grid.Column="1" Margin="10, 20, 30, 0" Padding="5"/>
+        <TextBox x:Name="NewDbName" Grid.Row="1" Grid.Column="1" Margin="10, 20, 30, 0" Padding="5" Visibility="Hidden" KeyUp="NewDbName_KeyUp"/>
+        <Button x:Name="AddDatabaseButton" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Margin="10, 20, 10, 0"
+                Padding="1, -3, 1, 3" FontSize="22" Content="+" Click="AddDatabase_Click"/>
         <TextBlock Grid.Row="1" Grid.Column="2" Margin="10, 0" Padding="2" Text="Port:"/>
         <TextBox Grid.Row="1" Grid.Column="2" Margin="10, 20, 10, 0" Padding="5" KeyDown="Numbers_KeyDown" Text="{Binding Path=Port}"/>
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="10, 0" Padding="2" Text="Username:"/>

@@ -11,11 +11,13 @@ namespace Universities
 {
     public partial class App
     {
+        public WaitWindow WaitWindow { get; set; }
         private string installedVersion;
 
         private async void Application_Startup(object sender, StartupEventArgs e)
         {
             Logging.Instance.WriteLine("Logging started");
+            ShowWaitWindow();
             FileHandler.ManageLogFiles();
             await CheckForUpdate();
 
@@ -49,6 +51,7 @@ namespace Universities
             }
             MainController controller = new MainController();
             MainWindow = new MainWindow(controller) { Title = $"Universities v. {installedVersion}     Current user: {SqlCommands.CurrentUser.Item1}" };
+            CloseWaitWindow();
             MainWindow.Show();
             MainWindow.Closed += delegate { Shutdown(); };
         }
@@ -83,5 +86,16 @@ namespace Universities
         }
 
         private void Application_Exit(object sender, ExitEventArgs e) => Logging.Instance.Close();
+
+        public void ShowWaitWindow(string text = null)
+        {
+            WaitWindow = new WaitWindow(text);
+            WaitWindow.Show();
+        }
+
+        public void CloseWaitWindow()
+        {
+            if (WaitWindow != null) WaitWindow.Close();
+        }
     }
 }

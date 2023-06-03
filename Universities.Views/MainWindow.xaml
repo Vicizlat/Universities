@@ -6,7 +6,7 @@
         xmlns:uc="clr-namespace:Universities.Views.UserControls"
         xmlns:images="clr-namespace:Universities.Views.Images"
         xmlns:local="clr-namespace:Universities.Views"
-        mc:Ignorable="d" FontSize="18" MinHeight="700" MinWidth="900" WindowState="Maximized">
+        mc:Ignorable="d" FontSize="18" MinHeight="700" Width="1000" MinWidth="900" WindowState="Maximized">
     <Grid Margin="10, 0, 10, 20">
         <Grid.RowDefinitions>
             <RowDefinition Height="60"/>
@@ -58,7 +58,8 @@
             </ListView.View>
         </ListView>
         <uc:LabelTextBlock Grid.Row="5" Grid.Column="0" Margin="10, 0" Label="Possible matching names (already processed):"/>
-        <ListView x:Name="lvSimilarProcessedAuthors" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="10, 0" SelectionMode="Single"
+        <uc:LabelTextBlock Grid.Row="5" Grid.Column="1" Margin="10, 0" Label="Possible matching names (Acad. Personnel):"/>
+        <ListView x:Name="lvSimilarProcessedAuthors" Grid.Row="6" Grid.Column="0" Margin="10, 0" SelectionMode="Single"
                   SelectionChanged="SelectOrganization_OnSelectionChanged">
             <ListView.View>
                 <GridView>
@@ -67,6 +68,19 @@
                     <GridViewColumn DisplayMemberBinding="{Binding [1]}" Header="First Name"/>
                     <GridViewColumn DisplayMemberBinding="{Binding [11]}" Header="Other First Names"/>
                     <GridViewColumn DisplayMemberBinding="{Binding [10]}" Header="OrgaName (ParentOrgaName)"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <ListView x:Name="lvAcadPersonnel" Grid.Row="6" Grid.Column="1" Margin="10, 0" SelectionMode="Single"
+                  SelectionChanged="SelectOrganization_OnSelectionChanged">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn DisplayMemberBinding="{Binding [0]}" Header="First Names"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [1]}" Header="Last Names"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [2]}" Header="Faculty"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [3]}" Header="Department"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [4]}" Header="Notes"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [5]}" Header="Comments"/>
                 </GridView>
             </ListView.View>
         </ListView>

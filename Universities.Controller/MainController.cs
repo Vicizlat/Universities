@@ -13,22 +13,23 @@ namespace Universities.Controller
         public event EventHandler? OnDocumentsChanged;
         public event EventHandler? OnOrganizationsChanged;
         public event EventHandler? OnPeopleChanged;
+        public event EventHandler? OnAcadPersonnelChanged;
         public List<Document> Documents { get; set; }
         public List<DuplicateDocument> DuplicateDocuments { get; set; }
         public List<IncompleteDocument> IncompleteDocuments { get; set; }
         public List<Organization> Organizations { get; set; }
         public List<string> OrganizationsDisplayNames { get; set; }
         public List<Person> People { get; set; }
+        public List<AcadPerson> AcadPersonnel { get; set; }
 
         public MainController()
         {
             CollectionSorter.Controller = this;
             ImportExport.Controller = this;
-            //Context.Database.EnsureDeleted();
-            //Context.Database.EnsureCreated();
             UpdateDocuments();
             UpdateOrganizations();
             UpdatePeople();
+            AcadPersonnel = DBAccess.Context.AcadPersonnel.ToList();
             if (SqlCommands.CurrentUser.Item2)
             {
                 DuplicateDocuments = DBAccess.Context.DuplicateDocuments.ToList();
@@ -37,11 +38,13 @@ namespace Universities.Controller
             DataReader.OnDocumentFound += DataReader_OnDocumentFound;
             DataReader.OnOrganizationFound += DataReader_OnOrganizationFound;
             DataReader.OnPersonFound += DataReader_OnPersonFound;
+            DataReader.OnAcadPersonFound += DataReader_OnAcadPersonFound; ;
             ImportExport.OnDocumentsChanged += OnDocumentsChanged_Triggered;
             ImportExport.OnOrganizationsChanged += OnOrganizationsChanged_Triggered;
             ImportExport.OnPeopleChanged += OnPeopleChanged_Triggered;
-            DBAccess.OnPeopleChanged += OnPeopleChanged_Triggered;
             DBAccess.OnDocumentsChanged -= OnDocumentsChanged_Triggered;
+            DBAccess.OnOrganizationsChanged -= OnOrganizationsChanged_Triggered;
+            DBAccess.OnPeopleChanged += OnPeopleChanged_Triggered;
         }
 
         private void OnDocumentsChanged_Triggered(object? sender, EventArgs e) => UpdateDocuments();
@@ -87,6 +90,13 @@ namespace Universities.Controller
         {
             if (sender == null) return;
             await AddPerson((string[])sender);
+        }
+
+        private void DataReader_OnAcadPersonFound(object? sender, EventArgs e)
+        {
+            if (sender == null) return;
+            AddAcadPerson((string[])sender);
+            OnAcadPersonnelChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public void UpdateDocument(string[] doc, object updateData)
@@ -135,7 +145,7 @@ namespace Universities.Controller
             }
             catch
             {
-                PromptBox.Error($"Failed to Add Organization: {orgArr[1]}!");
+                PromptBox.Error($"Failed to add Organization: {orgArr[1]}!");
             }
         }
 
@@ -160,7 +170,20 @@ namespace Universities.Controller
             }
             catch
             {
-                PromptBox.Error($"Failed to Save Person: {personArray[1]} {personArray[2]}!");
+                PromptBox.Error($"Failed to add Person: {personArray[1]} {personArray[2]}!");
+            }
+        }
+
+        public void AddAcadPerson(string[] acadPersonArray)
+        {
+            try
+            {
+                DBAccess.Context.AcadPersonnel.Add(new AcadPerson(acadPersonArray));
+                DBAccess.Context.SaveChanges();
+            }
+            catch
+            {
+                PromptBox.Error($"Failed to add Acad. Person {acadPersonArray[0]} {acadPersonArray[1]}!");
             }
         }
 
