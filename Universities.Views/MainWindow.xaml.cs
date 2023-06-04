@@ -178,9 +178,19 @@ namespace Universities.Views
         private void SelectOrganization_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SaveButton.IsEnabled = IsSaveEnabled();
-            if (sender is ListView && lvSimilarProcessedAuthors.SelectedItem != null)
+            if (sender == lvSimilarProcessedAuthors && lvSimilarProcessedAuthors.SelectedItem != null)
             {
                 SelectOrganization.SelectedItem = ((string[])lvSimilarProcessedAuthors.SelectedItem)[10];
+            }
+            if (sender == lvAcadPersonnel && lvAcadPersonnel.SelectedItem != null)
+            {
+                string acadPersFac = ((string[])lvAcadPersonnel.SelectedItem)[2];
+                string acadPersDep = ((string[])lvAcadPersonnel.SelectedItem)[3];
+                string orgName = string.IsNullOrEmpty(acadPersDep) ? acadPersFac : acadPersDep;
+                for (int i = 0; i < SelectOrganization.Items.Count; i++)
+                {
+                    if (SelectOrganization.Items[i].ToString().Contains(orgName)) SelectOrganization.SelectedIndex = i;
+                }
             }
         }
 

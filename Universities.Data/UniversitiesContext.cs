@@ -24,8 +24,8 @@ namespace Universities.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                MariaDbServerVersion mariaDbServer = new MariaDbServerVersion(new Version(5, 5, 68));
-                optionsBuilder.UseMySql(ConnectionString, mariaDbServer);
+                MariaDbServerVersion mariaDbServer = new MariaDbServerVersion(ServerVersion.AutoDetect(ConnectionString));// new Version(5, 5, 68));
+                optionsBuilder.UseMySql(ConnectionString, mariaDbServer, builder => { builder.EnableRetryOnFailure(5); });
             }
         }
 

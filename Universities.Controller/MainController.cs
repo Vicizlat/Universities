@@ -178,7 +178,19 @@ namespace Universities.Controller
         {
             try
             {
-                DBAccess.Context.AcadPersonnel.Add(new AcadPerson(acadPersonArray));
+                AcadPerson acadPerson = new AcadPerson(acadPersonArray);
+                if (!DBAccess.Context.Organizations.Any(o => o.OrganizationName == acadPerson.Faculty))
+                {
+                    int orgId = DBAccess.Context.Organizations.ToList().LastOrDefault()?.OrganizationId + 1 ?? Settings.Instance.OrgaStartId;
+                    DataReader_OnOrganizationFound(new string[3] { $"{orgId}", acadPerson.Faculty, $"{GetOrganizationByIndex(0)?.OrganizationId}" }, null);
+                }
+                if (!string.IsNullOrEmpty(acadPerson.Department) && !DBAccess.Context.Organizations.Any(o => o.OrganizationName == acadPerson.Department))
+                {
+                    int orgId = DBAccess.Context.Organizations.ToList().LastOrDefault()?.OrganizationId + 1 ?? Settings.Instance.OrgaStartId;
+                    int? parOrgId = DBAccess.Context.Organizations.FirstOrDefault(o => o.OrganizationName == acadPerson.Faculty)?.OrganizationId;
+                    DataReader_OnOrganizationFound(new string[3] { $"{orgId}", acadPerson.Department, $"{parOrgId}" }, null);
+                }
+                DBAccess.Context.AcadPersonnel.Add(acadPerson);
                 DBAccess.Context.SaveChanges();
             }
             catch

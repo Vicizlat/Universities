@@ -41,13 +41,14 @@ namespace Universities.Views
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
+            int? parOrgId = null;
             if (ParentOrganization.SelectedItem == null)
             {
                 if (!PromptBox.Question("Are you sure you want to save without a Parent Organization?")) return;
             }
-            controller.UpdateOrganizations();
-            int orgId = controller.Organizations.Last()?.OrganizationId + 1 ?? Settings.Instance.OrgaStartId;
-            int? parOrgId = controller.GetOrganizationByIndex(ParentOrganization.SelectedIndex)?.OrganizationId;
+            else parOrgId = controller.GetOrganizationByIndex(ParentOrganization.SelectedIndex)?.OrganizationId;
+            //controller.UpdateOrganizations();
+            int orgId = controller.Organizations.LastOrDefault()?.OrganizationId + 1 ?? Settings.Instance.OrgaStartId;
             controller.AddOrganization(new string[] { $"{orgId}", OrganizationName.Text, $"{parOrgId}" });
             Close();
         }

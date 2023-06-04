@@ -22,6 +22,10 @@ namespace Universities.Data.Models
             FirstNames = lineArr[2];
             LastNames = lineArr[3];
             Faculty = lineArr[4];
+            if (Faculty.StartsWith("\"") && Faculty.EndsWith("\"") && Faculty.Contains("\"\""))
+            {
+                Faculty = Faculty.Substring(1, Faculty.Length - 2).Replace("\"\"", "\"");
+            }
             Department = lineArr[5];
             Notes = lineArr[9];
             Comments = lineArr[10];
