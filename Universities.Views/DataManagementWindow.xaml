@@ -276,7 +276,7 @@
         </StackPanel>
         <StackPanel Grid.Row="3" Margin="200, 0, 0, 10" Orientation="Horizontal" VerticalAlignment="Bottom"
                     Visibility="{Binding IsSelected, ElementName=PeopleTab, Converter={StaticResource BoolToVisibilityConverter}}">
-            <Button x:Name="SetIdsInOrder" Margin="10, -3" Padding="2" Width="130" Content="Set Ids in Sorted Order" Click="SetIdsInOrder_Click"/>
+            <!--<Button x:Name="SetIdsInOrder" Margin="10, -3" Padding="2" Width="130" Content="Set Ids in Sorted Order" Click="SetIdsInOrder_Click"/>-->
             <Button x:Name="EditSelected" Margin="10, -3" Padding="2" Width="100" IsEnabled="False" Content="Edit Selected" Click="EditSelected_Click"/>
         </StackPanel>
         <Button x:Name="DeleteSelected" Grid.Row="3" Margin="10, 7" Width="100" Height="26" IsEnabled="False" HorizontalAlignment="Right" VerticalAlignment="Bottom"

@@ -84,7 +84,7 @@ namespace Universities.Views
         private void UpdateAcadPersonnelView()
         {
             lvAcadPersonnel.ItemsSource = DBAccess.Context.AcadPersonnel.ToList().Select(p => p.ToArray());
-            UpdatePeopleCount();
+            UpdateAcadPersonnelCount();
         }
 
         private void ListViewColumnHeader_Click(object sender, RoutedEventArgs e)
@@ -140,6 +140,9 @@ namespace Universities.Views
             if (DocumentsTab.IsSelected) ImportExport.ExportDocuments();
             if (OrganizationsTab.IsSelected) ImportExport.ExportOrganizations();
             if (PeopleTab.IsSelected) ImportExport.ExportPeople();
+            if (AcadPersonnelTab.IsSelected) ImportExport.ExportPeople();
+            if (IncompleteDocumentsTab.IsSelected) ImportExport.ExportDocuments(isIncomplete: true);
+            if (DuplicateDocumentsTab.IsSelected) ImportExport.ExportDocuments(isDuplicate: true);
         }
 
         private void Controller_OnDocumentsChanged(object? sender, EventArgs e)
@@ -259,7 +262,7 @@ namespace Universities.Views
 
         private void lvPeople_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SetIdsInOrder.IsEnabled = lvPeople.SelectedItems.Count == 0;
+            //SetIdsInOrder.IsEnabled = lvPeople.SelectedItems.Count == 0;
             DeleteSelected.IsEnabled = lvPeople.SelectedItems.Count > 0;
             EditSelected.IsEnabled = lvPeople.SelectedItems.Count == 1;
             UpdatePeopleCount();
@@ -281,6 +284,7 @@ namespace Universities.Views
             UpdateDocumentsCount();
             UpdateOrganizationsCount();
             UpdatePeopleCount();
+            UpdateAcadPersonnelCount();
         }
 
         private void UpdateDocumentsCount()
@@ -289,6 +293,16 @@ namespace Universities.Views
             {
                 TotalCount.Text = $"{lvDocuments.Items.Count}";
                 SelectedCount.Text = $"{lvDocuments.SelectedItems.Count}";
+            }
+            if (DuplicateDocumentsTab.IsSelected)
+            {
+                TotalCount.Text = $"{lvDuplicateDocuments.Items.Count}";
+                SelectedCount.Text = $"{lvDuplicateDocuments.SelectedItems.Count}";
+            }
+            if (IncompleteDocumentsTab.IsSelected)
+            {
+                TotalCount.Text = $"{lvIncompleteDocuments.Items.Count}";
+                SelectedCount.Text = $"{lvIncompleteDocuments.SelectedItems.Count}";
             }
         }
 
@@ -307,6 +321,15 @@ namespace Universities.Views
             {
                 TotalCount.Text = $"{lvPeople.Items.Count}";
                 SelectedCount.Text = $"{lvPeople.SelectedItems.Count}";
+            }
+        }
+
+        private void UpdateAcadPersonnelCount()
+        {
+            if (AcadPersonnelTab.IsSelected)
+            {
+                TotalCount.Text = $"{lvAcadPersonnel.Items.Count}";
+                SelectedCount.Text = $"{lvAcadPersonnel.SelectedItems.Count}";
             }
         }
 

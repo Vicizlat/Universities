@@ -18,6 +18,10 @@ namespace Universities.Data.Models
         {
             OrganizationId = int.Parse(lineArr[0]);
             OrganizationName = lineArr[1];
+            if (OrganizationName.StartsWith("\"") && OrganizationName.EndsWith("\"") && OrganizationName.Contains("\"\""))
+            {
+                OrganizationName = OrganizationName.Substring(1, OrganizationName.Length - 2).Replace("\"\"", "\"");
+            }
             ParentId = int.TryParse(lineArr[2], out int pId) ? pId : null;
         }
 

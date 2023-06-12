@@ -23,7 +23,7 @@ namespace Universities.Controller
                 if (DataReader.ReadDataSetFile(filePath, out string message))
                 {
                     OnDocumentsChanged?.Invoke(null, EventArgs.Empty);
-                    message = $"Successfully loaded {Controller.Documents.Count} Documents.";
+                    message = $"Successfully imported all Documents from {filePath}.";
                     MessageBox.Show(message);
                     return true;
                 }
@@ -40,7 +40,7 @@ namespace Universities.Controller
                 if (DataReader.ReadOrganizationsFile(filePath, out string message))
                 {
                     OnOrganizationsChanged?.Invoke(null, EventArgs.Empty);
-                    message = $"Successfully loaded {Controller.Organizations.Count} Organizations.";
+                    message = $"Successfully imported all Organizations from {filePath}.";
                     MessageBox.Show(message);
                     return true;
                 }
@@ -57,7 +57,7 @@ namespace Universities.Controller
                 if (DataReader.ReadPeopleFile(filePath, out string message))
                 {
                     OnPeopleChanged?.Invoke(null, EventArgs.Empty);
-                    message = $"Successfully loaded {Controller.People.Count} People.";
+                    message = $"Successfully imported all People from {filePath}.";
                     MessageBox.Show(message);
                     return true;
                 }
@@ -69,13 +69,13 @@ namespace Universities.Controller
         public static bool ImportAcadPersonnel()
         {
             if (Controller == null) return false;
-            if (FileDialogHandler.ShowOpenFileDialog("Open Acad. Personnel file", out string filePath))
+            if (FileDialogHandler.ShowOpenFileDialog("Open Acadademic Personnel file", out string filePath))
             {
                 if (DataReader.ReadAcadPersonnelFile(filePath, out string message))
                 {
                     //OnPeopleChanged?.Invoke(null, EventArgs.Empty);
-                    //message = $"Successfully loaded {Controller.People.Count} People.";
-                    //MessageBox.Show(message);
+                    message = $"Successfully imported all Acadademic Personnel from {filePath}.";
+                    MessageBox.Show(message);
                     return true;
                 }
                 MessageBox.Show(message);
@@ -83,13 +83,15 @@ namespace Universities.Controller
             return false;
         }
 
-        public static bool ExportDocuments()
+        public static bool ExportDocuments(bool isIncomplete = false, bool isDuplicate = false)
         {
             if (Controller == null) return false;
             if (FileDialogHandler.ShowSaveFileDialog("Export Documents", out string filePath))
             {
                 List<string> exportDocuments = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportDocumentsHeader) };
-                exportDocuments.AddRange(DBAccess.Context.Documents.Select(d => d.ToString()));
+                if (isDuplicate) exportDocuments.AddRange(DBAccess.Context.DuplicateDocuments.Select(d => d.ToString()));
+                else if (isIncomplete) exportDocuments.AddRange(DBAccess.Context.IncompleteDocuments.Select(d => d.ToString()));
+                else exportDocuments.AddRange(DBAccess.Context.Documents.Select(d => d.ToString()));
                 if (FileHandler.WriteAllLines(filePath, exportDocuments))
                 {
                     string message = $"Successfully exported all Documents to {filePath}.";
@@ -127,6 +129,23 @@ namespace Universities.Controller
                 if (FileHandler.WriteAllLines(filePath, exportPeople))
                 {
                     string message = $"Successfully exported all People to {filePath}.";
+                    MessageBox.Show(message);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static bool ExportAcadPersonnel()
+        {
+            if (Controller == null) return false;
+            if (FileDialogHandler.ShowSaveFileDialog("Export Academic Personnel", out string filePath))
+            {
+                List<string> exportAcadPersonnel = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportAcadPersonnelHeader) };
+                exportAcadPersonnel.AddRange(DBAccess.Context.AcadPersonnel.Select(p => p.ToString()));
+                if (FileHandler.WriteAllLines(filePath, exportAcadPersonnel))
+                {
+                    string message = $"Successfully exported all Academic Personnel to {filePath}.";
                     MessageBox.Show(message);
                     return true;
                 }

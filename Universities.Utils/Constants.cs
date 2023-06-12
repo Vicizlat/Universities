@@ -38,6 +38,15 @@ namespace Universities.Utils
             "OtherNames",
             "FormerInstitution"
         };
+        public static readonly string[] ExportAcadPersonnelHeader =
+        {
+            "FirstNames",
+            "LastNames",
+            "Faculty",
+            "Department",
+            "Notes",
+            "Comments"
+        };
         public static readonly string[] ExportDocumentsHeader =
         {
             "UT",
@@ -60,7 +69,9 @@ namespace Universities.Utils
             "last_name",
             "display_name",
             "wos_standard",
-            "first_name"
+            "first_name",
+            "AssignedToUser",
+            "Processed"
         };
     }
 }
