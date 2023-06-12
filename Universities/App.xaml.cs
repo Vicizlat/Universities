@@ -24,7 +24,7 @@ namespace Universities
             if (!FileHandler.FileExists(Constants.SettingsFilePath) && installedVersion != "Debug")
             {
                 double previousVersion = ((double)(double.Parse(installedVersion[2..]) * 10) - 1) / 10;
-                string oldPath1 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, $"app-0.{previousVersion}"), "Settings")).FullName;
+                string oldPath1 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, $"app-0.{previousVersion:f1}"), "Settings")).FullName;
                 string oldPath2 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, "app-0.1.3"), "Settings")).FullName;
                 string oldPath3 = Directory.CreateDirectory(Path.Combine(Path.Combine(Constants.WorkingFolder, "app-0.1.2"), "Settings")).FullName;
                 if (FileHandler.FileExists(Path.Combine(oldPath1, "Settings.xml")))
