@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Universities.Controller;
 using Universities.Utils;
 
@@ -128,12 +129,13 @@ namespace Universities.Views
                 AFirstName.TextBox.Text = string.Empty;
                 Wos.TextBox.Text = string.Empty;
                 SeqNo.TextBox.Text = string.Empty;
-                Address.TextBox.Text = string.Empty;
-                OrganizationNames.TextBox.Text = string.Empty;
-                SubOrganizationName.TextBox.Text = string.Empty;
+                Address.Text = string.Empty;
+                //OrganizationNames.TextBox.Text = string.Empty;
+                SubOrganizationName.Text = string.Empty;
                 lvSimilarPendingAuthors.ItemsSource = new List<string[]>();
                 lvSimilarProcessedAuthors.ItemsSource = new List<string[]>();
                 lvAcadPersonnel.ItemsSource = new List<string[]>();
+                lvSimilarProcessedAuthors.Background = Brushes.Transparent;
             }
             else
             {
@@ -141,15 +143,15 @@ namespace Universities.Views
                 AFirstName.TextBox.Text = docArray[20];
                 Wos.TextBox.Text = docArray[0];
                 SeqNo.TextBox.Text = docArray[14];
-                Address.TextBox.Text = docArray[7];
+                Address.Text = docArray[7];
                 StringBuilder sb = new StringBuilder()
                     .AppendLine(docArray[8])
                     .AppendLine(docArray[9])
                     .AppendLine(docArray[10])
                     .AppendLine(docArray[11])
                     .AppendLine(docArray[12]);
-                OrganizationNames.TextBox.Text = sb.ToString().TrimEnd();
-                SubOrganizationName.TextBox.Text = docArray[13];
+                //OrganizationNames.TextBox.Text = sb.ToString().TrimEnd();
+                SubOrganizationName.Text = docArray[13];
                 lvSimilarPendingAuthors.ItemsSource = controller.Documents
                     .Where(d => d.Ut != docArray[0] && d.LastName == docArray[17])
                     .Select(d => d.ToArray());
@@ -172,6 +174,14 @@ namespace Universities.Views
                     acadPersonnel.Add(author);
                 }
                 lvAcadPersonnel.ItemsSource = acadPersonnel.OrderBy(a => a[1]).ThenBy(a => a[0]);
+                if (lvSimilarProcessedAuthors.Items.Count > 0)
+                {
+                    lvSimilarProcessedAuthors.Background = Brushes.LightGreen;
+                }
+                else
+                {
+                    lvSimilarProcessedAuthors.Background = Brushes.Transparent;
+                }
             }
         }
 
