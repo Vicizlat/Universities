@@ -13,7 +13,7 @@ namespace Universities.Views
     public partial class MainWindow
     {
         private readonly MainController controller;
-        private WaitWindow WaitWindow = new WaitWindow();
+        private WaitWindow WaitWindow;
         private string[] docArray = Array.Empty<string>();
         private int docId = -1;
 
@@ -193,7 +193,7 @@ namespace Universities.Views
 
         public void ShowWaitWindow(string text = null)
         {
-            if (WaitWindow == null) WaitWindow = new WaitWindow(text);
+            WaitWindow = new WaitWindow(text);
             WaitWindow.Show();
         }
 
