@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -14,10 +12,10 @@ namespace Universities.Views
 {
     public partial class MainWindow
     {
-        public WaitWindow WaitWindow { get; set; }
         private readonly MainController controller;
+        private WaitWindow WaitWindow = new WaitWindow();
+        private string[] docArray = Array.Empty<string>();
         private int docId = -1;
-        public string[] docArray;
 
         public MainWindow(MainController controller)
         {
@@ -82,8 +80,9 @@ namespace Universities.Views
             PopulateFields();
         }
 
-        private async void SaveButton_OnClick(object sender, RoutedEventArgs e)
+        private void SaveButton_OnClick(object sender, RoutedEventArgs e)
         {
+            ShowWaitWindow();
             int orgId;
             int personId;
             if (lvSimilarProcessedAuthors.SelectedItem != null)
@@ -96,21 +95,15 @@ namespace Universities.Views
                 orgId = controller.Organizations[SelectOrganization.SelectedIndex].OrganizationId;
                 personId = controller.GetPersonId(docArray[20], docArray[17], orgId);
             }
-            ShowWaitWindow();
-            await ExecuteSaveAsync(orgId, personId);
-            CloseWaitWindow();
-        }
-
-        private async Task ExecuteSaveAsync(int orgId, int personId)
-        {
             List<string[]> documents = new List<string[]>() { docArray };
             documents.AddRange(lvSimilarPendingAuthors.SelectedItems.OfType<string[]>());
             foreach (string[] doc in documents)
             {
-                await controller.AddPerson(new string[] { $"{personId}", doc[20], doc[17], $"{orgId}", doc[0], doc[14], "", "", "" });
+                controller.AddPerson(new string[] { $"{personId}", doc[20], doc[17], $"{orgId}", doc[0], doc[14], "", "", "" });
                 controller.UpdateDocument(doc, true);
             }
             controller.UpdateDocuments();
+            CloseWaitWindow();
         }
 
         private void PopulateFields()
@@ -128,9 +121,7 @@ namespace Universities.Views
                 ALastName.TextBox.Text = string.Empty;
                 AFirstName.TextBox.Text = string.Empty;
                 Wos.TextBox.Text = string.Empty;
-                SeqNo.TextBox.Text = string.Empty;
                 Address.Text = string.Empty;
-                //OrganizationNames.TextBox.Text = string.Empty;
                 SubOrganizationName.Text = string.Empty;
                 lvSimilarPendingAuthors.ItemsSource = new List<string[]>();
                 lvSimilarProcessedAuthors.ItemsSource = new List<string[]>();
@@ -142,30 +133,20 @@ namespace Universities.Views
                 ALastName.TextBox.Text = docArray[17];
                 AFirstName.TextBox.Text = docArray[20];
                 Wos.TextBox.Text = docArray[0];
-                SeqNo.TextBox.Text = docArray[14];
                 Address.Text = docArray[7];
-                StringBuilder sb = new StringBuilder()
-                    .AppendLine(docArray[8])
-                    .AppendLine(docArray[9])
-                    .AppendLine(docArray[10])
-                    .AppendLine(docArray[11])
-                    .AppendLine(docArray[12]);
-                //OrganizationNames.TextBox.Text = sb.ToString().TrimEnd();
                 SubOrganizationName.Text = docArray[13];
-                lvSimilarPendingAuthors.ItemsSource = controller.Documents
-                    .Where(d => d.Ut != docArray[0] && d.LastName == docArray[17])
-                    .Select(d => d.ToArray());
+                lvSimilarPendingAuthors.ItemsSource = controller.Documents.Where(d => d.Ut != docArray[0] && d.LastName == docArray[17]).Select(d => d.ToArray());
                 List<string[]> similarProcessedAuthors = new List<string[]>();
                 foreach (string[] author in controller.People.Where(p => p.LastName == docArray[17]).Select(p => p.ToArray()))
                 {
                     if (similarProcessedAuthors.Any(a => a[0] == author[0]))
                     {
                         string[] a = similarProcessedAuthors.FirstOrDefault(a => a[0] == author[0]);
-                        if (a[1] != author[1] && !a[11].Contains(author[1])) a[11] += author[1] + "; ";
+                        if (a[1] != author[1] && !a[11].Contains(author[1])) a[11] += " | " + author[1];
                         continue;
                     }
                     string orgDisplayName = controller.Organizations.FirstOrDefault(o => o.OrganizationId == int.Parse(author[3])).GetDisplayName(controller.Organizations);
-                    similarProcessedAuthors.Add(author.Append(orgDisplayName).Append("").ToArray());
+                    similarProcessedAuthors.Add(author.Append(orgDisplayName).Append(author[1]).ToArray());
                 }
                 lvSimilarProcessedAuthors.ItemsSource = similarProcessedAuthors.OrderBy(a => a[2]).ThenBy(a => a[1]);
                 List<string[]> acadPersonnel = new List<string[]>();
@@ -212,7 +193,7 @@ namespace Universities.Views
 
         public void ShowWaitWindow(string text = null)
         {
-            WaitWindow = new WaitWindow(text);
+            if (WaitWindow == null) WaitWindow = new WaitWindow(text);
             WaitWindow.Show();
         }
 

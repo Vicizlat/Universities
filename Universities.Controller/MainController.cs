@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading.Tasks;
 using Universities.Data.Models;
 using Universities.Utils;
 
@@ -86,10 +85,10 @@ namespace Universities.Controller
             AddOrganization((string[])sender);
         }
 
-        private async void DataReader_OnPersonFound(object? sender, EventArgs e)
+        private void DataReader_OnPersonFound(object? sender, EventArgs e)
         {
             if (sender == null) return;
-            await AddPerson((string[])sender);
+            AddPerson((string[])sender);
         }
 
         private void DataReader_OnAcadPersonFound(object? sender, EventArgs e)
@@ -113,7 +112,9 @@ namespace Universities.Controller
 
         public void UpdateDocuments()
         {
-            Documents = DBAccess.Context.Documents.Where(d => d.AssignedToUser == SqlCommands.CurrentUser.Item1 || SqlCommands.CurrentUser.Item1 == "root").Where(d => !d.Processed).ToList();
+            string user = SqlCommands.CurrentUser.Item1;
+            bool isRoot = user == "root";
+            Documents = DBAccess.Context.Documents.Where(d => d.AssignedToUser == user || isRoot).Where(d => !d.Processed).ToList();
             OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -160,12 +161,12 @@ namespace Universities.Controller
             else return findPerson.PersonId;
         }
 
-        public async Task AddPerson(string[] personArray)
+        public void AddPerson(string[] personArray)
         {
             try
             {
-                await DBAccess.Context.People.AddAsync(new Person(personArray));
-                await DBAccess.Context.SaveChangesAsync();
+                DBAccess.Context.People.Add(new Person(personArray));
+                DBAccess.Context.SaveChanges();
                 UpdatePeople();
             }
             catch

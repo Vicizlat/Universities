@@ -32,7 +32,6 @@ namespace Universities.Utils
             "LastName",
             "OrganizationID",
             "DocumentID",
-            "seq_No",
             "AuthorID",
             "EmailAddress",
             "OtherNames",
