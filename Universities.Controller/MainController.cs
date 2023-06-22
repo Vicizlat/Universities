@@ -28,11 +28,11 @@ namespace Universities.Controller
             UpdateDocuments();
             UpdateOrganizations();
             UpdatePeople();
-            AcadPersonnel = DBAccess.Context.AcadPersonnel.ToList();
+            AcadPersonnel = DBAccess.GetContext().AcadPersonnel.ToList();
             if (SqlCommands.CurrentUser.Item2)
             {
-                DuplicateDocuments = DBAccess.Context.DuplicateDocuments.ToList();
-                IncompleteDocuments = DBAccess.Context.IncompleteDocuments.ToList();
+                DuplicateDocuments = DBAccess.GetContext().DuplicateDocuments.ToList();
+                IncompleteDocuments = DBAccess.GetContext().IncompleteDocuments.ToList();
             }
             DataReader.OnDocumentFound += DataReader_OnDocumentFound;
             DataReader.OnOrganizationFound += DataReader_OnOrganizationFound;
@@ -60,22 +60,22 @@ namespace Universities.Controller
             {
                 IncompleteDocument emptyDoc = new IncompleteDocument(docArr);
                 IncompleteDocuments.Add(emptyDoc);
-                DBAccess.Context.IncompleteDocuments.Add(emptyDoc);
-                DBAccess.Context.SaveChanges();
+                DBAccess.GetContext().IncompleteDocuments.Add(emptyDoc);
+                DBAccess.GetContext().SaveChanges();
             }
             else if (Documents.Any(d => d.Ut == docArr[0] && d.FirstName == docArr[20] && d.LastName == docArr[17]))
             {
                 DuplicateDocument dupDoc = new DuplicateDocument(docArr);
                 DuplicateDocuments.Add(dupDoc);
-                DBAccess.Context.DuplicateDocuments.Add(dupDoc);
-                DBAccess.Context.SaveChanges();
+                DBAccess.GetContext().DuplicateDocuments.Add(dupDoc);
+                DBAccess.GetContext().SaveChanges();
             }
             else
             {
                 Document doc = new Document(docArr);
                 Documents.Add(doc);
-                DBAccess.Context.Documents.Add(doc);
-                DBAccess.Context.SaveChanges();
+                DBAccess.GetContext().Documents.Add(doc);
+                DBAccess.GetContext().SaveChanges();
             }
         }
 
@@ -100,12 +100,12 @@ namespace Universities.Controller
 
         public void UpdateDocument(string[] doc, object updateData)
         {
-            Document? document = DBAccess.Context.Documents.FirstOrDefault(d => d.Ut == doc[0] && d.FirstName == doc[20] && d.LastName == doc[17]);
+            Document? document = DBAccess.GetContext().Documents.FirstOrDefault(d => d.Ut == doc[0] && d.FirstName == doc[20] && d.LastName == doc[17]);
             if (document != null)
             {
                 if (updateData is bool) document.Processed = (bool)updateData;
                 if (updateData is string) document.AssignedToUser = (string)updateData;
-                DBAccess.Context.SaveChanges();
+                DBAccess.GetContext().SaveChanges();
                 OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -114,20 +114,20 @@ namespace Universities.Controller
         {
             string user = SqlCommands.CurrentUser.Item1;
             bool isRoot = user == "root";
-            Documents = DBAccess.Context.Documents.Where(d => d.AssignedToUser == user || isRoot).Where(d => !d.Processed).ToList();
+            Documents = DBAccess.GetContext().Documents.Where(d => d.AssignedToUser == user || isRoot).Where(d => !d.Processed).ToList();
             OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public void UpdateOrganizations()
         {
-            Organizations = DBAccess.Context.Organizations.ToList();
+            Organizations = DBAccess.GetContext().Organizations.ToList();
             OrganizationsDisplayNames = Organizations.Select(o => o.GetDisplayName(Organizations)).ToList();
             OnOrganizationsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public void UpdatePeople()
         {
-            People = DBAccess.Context.People.ToList();
+            People = DBAccess.GetContext().People.ToList();
             OnPeopleChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -140,8 +140,8 @@ namespace Universities.Controller
         {
             try
             {
-                DBAccess.Context.Organizations.Add(new Organization(orgArr));
-                DBAccess.Context.SaveChanges();
+                DBAccess.GetContext().Organizations.Add(new Organization(orgArr));
+                DBAccess.GetContext().SaveChanges();
                 UpdateOrganizations();
             }
             catch
@@ -152,11 +152,11 @@ namespace Universities.Controller
 
         public int GetPersonId(string firstName, string lastName, int orgId)
         {
-            Person? findPerson = DBAccess.Context.People.FirstOrDefault(p => p.FirstName == firstName && p.LastName == lastName && p.OrgId == orgId);
+            Person? findPerson = DBAccess.GetContext().People.FirstOrDefault(p => p.FirstName == firstName && p.LastName == lastName && p.OrgId == orgId);
             if (findPerson == null)
             {
-                if (!DBAccess.Context.People.Any()) return Settings.Instance.PeopleStartId;
-                else return DBAccess.Context.People.OrderBy(p => p.PersonId).Last().PersonId + 1;
+                if (!DBAccess.GetContext().People.Any()) return Settings.Instance.PeopleStartId;
+                else return DBAccess.GetContext().People.OrderBy(p => p.PersonId).Last().PersonId + 1;
             }
             else return findPerson.PersonId;
         }
@@ -165,8 +165,8 @@ namespace Universities.Controller
         {
             try
             {
-                DBAccess.Context.People.Add(new Person(personArray));
-                DBAccess.Context.SaveChanges();
+                DBAccess.GetContext().People.Add(new Person(personArray));
+                DBAccess.GetContext().SaveChanges();
                 UpdatePeople();
             }
             catch
@@ -180,19 +180,19 @@ namespace Universities.Controller
             try
             {
                 AcadPerson acadPerson = new AcadPerson(acadPersonArray);
-                if (!DBAccess.Context.Organizations.Any(o => o.OrganizationName == acadPerson.Faculty))
+                if (!DBAccess.GetContext().Organizations.Any(o => o.OrganizationName == acadPerson.Faculty))
                 {
-                    int orgId = DBAccess.Context.Organizations.ToList().LastOrDefault()?.OrganizationId + 1 ?? Settings.Instance.OrgaStartId;
+                    int orgId = DBAccess.GetContext().Organizations.ToList().LastOrDefault()?.OrganizationId + 1 ?? Settings.Instance.OrgaStartId;
                     DataReader_OnOrganizationFound(new string[3] { $"{orgId}", acadPerson.Faculty, $"{GetOrganizationByIndex(0)?.OrganizationId}" }, null);
                 }
-                if (!string.IsNullOrEmpty(acadPerson.Department) && !DBAccess.Context.Organizations.Any(o => o.OrganizationName == acadPerson.Department))
+                if (!string.IsNullOrEmpty(acadPerson.Department) && !DBAccess.GetContext().Organizations.Any(o => o.OrganizationName == acadPerson.Department))
                 {
-                    int orgId = DBAccess.Context.Organizations.ToList().LastOrDefault()?.OrganizationId + 1 ?? Settings.Instance.OrgaStartId;
-                    int? parOrgId = DBAccess.Context.Organizations.FirstOrDefault(o => o.OrganizationName == acadPerson.Faculty)?.OrganizationId;
+                    int orgId = DBAccess.GetContext().Organizations.ToList().LastOrDefault()?.OrganizationId + 1 ?? Settings.Instance.OrgaStartId;
+                    int? parOrgId = DBAccess.GetContext().Organizations.FirstOrDefault(o => o.OrganizationName == acadPerson.Faculty)?.OrganizationId;
                     DataReader_OnOrganizationFound(new string[3] { $"{orgId}", acadPerson.Department, $"{parOrgId}" }, null);
                 }
-                DBAccess.Context.AcadPersonnel.Add(acadPerson);
-                DBAccess.Context.SaveChanges();
+                DBAccess.GetContext().AcadPersonnel.Add(acadPerson);
+                DBAccess.GetContext().SaveChanges();
             }
             catch
             {
@@ -202,7 +202,7 @@ namespace Universities.Controller
 
         public Person? FindPerson(string firstName, string lastName, string docId)
         {
-            return DBAccess.Context.People.FirstOrDefault(p => p.FirstName == firstName && p.LastName == lastName && p.DocId == docId);
+            return DBAccess.GetContext().People.FirstOrDefault(p => p.FirstName == firstName && p.LastName == lastName && p.DocId == docId);
         }
     }
 }

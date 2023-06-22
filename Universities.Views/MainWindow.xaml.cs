@@ -201,5 +201,7 @@ namespace Universities.Views
         {
             if (WaitWindow != null) WaitWindow.Close();
         }
+
+        private void Window_Closed(object sender, System.EventArgs e) => Application.Current.Shutdown(0);
     }
 }

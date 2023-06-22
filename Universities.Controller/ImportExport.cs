@@ -89,9 +89,9 @@ namespace Universities.Controller
             if (FileDialogHandler.ShowSaveFileDialog("Export Documents", out string filePath))
             {
                 List<string> exportDocuments = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportDocumentsHeader) };
-                if (isDuplicate) exportDocuments.AddRange(DBAccess.Context.DuplicateDocuments.Select(d => d.ToString()));
-                else if (isIncomplete) exportDocuments.AddRange(DBAccess.Context.IncompleteDocuments.Select(d => d.ToString()));
-                else exportDocuments.AddRange(DBAccess.Context.Documents.Select(d => d.ToString()));
+                if (isDuplicate) exportDocuments.AddRange(DBAccess.GetContext().DuplicateDocuments.Select(d => d.ToString()));
+                else if (isIncomplete) exportDocuments.AddRange(DBAccess.GetContext().IncompleteDocuments.Select(d => d.ToString()));
+                else exportDocuments.AddRange(DBAccess.GetContext().Documents.Select(d => d.ToString()));
                 if (FileHandler.WriteAllLines(filePath, exportDocuments))
                 {
                     string message = $"Successfully exported all Documents to {filePath}.";
@@ -108,7 +108,7 @@ namespace Universities.Controller
             if (FileDialogHandler.ShowSaveFileDialog("Export Organizations", out string filePath))
             {
                 List<string> exportOrganizations = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportOrganizationsHeader) };
-                exportOrganizations.AddRange(DBAccess.Context.Organizations.Select(o => o.ToString()));
+                exportOrganizations.AddRange(DBAccess.GetContext().Organizations.Select(o => o.ToString()));
                 if (FileHandler.WriteAllLines(filePath, exportOrganizations))
                 {
                     string message = $"Successfully exported all Organizations to {filePath}.";
@@ -125,7 +125,7 @@ namespace Universities.Controller
             if (FileDialogHandler.ShowSaveFileDialog("Export People", out string filePath))
             {
                 List<string> exportPeople = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportPeopleHeader) };
-                exportPeople.AddRange(DBAccess.Context.People.Select(p => p.ToExportString()));
+                exportPeople.AddRange(DBAccess.GetContext().People.Select(p => p.ToExportString()));
                 if (FileHandler.WriteAllLines(filePath, exportPeople))
                 {
                     string message = $"Successfully exported all People to {filePath}.";
@@ -142,7 +142,7 @@ namespace Universities.Controller
             if (FileDialogHandler.ShowSaveFileDialog("Export Academic Personnel", out string filePath))
             {
                 List<string> exportAcadPersonnel = new List<string> { string.Join(Settings.Instance.Separator, Constants.ExportAcadPersonnelHeader) };
-                exportAcadPersonnel.AddRange(DBAccess.Context.AcadPersonnel.Select(p => p.ToString()));
+                exportAcadPersonnel.AddRange(DBAccess.GetContext().AcadPersonnel.Select(p => p.ToString()));
                 if (FileHandler.WriteAllLines(filePath, exportAcadPersonnel))
                 {
                     string message = $"Successfully exported all Academic Personnel to {filePath}.";

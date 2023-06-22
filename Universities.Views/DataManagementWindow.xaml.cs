@@ -23,7 +23,7 @@ namespace Universities.Views
             InitializeComponent();
             DataContext = this;
             this.controller = controller;
-            controller.Documents = DBAccess.Context.Documents.ToList();
+            controller.Documents = DBAccess.GetContext().Documents.ToList();
             UpdateDocumentsView();
             UpdateOrganizationsView();
             UpdatePeopleView();
@@ -83,7 +83,7 @@ namespace Universities.Views
 
         private void UpdateAcadPersonnelView()
         {
-            lvAcadPersonnel.ItemsSource = DBAccess.Context.AcadPersonnel.ToList().Select(p => p.ToArray());
+            lvAcadPersonnel.ItemsSource = DBAccess.GetContext().AcadPersonnel.ToList().Select(p => p.ToArray());
             UpdateAcadPersonnelCount();
         }
 
@@ -197,7 +197,7 @@ namespace Universities.Views
                 List<string[]> selectedDocuments = lvDocuments.SelectedItems.Cast<string[]>().ToList();
                 Logging.Instance.WriteLine("Documents removed from DB:");
                 selectedDocuments.ForEach(DBAccess.DeleteDocument);
-                controller.Documents = DBAccess.Context.Documents.ToList();
+                controller.Documents = DBAccess.GetContext().Documents.ToList();
                 UpdateDocumentsView();
             }
             if (OrganizationsTab.IsSelected)
@@ -205,7 +205,7 @@ namespace Universities.Views
                 List<string[]> selectedOrganizations = lvOrganizations.SelectedItems.Cast<string[]>().ToList();
                 Logging.Instance.WriteLine("Organizations removed from DB:");
                 selectedOrganizations.ForEach(DBAccess.DeleteOrganization);
-                controller.Organizations = DBAccess.Context.Organizations.ToList();
+                controller.Organizations = DBAccess.GetContext().Organizations.ToList();
                 UpdateOrganizationsView();
             }
             if (PeopleTab.IsSelected)
@@ -213,7 +213,7 @@ namespace Universities.Views
                 List<string[]> selectedPeople = lvPeople.SelectedItems.Cast<string[]>().ToList();
                 Logging.Instance.WriteLine("People removed from DB:");
                 selectedPeople.ForEach(DBAccess.DeletePerson);
-                controller.People = DBAccess.Context.People.ToList();
+                controller.People = DBAccess.GetContext().People.ToList();
                 UpdatePeopleView();
             }
             MessageBox.Show("All done!");

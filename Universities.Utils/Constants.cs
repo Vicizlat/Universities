@@ -72,5 +72,12 @@ namespace Universities.Utils
             "AssignedToUser",
             "Processed"
         };
+        public enum ExitCodes
+        {
+            NoErrors = 0,
+            NoSettings = 1,
+            NoInternet = 2,
+            NoDatabase = 3
+        };
     }
 }
