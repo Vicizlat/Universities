@@ -6,7 +6,7 @@
         xmlns:uc="clr-namespace:Universities.Views.UserControls"
         xmlns:images="clr-namespace:Universities.Views.Images"
         xmlns:local="clr-namespace:Universities.Views"
-        mc:Ignorable="d" FontSize="18" MinHeight="700" Width="900" MinWidth="900" WindowState="Maximized" Closed="Window_Closed">
+        mc:Ignorable="d" FontSize="18" MinHeight="700" Width="1000" MinWidth="1000" WindowState="Maximized" Closed="Window_Closed">
     <Grid Margin="10, 0, 10, 20">
         <Grid.RowDefinitions>
             <RowDefinition Height="60"/>
@@ -51,8 +51,8 @@
                         <GridViewColumn DisplayMemberBinding="{Binding [1]}" Header="Last Names"/>
                         <GridViewColumn DisplayMemberBinding="{Binding [2]}" Header="Faculty"/>
                         <GridViewColumn DisplayMemberBinding="{Binding [3]}" Header="Department"/>
-                        <GridViewColumn DisplayMemberBinding="{Binding [4]}" Header="Notes"/>
-                        <GridViewColumn DisplayMemberBinding="{Binding [5]}" Header="Comments"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding [4]}" Header="AuthorId"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding [5]}" Header="Notes"/>
                     </GridView>
                 </ListView.View>
             </ListView>

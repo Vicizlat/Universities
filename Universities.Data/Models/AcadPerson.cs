@@ -9,6 +9,7 @@ namespace Universities.Data.Models
         public string LastNames { get; set; }
         public string Faculty { get; set; }
         public string Department { get; set; }
+        public string? AuthorId { get; set; }
         public string Notes { get; set; }
         public string Comments { get; set; }
 
@@ -31,6 +32,7 @@ namespace Universities.Data.Models
             {
                 Department = Department.Substring(1, Department.Length - 2).Replace("\"\"", "\"");
             }
+            AuthorId = lineArr[7];
             Notes = lineArr[9];
             Comments = lineArr[10];
         }
@@ -43,6 +45,7 @@ namespace Universities.Data.Models
                 string.Join(Settings.Instance.Separator, LastNames),
                 Faculty,
                 Department,
+                AuthorId ?? string.Empty,
                 string.Join(Settings.Instance.Separator, Notes),
                 string.Join(Settings.Instance.Separator, Comments)
             };

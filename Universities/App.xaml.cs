@@ -47,7 +47,7 @@ namespace Universities
                 if (!PromptForSettingsDetails()) return;
             }
             MainController controller = new MainController();
-            MainWindow = new MainWindow(controller) { Title = $"Universities v. {installedVersion}     Current user: {SqlCommands.CurrentUser.Item1}" };
+            MainWindow = new MainWindow(controller, installedVersion);
             CloseWaitWindow();
             MainWindow.Show();
         }

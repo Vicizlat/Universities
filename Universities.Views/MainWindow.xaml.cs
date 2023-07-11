@@ -17,10 +17,11 @@ namespace Universities.Views
         private string[] docArray = Array.Empty<string>();
         private int docId = -1;
 
-        public MainWindow(MainController controller)
+        public MainWindow(MainController controller, string version)
         {
             InitializeComponent();
             DataContext = this;
+            Title = $"Universities     v.{version}     User: {SqlCommands.CurrentUser.Item1}     Database: {Settings.Instance.Database}";
             this.controller = controller;
             if (!SqlCommands.CurrentUser.Item2)
             {
@@ -99,7 +100,7 @@ namespace Universities.Views
             documents.AddRange(lvSimilarPendingAuthors.SelectedItems.OfType<string[]>());
             foreach (string[] doc in documents)
             {
-                controller.AddPerson(new string[] { $"{personId}", doc[20], doc[17], $"{orgId}", doc[0], doc[14], "", "", "" });
+                controller.AddPerson(new string[] { $"{personId}", doc[20], doc[17], $"{orgId}", doc[0], "", "", "", "" });
                 controller.UpdateDocument(doc, true);
             }
             controller.UpdateDocuments();
@@ -155,14 +156,7 @@ namespace Universities.Views
                     acadPersonnel.Add(author);
                 }
                 lvAcadPersonnel.ItemsSource = acadPersonnel.OrderBy(a => a[1]).ThenBy(a => a[0]);
-                if (lvSimilarProcessedAuthors.Items.Count > 0)
-                {
-                    lvSimilarProcessedAuthors.Background = Brushes.LightGreen;
-                }
-                else
-                {
-                    lvSimilarProcessedAuthors.Background = Brushes.Transparent;
-                }
+                lvSimilarProcessedAuthors.Background = lvSimilarProcessedAuthors.Items.Count > 0 ? Brushes.LightGreen : Brushes.Transparent;
             }
         }
 

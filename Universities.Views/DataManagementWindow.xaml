@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Universities.Views"
         mc:Ignorable="d"
-        x:Name="DataManageWindow" Title="Data Management" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow"
-        Height="400" MinHeight="400" Width="1132" MinWidth="1022" KeyUp="Window_KeyUp" Closing="DataManageWindow_Closing">
+        x:Name="DataManageWindow" Title="Data Management" WindowStartupLocation="CenterScreen"
+        Height="600" MinHeight="500" Width="1132" MinWidth="1022" KeyUp="Window_KeyUp" Closing="DataManageWindow_Closing">
     <Window.Resources>
         <local:MultiBoolToVisibilityConverter x:Key="MultiBoolToVisibilityConverter"/>
         <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
@@ -160,10 +160,10 @@
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Department"/>
                             </GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding [4]}">
-                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Notes"/>
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AuthorId"/>
                             </GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding [5]}">
-                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Comments"/>
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="Notes"/>
                             </GridViewColumn>
                         </GridView>
                     </ListView.View>

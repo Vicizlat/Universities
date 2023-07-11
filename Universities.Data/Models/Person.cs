@@ -10,7 +10,7 @@ namespace Universities.Data.Models
         public string LastName { get; set; }
         public int OrgId { get; set; }
         public string DocId { get; set; }
-        public int? AuthorId { get; set; }
+        public string? AuthorId { get; set; }
         public string EmailAddress { get; set; }
         public string OtherNames { get; set; }
         public string FormerInstitution { get; set; }
@@ -27,7 +27,7 @@ namespace Universities.Data.Models
             LastName = lineArr[2];
             OrgId = int.Parse(lineArr[3]);
             DocId = lineArr[4];
-            AuthorId = int.TryParse(lineArr[5], out int authorId) ? authorId : null;
+            AuthorId = lineArr[5];
             EmailAddress = lineArr[6];
             OtherNames = lineArr[7];
             FormerInstitution = lineArr[8];
@@ -42,7 +42,7 @@ namespace Universities.Data.Models
                 LastName,
                 $"{OrgId}",
                 DocId,
-                $"{AuthorId}",
+                AuthorId ?? string.Empty,
                 EmailAddress,
                 OtherNames,
                 FormerInstitution,

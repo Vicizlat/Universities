@@ -69,12 +69,12 @@ namespace Universities.Controller
         public static bool ImportAcadPersonnel()
         {
             if (Controller == null) return false;
-            if (FileDialogHandler.ShowOpenFileDialog("Open Acadademic Personnel file", out string filePath))
+            if (FileDialogHandler.ShowOpenFileDialog("Open Academic Personnel file", out string filePath))
             {
                 if (DataReader.ReadAcadPersonnelFile(filePath, out string message))
                 {
                     //OnPeopleChanged?.Invoke(null, EventArgs.Empty);
-                    message = $"Successfully imported all Acadademic Personnel from {filePath}.";
+                    message = $"Successfully imported all Academic Personnel from {filePath}.";
                     MessageBox.Show(message);
                     return true;
                 }
