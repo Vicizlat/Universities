@@ -110,7 +110,7 @@ namespace Universities.Views
         private void PopulateFields()
         {
             docArray = docId >= 0 && docId < controller.Documents.Count ? controller.Documents[docId].ToArray() : Array.Empty<string>();
-            if (docArray.Length < 0) docId = -1;
+            if (docArray.Length < 0 || docArray.Length < docId) docId = -1;
             SaveButton.IsEnabled = IsSaveEnabled();
             SelectOrganization.SelectedIndex = -1;
             PreviousButton.IsEnabled = docId >= 0;
@@ -174,7 +174,7 @@ namespace Universities.Views
                 string orgName = string.IsNullOrEmpty(acadPersDep) ? acadPersFac : acadPersDep;
                 for (int i = 0; i < SelectOrganization.Items.Count; i++)
                 {
-                    if (SelectOrganization.Items[i].ToString().Contains(orgName)) SelectOrganization.SelectedIndex = i;
+                    if (SelectOrganization.Items[i].ToString().StartsWith(orgName)) SelectOrganization.SelectedIndex = i;
                 }
             }
         }

@@ -98,7 +98,7 @@ namespace Universities.Controller
             OnAcadPersonnelChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public void UpdateDocument(string[] doc, object updateData)
+        public bool UpdateDocument(string[] doc, object updateData)
         {
             Document? document = DBAccess.GetContext().Documents.FirstOrDefault(d => d.Ut == doc[0] && d.FirstName == doc[20] && d.LastName == doc[17]);
             if (document != null)
@@ -107,7 +107,9 @@ namespace Universities.Controller
                 if (updateData is string) document.AssignedToUser = (string)updateData;
                 DBAccess.GetContext().SaveChanges();
                 OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
+                return true;
             }
+            return false;
         }
 
         public void UpdateDocuments()

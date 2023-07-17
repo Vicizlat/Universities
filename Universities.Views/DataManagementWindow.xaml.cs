@@ -212,11 +212,17 @@ namespace Universities.Views
             {
                 List<string[]> selectedPeople = lvPeople.SelectedItems.Cast<string[]>().ToList();
                 Logging.Instance.WriteLine("People removed from DB:");
-                selectedPeople.ForEach(DBAccess.DeletePerson);
+                selectedPeople.ForEach(DeletePersonAndRestoreDocument);
                 controller.People = DBAccess.GetContext().People.ToList();
                 UpdatePeopleView();
             }
             MessageBox.Show("All done!");
+        }
+
+        private void DeletePersonAndRestoreDocument(string[] personArr)
+        {
+            string[] doc = controller.Documents.FirstOrDefault(d => d.Ut == personArr[4] && d.FirstName == personArr[1] && d.LastName == personArr[2]).ToArray();
+            if (controller.UpdateDocument(doc, false)) DBAccess.DeletePerson(personArr);
         }
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
