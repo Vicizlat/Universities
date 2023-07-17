@@ -15,7 +15,7 @@ namespace Universities.Views
         private readonly MainController controller;
         private WaitWindow WaitWindow;
         private string[] docArray = Array.Empty<string>();
-        private int docId = -1;
+        private int docId = Settings.Instance.LastDocNo;
 
         public MainWindow(MainController controller, string version)
         {
@@ -196,6 +196,11 @@ namespace Universities.Views
             if (WaitWindow != null) WaitWindow.Close();
         }
 
-        private void Window_Closed(object sender, System.EventArgs e) => Application.Current.Shutdown(0);
+        private void Window_Closed(object sender, System.EventArgs e)
+        {
+            Settings.Instance.LastDocNo = docId;
+            Settings.Instance.WriteSettingsFile();
+            Application.Current.Shutdown(0);
+        }
     }
 }
