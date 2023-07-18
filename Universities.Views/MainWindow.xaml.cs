@@ -119,9 +119,9 @@ namespace Universities.Views
             NextButton.Content = $"({controller.Documents.Count - docId - 1}) Next >>";
             if (docId < 0)
             {
-                ALastName.TextBox.Text = string.Empty;
-                AFirstName.TextBox.Text = string.Empty;
-                Wos.TextBox.Text = string.Empty;
+                ALastName.Text = string.Empty;
+                AFirstName.Text = string.Empty;
+                Wos.Text = string.Empty;
                 Address.Text = string.Empty;
                 SubOrganizationName.Text = string.Empty;
                 lvSimilarPendingAuthors.ItemsSource = new List<string[]>();
@@ -131,18 +131,18 @@ namespace Universities.Views
             }
             else
             {
-                ALastName.TextBox.Text = docArray[17];
-                AFirstName.TextBox.Text = docArray[20];
-                Wos.TextBox.Text = docArray[0];
+                ALastName.Text = docArray[17];
+                AFirstName.Text = docArray[20];
+                Wos.Text = docArray[0];
                 Address.Text = docArray[7];
                 SubOrganizationName.Text = docArray[13];
-                lvSimilarPendingAuthors.ItemsSource = controller.Documents.Where(d => d.Ut != docArray[0] && d.LastName == docArray[17]).Select(d => d.ToArray());
+                lvSimilarPendingAuthors.ItemsSource = controller.Documents.Where(d => d.Ut != docArray[0] && controller.RegexPatternString(d.LastName) == controller.RegexPatternString(docArray[17])).Select(d => d.ToArray());
                 List<string[]> similarProcessedAuthors = new List<string[]>();
-                foreach (string[] author in controller.People.Where(p => p.LastName == docArray[17]).Select(p => p.ToArray()))
+                foreach (string[] author in controller.People.Where(p => controller.RegexPatternString(p.LastName) == controller.RegexPatternString(docArray[17])).Select(p => p.ToArray()))
                 {
-                    if (similarProcessedAuthors.Any(a => a[0] == author[0]))
+                    if (similarProcessedAuthors.Any(a => controller.RegexPatternString(a[0]) == controller.RegexPatternString(author[0])))
                     {
-                        string[] a = similarProcessedAuthors.FirstOrDefault(a => a[0] == author[0]);
+                        string[] a = similarProcessedAuthors.FirstOrDefault(a => controller.RegexPatternString(a[0]) == controller.RegexPatternString(author[0]));
                         if (a[1] != author[1] && !a[11].Contains(author[1])) a[11] += " | " + author[1];
                         continue;
                     }
@@ -151,7 +151,7 @@ namespace Universities.Views
                 }
                 lvSimilarProcessedAuthors.ItemsSource = similarProcessedAuthors.OrderBy(a => a[2]).ThenBy(a => a[1]);
                 List<string[]> acadPersonnel = new List<string[]>();
-                foreach (string[] author in controller.AcadPersonnel.Where(p => p.LastNames.Contains(docArray[17])).Select(p => p.ToArray()))
+                foreach (string[] author in controller.AcadPersonnel.Where(p => controller.RegexPatternString(p.LastNames).Contains(controller.RegexPatternString(docArray[17]))).Select(p => p.ToArray()))
                 {
                     acadPersonnel.Add(author);
                 }

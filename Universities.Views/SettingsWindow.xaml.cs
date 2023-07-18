@@ -1,5 +1,7 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using System.Windows.Input;
+using Universities.Controller;
 using Universities.Handlers;
 using Universities.Utils;
 
@@ -14,12 +16,14 @@ namespace Universities.Views
             Databases.ItemsSource = SqlCommands.GetDatabases();
             Databases.SelectedValue = Settings.Instance.Database;
             EditUserButton.Content = SqlCommands.CurrentUser.Item2 ? "Edit Users" : "Change Password";
+            RegexPatternBox.Text = string.Join("|", DBAccess.GetContext().RegexPatterns.Select(rp => rp.Pattern));
             if (!SqlCommands.CurrentUser.Item2) AddDatabaseButton.Visibility = Visibility.Hidden;
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             Settings.Instance.Database = (string)Databases.SelectedValue;
+            Settings.Instance.RegexPattern = RegexPatternBox.Text;
             Settings.Instance.WriteSettingsFile();
             MessageBox.Show("All settings saved successfully. Please note that most settings require a restart to take effect.");
             DialogResult = true;
@@ -71,6 +75,16 @@ namespace Universities.Views
             {
                 NewDbName.Text = string.Empty;
                 NewDbName.Visibility = Visibility.Hidden;
+            }
+        }
+
+        private void AddToPatternButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(AddToPattern.Text) && !DBAccess.GetContext().RegexPatterns.Select(rp => rp.Pattern).Contains(AddToPattern.Text))
+            {
+                DBAccess.AddRegexPattern(AddToPattern.Text);
+                RegexPatternBox.Text = string.Join("|", DBAccess.GetContext().RegexPatterns.Select(rp => rp.Pattern));
+                Settings.Instance.RegexPattern = RegexPatternBox.Text;
             }
         }
     }

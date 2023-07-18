@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Universities.Data.Models;
 using Universities.Utils;
 
@@ -25,6 +26,8 @@ namespace Universities.Controller
         {
             CollectionSorter.Controller = this;
             ImportExport.Controller = this;
+            Settings.Instance.RegexPattern = string.Join("|", DBAccess.GetContext().RegexPatterns.Select(rp => rp.Pattern));
+            Settings.Instance.WriteSettingsFile();
             UpdateDocuments();
             UpdateOrganizations();
             UpdatePeople();
@@ -205,6 +208,11 @@ namespace Universities.Controller
         public Person? FindPerson(string firstName, string lastName, string docId)
         {
             return DBAccess.GetContext().People.FirstOrDefault(p => p.FirstName == firstName && p.LastName == lastName && p.DocId == docId);
+        }
+
+        public string RegexPatternString(string input)
+        {
+            return new Regex(string.Join("|", Settings.Instance.RegexPattern)).Replace(input, "");
         }
     }
 }

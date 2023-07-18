@@ -17,6 +17,7 @@ namespace Universities.Utils
         public int PeopleStartId { get; set; } = 2000;
         public int OrgaStartId { get; set; } = 1000;
         public int LastDocNo { get; set; } = -1;
+        public string RegexPattern { get; set; }
         public bool ShowParentOrganization { get; set; } = false;
         private XmlSerializer Serializer = new XmlSerializer(typeof(Settings));
 

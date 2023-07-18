@@ -108,5 +108,11 @@ namespace Universities.Controller
                 return GetContext().AcadPersonnel.OrderBy(p => p.Id).LastOrDefault();
             }
         }
+
+        public static void AddRegexPattern(string pattern)
+        {
+            GetContext().RegexPatterns.Add(new RegexPattern() { Pattern = pattern });
+            GetContext().SaveChanges();
+        }
     }
 }

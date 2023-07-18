@@ -24,9 +24,18 @@
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Bottom">
-            <uc:TextBoxLabeled x:Name="ALastName" Margin="10, 0" Width="180" Label="Last name:"/>
-            <uc:TextBoxLabeled x:Name="AFirstName" Margin="10, 0" Width="180" Label="First name:"/>
-            <uc:TextBoxLabeled x:Name="Wos" Margin="10, 0" Width="200" Label="WOS Document:"/>
+            <StackPanel Margin="10, 0" Width="180">
+                <TextBlock Text="Last name:"/>
+                <TextBox x:Name="ALastName"/>
+            </StackPanel>
+            <StackPanel Margin="10, 0" Width="180">
+                <TextBlock Text="First name:"/>
+                <TextBox x:Name="AFirstName"/>
+            </StackPanel>
+            <StackPanel Margin="10, 0" Width="200">
+                <TextBlock Text="WOS Document:"/>
+                <TextBox x:Name="Wos"/>
+            </StackPanel>
         </StackPanel>
         <StackPanel Grid.Row="0" Grid.Column="1" Margin="0, 10" Orientation="Horizontal" HorizontalAlignment="Right">
             <images:ButtonImage x:Name="AddUser" FileName="AddUserIcon" ToolTip="Add User"

@@ -11,6 +11,7 @@ namespace Universities.Data
         public DbSet<AcadPerson> AcadPersonnel { get; set; }
         public DbSet<DuplicateDocument> DuplicateDocuments { get; set; }
         public DbSet<IncompleteDocument> IncompleteDocuments { get; set; }
+        public DbSet<RegexPattern> RegexPatterns { get; set; }
         public string ConnectionString { get; set; }
 
         public UniversitiesContext(string connectionString)
