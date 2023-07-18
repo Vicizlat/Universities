@@ -110,7 +110,7 @@ namespace Universities.Views
         private void PopulateFields()
         {
             docArray = docId >= 0 && docId < controller.Documents.Count ? controller.Documents[docId].ToArray() : Array.Empty<string>();
-            if (docArray.Length < 0 || docArray.Length < docId) docId = -1;
+            if (docArray.Length < 0 || controller.Documents.Count < docId) docId = -1;
             SaveButton.IsEnabled = IsSaveEnabled();
             SelectOrganization.SelectedIndex = -1;
             PreviousButton.IsEnabled = docId >= 0;
