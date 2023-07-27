@@ -37,12 +37,12 @@ namespace Universities.Views
             controller.OnOrganizationsChanged += OnOrganizationsChanged;
         }
 
-        private void OnDocumentsChanged(object? sender, EventArgs e)
+        private void OnDocumentsChanged(object sender, EventArgs e)
         {
             PopulateFields();
         }
 
-        private void OnOrganizationsChanged(object? sender, EventArgs e)
+        private void OnOrganizationsChanged(object sender, EventArgs e)
         {
             SelectOrganization.ItemsSource = controller.OrganizationsDisplayNames;
             SelectOrganization.SelectedIndex = -1;
@@ -136,13 +136,13 @@ namespace Universities.Views
                 Wos.Text = docArray[0];
                 Address.Text = docArray[7];
                 SubOrganizationName.Text = docArray[13];
-                lvSimilarPendingAuthors.ItemsSource = controller.Documents.Where(d => d.Ut != docArray[0] && controller.RegexPatternString(d.LastName) == controller.RegexPatternString(docArray[17])).Select(d => d.ToArray());
+                lvSimilarPendingAuthors.ItemsSource = controller.Documents.Where(d => d.Ut != docArray[0] && controller.RegexMatch(d.LastName, docArray[17])).Select(d => d.ToArray());
                 List<string[]> similarProcessedAuthors = new List<string[]>();
-                foreach (string[] author in controller.People.Where(p => controller.RegexPatternString(p.LastName) == controller.RegexPatternString(docArray[17])).Select(p => p.ToArray()))
+                foreach (string[] author in controller.People.Where(p => controller.RegexMatch(p.LastName, docArray[17])).Select(p => p.ToArray()))
                 {
-                    if (similarProcessedAuthors.Any(a => controller.RegexPatternString(a[0]) == controller.RegexPatternString(author[0])))
+                    if (similarProcessedAuthors.Any(pa => controller.RegexMatch(pa[0], author[0])))
                     {
-                        string[] a = similarProcessedAuthors.FirstOrDefault(a => controller.RegexPatternString(a[0]) == controller.RegexPatternString(author[0]));
+                        string[] a = similarProcessedAuthors.FirstOrDefault(pa => controller.RegexMatch(pa[0], author[0]));
                         if (a[1] != author[1] && !a[11].Contains(author[1])) a[11] += " | " + author[1];
                         continue;
                     }
@@ -151,7 +151,7 @@ namespace Universities.Views
                 }
                 lvSimilarProcessedAuthors.ItemsSource = similarProcessedAuthors.OrderBy(a => a[2]).ThenBy(a => a[1]);
                 List<string[]> acadPersonnel = new List<string[]>();
-                foreach (string[] author in controller.AcadPersonnel.Where(p => controller.RegexPatternString(p.LastNames).Contains(controller.RegexPatternString(docArray[17]))).Select(p => p.ToArray()))
+                foreach (string[] author in controller.AcadPersonnel.Where(p => controller.RegexMatch(p.LastNames, docArray[17])).Select(p => p.ToArray()))
                 {
                     acadPersonnel.Add(author);
                 }
@@ -196,10 +196,11 @@ namespace Universities.Views
             if (WaitWindow != null) WaitWindow.Close();
         }
 
-        private void Window_Closed(object sender, System.EventArgs e)
+        private void Window_Closed(object sender, EventArgs e)
         {
             Settings.Instance.LastDocNo = docId;
             Settings.Instance.WriteSettingsFile();
+            ImportExport.ExportBackupFiles();
             Application.Current.Shutdown(0);
         }
     }

@@ -60,5 +60,24 @@ namespace Universities.Handlers
                 files = Directory.GetFiles(Constants.LogsPath);
             }
         }
+
+        public static void ManageBackupFiles()
+        {
+            string[] foldersDays = Directory.GetDirectories(Constants.BackupsPath);
+            while (foldersDays.Length > Constants.BackupDaysToKeep)
+            {
+                Directory.Delete(foldersDays[0], true);
+                foldersDays = Directory.GetDirectories(Constants.BackupsPath);
+            }
+            foreach (string folder in foldersDays)
+            {
+                string[] foldersHours = Directory.GetDirectories(folder);
+                while (foldersHours.Length > Constants.BackupsPerDayToKeep)
+                {
+                    Directory.Delete(foldersHours[0], true);
+                    foldersHours = Directory.GetDirectories(folder);
+                }
+            }
+        }
     }
 }

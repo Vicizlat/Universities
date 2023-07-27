@@ -22,6 +22,7 @@ namespace Universities.Views
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
+            ImportExport.ExportBackupFiles();
             Settings.Instance.Database = (string)Databases.SelectedValue;
             Settings.Instance.RegexPattern = RegexPatternBox.Text;
             Settings.Instance.WriteSettingsFile();

@@ -1,13 +1,13 @@
-﻿using System.IO;
-using System.Windows;
+﻿using Squirrel;
+using System;
+using System.IO;
 using System.Threading.Tasks;
-using Squirrel;
+using System.Windows;
+using System.Windows.Threading;
 using Universities.Controller;
 using Universities.Handlers;
 using Universities.Utils;
 using Universities.Views;
-using System.Windows.Threading;
-using System;
 
 namespace Universities
 {
@@ -20,7 +20,6 @@ namespace Universities
         {
             Logging.Instance.WriteLine("Logging started");
             ShowWaitWindow();
-            FileHandler.ManageLogFiles();
             await CheckForUpdate();
 
             if (!FileHandler.FileExists(Constants.SettingsFilePath) && installedVersion != "Debug")
@@ -123,6 +122,8 @@ namespace Universities
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
+            FileHandler.ManageLogFiles();
+            FileHandler.ManageBackupFiles();
             switch (e.ApplicationExitCode)
             {
                 case (int)Constants.ExitCodes.NoErrors:
@@ -154,9 +155,9 @@ namespace Universities
 
         private void Application_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            string message = e.Exception.Message + Environment.NewLine + e.Exception.StackTrace;
+            string message = e.Exception.Message + Environment.NewLine + "Please, check log file for more information.";
             MessageBox.Show(message);
-            Logging.Instance.WriteLine(message);
+            Logging.Instance.WriteLine(e.Exception.Message + Environment.NewLine + e.Exception.StackTrace);
             e.Handled = true;
         }
     }

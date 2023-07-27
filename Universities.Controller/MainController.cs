@@ -14,13 +14,13 @@ namespace Universities.Controller
         public event EventHandler? OnOrganizationsChanged;
         public event EventHandler? OnPeopleChanged;
         public event EventHandler? OnAcadPersonnelChanged;
-        public List<Document> Documents { get; set; }
-        public List<DuplicateDocument> DuplicateDocuments { get; set; }
-        public List<IncompleteDocument> IncompleteDocuments { get; set; }
-        public List<Organization> Organizations { get; set; }
-        public List<string> OrganizationsDisplayNames { get; set; }
-        public List<Person> People { get; set; }
-        public List<AcadPerson> AcadPersonnel { get; set; }
+        public List<Document> Documents { get; set; } = new List<Document> ();
+        public List<DuplicateDocument> DuplicateDocuments { get; set; } = new List<DuplicateDocument>();
+        public List<IncompleteDocument> IncompleteDocuments { get; set; } = new List<IncompleteDocument>();
+        public List<Organization> Organizations { get; set; } = new List<Organization>();
+        public List<string> OrganizationsDisplayNames { get; set; } = new List<string>();
+        public List<Person> People { get; set; } = new List<Person>();
+        public List<AcadPerson> AcadPersonnel { get; set; } = new List<AcadPerson>();
 
         public MainController()
         {
@@ -188,13 +188,13 @@ namespace Universities.Controller
                 if (!DBAccess.GetContext().Organizations.Any(o => o.OrganizationName == acadPerson.Faculty))
                 {
                     int orgId = DBAccess.GetContext().Organizations.ToList().LastOrDefault()?.OrganizationId + 1 ?? Settings.Instance.OrgaStartId;
-                    DataReader_OnOrganizationFound(new string[3] { $"{orgId}", acadPerson.Faculty, $"{GetOrganizationByIndex(0)?.OrganizationId}" }, null);
+                    DataReader_OnOrganizationFound(new string[3] { $"{orgId}", acadPerson.Faculty, $"{GetOrganizationByIndex(0)?.OrganizationId}" }, EventArgs.Empty);
                 }
                 if (!string.IsNullOrEmpty(acadPerson.Department) && !DBAccess.GetContext().Organizations.Any(o => o.OrganizationName == acadPerson.Department))
                 {
                     int orgId = DBAccess.GetContext().Organizations.ToList().LastOrDefault()?.OrganizationId + 1 ?? Settings.Instance.OrgaStartId;
                     int? parOrgId = DBAccess.GetContext().Organizations.FirstOrDefault(o => o.OrganizationName == acadPerson.Faculty)?.OrganizationId;
-                    DataReader_OnOrganizationFound(new string[3] { $"{orgId}", acadPerson.Department, $"{parOrgId}" }, null);
+                    DataReader_OnOrganizationFound(new string[3] { $"{orgId}", acadPerson.Department, $"{parOrgId}" }, EventArgs.Empty);
                 }
                 DBAccess.GetContext().AcadPersonnel.Add(acadPerson);
                 DBAccess.GetContext().SaveChanges();
@@ -210,9 +210,12 @@ namespace Universities.Controller
             return DBAccess.GetContext().People.FirstOrDefault(p => p.FirstName == firstName && p.LastName == lastName && p.DocId == docId);
         }
 
-        public string RegexPatternString(string input)
+        public bool RegexMatch(string text1, string text2)
         {
-            return new Regex(string.Join("|", Settings.Instance.RegexPattern)).Replace(input, "");
+            Regex regex = new Regex(string.Join("|", Settings.Instance.RegexPattern), RegexOptions.IgnoreCase);
+            text1 = regex.Replace(text1, "");
+            text2 = regex.Replace(text2, "");
+            return text1 == text2;
         }
     }
 }

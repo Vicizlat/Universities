@@ -137,12 +137,15 @@ namespace Universities.Views
 
         private void ExportButton_Click(object sender, RoutedEventArgs e)
         {
-            if (DocumentsTab.IsSelected) ImportExport.ExportDocuments();
-            if (OrganizationsTab.IsSelected) ImportExport.ExportOrganizations();
-            if (PeopleTab.IsSelected) ImportExport.ExportPeople();
-            if (AcadPersonnelTab.IsSelected) ImportExport.ExportPeople();
-            if (IncompleteDocumentsTab.IsSelected) ImportExport.ExportDocuments(isIncomplete: true);
-            if (DuplicateDocumentsTab.IsSelected) ImportExport.ExportDocuments(isDuplicate: true);
+            string message = string.Empty;
+            if (DocumentsTab.IsSelected) ImportExport.ExportDocuments(out message);
+            if (OrganizationsTab.IsSelected) ImportExport.ExportOrganizations(out message);
+            if (PeopleTab.IsSelected) ImportExport.ExportPeople(out message);
+            if (AcadPersonnelTab.IsSelected) ImportExport.ExportAcadPersonnel(out message);
+            if (IncompleteDocumentsTab.IsSelected) ImportExport.ExportDocuments(out message, isIncomplete: true);
+            if (DuplicateDocumentsTab.IsSelected) ImportExport.ExportDocuments(out message, isDuplicate: true);
+            Logging.Instance.WriteLine(message);
+            MessageBox.Show(message);
         }
 
         private void Controller_OnDocumentsChanged(object? sender, EventArgs e)
