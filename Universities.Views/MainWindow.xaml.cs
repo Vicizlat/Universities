@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Universities.Controller;
+using Universities.Data.Models;
 using Universities.Utils;
 
 namespace Universities.Views
@@ -13,6 +14,7 @@ namespace Universities.Views
     public partial class MainWindow
     {
         private readonly MainController controller;
+        private readonly string version;
         private WaitWindow WaitWindow;
         private string[] docArray = Array.Empty<string>();
         private int docId = Settings.Instance.LastDocNo;
@@ -21,6 +23,7 @@ namespace Universities.Views
         {
             InitializeComponent();
             DataContext = this;
+            this.version = version;
             Title = $"Universities     v.{version}     User: {SqlCommands.CurrentUser.Item1}     Database: {Settings.Instance.Database}";
             this.controller = controller;
             if (!SqlCommands.CurrentUser.Item2)
@@ -35,6 +38,12 @@ namespace Universities.Views
             PopulateFields();
             controller.OnDocumentsChanged += OnDocumentsChanged;
             controller.OnOrganizationsChanged += OnOrganizationsChanged;
+            DBAccess.OnDBChanged += DBAccess_OnDBChanged;
+        }
+
+        private void DBAccess_OnDBChanged(object sender, EventArgs e)
+        {
+            Title = $"Universities     v.{version}     User: {SqlCommands.CurrentUser.Item1}     Database: {Settings.Instance.Database}";
         }
 
         private void OnDocumentsChanged(object sender, EventArgs e)

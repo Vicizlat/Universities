@@ -26,7 +26,7 @@ namespace Universities.Controller
         {
             CollectionSorter.Controller = this;
             ImportExport.Controller = this;
-            Settings.Instance.RegexPattern = string.Join("|", DBAccess.GetContext().RegexPatterns.Select(rp => rp.Pattern));
+            Settings.Instance.RegexPattern = string.Join("|", DBAccess.GetCommonContext().RegexPatterns.Select(rp => rp.Pattern));
             Settings.Instance.WriteSettingsFile();
             UpdateDocuments();
             UpdateOrganizations();
@@ -47,6 +47,20 @@ namespace Universities.Controller
             DBAccess.OnDocumentsChanged -= OnDocumentsChanged_Triggered;
             DBAccess.OnOrganizationsChanged -= OnOrganizationsChanged_Triggered;
             DBAccess.OnPeopleChanged += OnPeopleChanged_Triggered;
+            DBAccess.OnDBChanged += DBAccess_OnDBChanged;
+        }
+
+        private void DBAccess_OnDBChanged(object? sender, EventArgs e)
+        {
+            UpdateDocuments();
+            UpdateOrganizations();
+            UpdatePeople();
+            AcadPersonnel = DBAccess.GetContext().AcadPersonnel.ToList();
+            if (SqlCommands.CurrentUser.Item2)
+            {
+                DuplicateDocuments = DBAccess.GetContext().DuplicateDocuments.ToList();
+                IncompleteDocuments = DBAccess.GetContext().IncompleteDocuments.ToList();
+            }
         }
 
         private void OnDocumentsChanged_Triggered(object? sender, EventArgs e) => UpdateDocuments();
@@ -149,9 +163,10 @@ namespace Universities.Controller
                 DBAccess.GetContext().SaveChanges();
                 UpdateOrganizations();
             }
-            catch
+            catch (Exception e)
             {
                 PromptBox.Error($"Failed to add Organization: {orgArr[1]}!");
+                Logging.Instance.WriteLine(e.Message);
             }
         }
 
@@ -174,9 +189,10 @@ namespace Universities.Controller
                 DBAccess.GetContext().SaveChanges();
                 UpdatePeople();
             }
-            catch
+            catch (Exception e)
             {
                 PromptBox.Error($"Failed to add Person: {personArray[1]} {personArray[2]}!");
+                Logging.Instance.WriteLine(e.Message);
             }
         }
 
@@ -199,9 +215,10 @@ namespace Universities.Controller
                 DBAccess.GetContext().AcadPersonnel.Add(acadPerson);
                 DBAccess.GetContext().SaveChanges();
             }
-            catch
+            catch (Exception e)
             {
                 PromptBox.Error($"Failed to add Acad. Person {acadPersonArray[0]} {acadPersonArray[1]}!");
+                Logging.Instance.WriteLine(e.Message);
             }
         }
 

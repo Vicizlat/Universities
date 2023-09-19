@@ -11,6 +11,7 @@ namespace Universities.Controller
         public static event EventHandler? OnDocumentsChanged;
         public static event EventHandler? OnOrganizationsChanged;
         public static event EventHandler? OnPeopleChanged;
+        public static event EventHandler? OnDBChanged;
         private static UniversitiesContext? context;
 
         public static UniversitiesContext GetContext(bool forceNewContext = false)
@@ -20,8 +21,22 @@ namespace Universities.Controller
                 string database = $"Database={Settings.Instance.Database};";
                 string connectionString = $"{SqlCommands.GetConnectionString()}{database}";
                 context = new UniversitiesContext(connectionString);
+                OnDBChanged?.Invoke(null, EventArgs.Empty);
             }
             return context;
+        }
+
+        private static UniversitiesContext? commonContext;
+
+        public static UniversitiesContext GetCommonContext()
+        {
+            if (commonContext == null)
+            {
+                string database = $"Database=common;";
+                string connectionString = $"{SqlCommands.GetConnectionString()}{database}";
+                commonContext = new UniversitiesContext(connectionString);
+            }
+            return commonContext;
         }
 
         public static Organization? GetOrganization(int? id)
@@ -111,8 +126,8 @@ namespace Universities.Controller
 
         public static void AddRegexPattern(string pattern)
         {
-            GetContext().RegexPatterns.Add(new RegexPattern() { Pattern = pattern });
-            GetContext().SaveChanges();
+            GetCommonContext().RegexPatterns.Add(new RegexPattern() { Pattern = pattern });
+            GetCommonContext().SaveChanges();
         }
     }
 }

@@ -15,8 +15,8 @@ namespace Universities.Utils
         public static readonly string LogFileName = $"Log-{DateTime.Now:[yyyy-MM-dd][HH-mm-ss]}.txt";
         public static readonly string LogFilePath = Path.Combine(LogsPath, LogFileName);
         public static readonly string BackupsPath = Directory.CreateDirectory(Path.Combine(WorkingFolder, "Backups")).FullName;
-        public static readonly string TodayPath = Directory.CreateDirectory(Path.Combine(BackupsPath, DateTime.Now.ToShortDateString().Replace(" г", ""))).FullName;
-        public static readonly string NowPath = Directory.CreateDirectory(Path.Combine(TodayPath, DateTime.Now.ToShortTimeString().Replace(":", ".."))).FullName;
+        public static readonly string TodayPath = Directory.CreateDirectory(Path.Combine(BackupsPath, $"{DateTime.Now:yyyy.MM.dd}")).FullName;
+        public static readonly string NowPath = Directory.CreateDirectory(Path.Combine(TodayPath, $"{DateTime.Now:HH..mm}")).FullName;
         public const string ConnectionDetailsWarning = "Some connection information is missing in the Settings file." +
             " Please provide connection details in the Settings window.";
         public static readonly char[] Separators =

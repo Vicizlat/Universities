@@ -13,10 +13,11 @@ namespace Universities.Views
         {
             InitializeComponent();
             DataContext = Settings.Instance;
-            Databases.ItemsSource = SqlCommands.GetDatabases();
+            Databases.ItemsSource = SqlCommands.GetDatabases().SkipWhile(x => x == "common");
             Databases.SelectedValue = Settings.Instance.Database;
             EditUserButton.Content = SqlCommands.CurrentUser.Item2 ? "Edit Users" : "Change Password";
-            RegexPatternBox.Text = string.Join("|", DBAccess.GetContext().RegexPatterns.Select(rp => rp.Pattern));
+            RegexPatternBox.Text = string.Join("|", DBAccess.GetCommonContext().RegexPatterns.Select(rp => rp.Pattern));
+            RegexPatternBox.ToolTip = RegexPatternBox.Text;
             if (!SqlCommands.CurrentUser.Item2) AddDatabaseButton.Visibility = Visibility.Hidden;
         }
 
@@ -26,6 +27,7 @@ namespace Universities.Views
             Settings.Instance.Database = (string)Databases.SelectedValue;
             Settings.Instance.RegexPattern = RegexPatternBox.Text;
             Settings.Instance.WriteSettingsFile();
+            DBAccess.GetContext(true);
             MessageBox.Show("All settings saved successfully. Please note that most settings require a restart to take effect.");
             DialogResult = true;
             Close();
@@ -81,10 +83,10 @@ namespace Universities.Views
 
         private void AddToPatternButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(AddToPattern.Text) && !DBAccess.GetContext().RegexPatterns.Select(rp => rp.Pattern).Contains(AddToPattern.Text))
+            if (!string.IsNullOrEmpty(AddToPattern.Text) && !DBAccess.GetCommonContext().RegexPatterns.Select(rp => rp.Pattern).Contains(AddToPattern.Text))
             {
                 DBAccess.AddRegexPattern(AddToPattern.Text);
-                RegexPatternBox.Text = string.Join("|", DBAccess.GetContext().RegexPatterns.Select(rp => rp.Pattern));
+                RegexPatternBox.Text = string.Join("|", DBAccess.GetCommonContext().RegexPatterns.Select(rp => rp.Pattern));
                 Settings.Instance.RegexPattern = RegexPatternBox.Text;
             }
         }
