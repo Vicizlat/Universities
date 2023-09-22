@@ -148,11 +148,19 @@ namespace Universities.Views
                 Wos.Text = docArray[0];
                 Address.Text = docArray[7];
                 SubOrganizationName.Text = docArray[13];
-                lvSimilarPendingAuthors.ItemsSource = controller.Documents.Where(d => d.Ut != docArray[0] && controller.RegexMatch(d.LastName, docArray[17])).Select(d => d.ToArray());
+                lvSimilarPendingAuthors.ItemsSource = GetSimilarPendingAuthors();
                 lvSimilarProcessedAuthors.ItemsSource = GetSimilarProcessedAuthors();
                 lvSimilarProcessedAuthors.Background = lvSimilarProcessedAuthors.Items.Count > 0 ? Brushes.LightGreen : Brushes.Transparent;
                 lvAcadPersonnel.ItemsSource = GetMatchingAcadPersonnel();
             }
+        }
+
+        private IEnumerable<string[]> GetSimilarPendingAuthors()
+        {
+            return controller.Documents
+                .Where(d => d.Ut != docArray[0] && controller.RegexMatch(d.LastName, docArray[17]))
+                .OrderBy(d => d.LastName).ThenBy(d => d.FirstName)
+                .Select(d => d.ToArray());
         }
 
         private List<string[]> GetSimilarProcessedAuthors()
