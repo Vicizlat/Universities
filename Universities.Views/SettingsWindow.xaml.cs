@@ -13,7 +13,7 @@ namespace Universities.Views
         {
             InitializeComponent();
             DataContext = Settings.Instance;
-            Databases.ItemsSource = SqlCommands.GetDatabases().SkipWhile(x => x == "common");
+            Databases.ItemsSource = SqlCommands.GetDatabases().Where(x => x != "common");
             Databases.SelectedValue = Settings.Instance.Database;
             EditUserButton.Content = SqlCommands.CurrentUser.Item2 ? "Edit Users" : "Change Password";
             RegexPatternBox.Text = string.Join("|", DBAccess.GetCommonContext().RegexPatterns.Select(rp => rp.Pattern));
@@ -28,7 +28,7 @@ namespace Universities.Views
             Settings.Instance.RegexPattern = RegexPatternBox.Text;
             Settings.Instance.WriteSettingsFile();
             DBAccess.GetContext(true);
-            MessageBox.Show("All settings saved successfully. Please note that most settings require a restart to take effect.");
+            MessageBox.Show("All settings saved successfully.");
             DialogResult = true;
             Close();
         }

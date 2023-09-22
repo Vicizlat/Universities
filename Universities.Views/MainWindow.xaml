@@ -95,10 +95,8 @@
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <ComboBox x:Name="SelectOrganization" Grid.Column="0" Margin="10, 0" Padding="2" VerticalContentAlignment="Center"
-                      SelectionChanged="SelectOrganization_OnSelectionChanged"/>
-            <Button x:Name="AddOrganization" Grid.Column="1" Content="Add Organization" Margin="10, 0" Padding="2"
-                    Click="AddOrganization_OnClick"/>
+            <uc:AutoCompleteTextBox x:Name="SelectOrganization" Grid.Column="0" Margin="10, 0" OnTextChanged="AutoTextBox_TextChanged"/>
+            <Button x:Name="AddOrganization" Grid.Column="1" Content="Add Organization" Margin="10, 0" Padding="2" Click="AddOrganization_OnClick"/>
         </Grid>
         <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 20, 0, 0" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button x:Name="PreviousButton" Margin="10, 0" Padding="2" Width="200" Click="PreviousButton_OnClick"/>
