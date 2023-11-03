@@ -95,7 +95,7 @@ namespace Universities.Views
         {
             ShowWaitWindow();
             int orgId;
-            int personId;
+            int? personId = null;
             if (lvSimilarProcessedAuthors.SelectedItem != null)
             {
                 orgId = int.Parse(((string[])lvSimilarProcessedAuthors.SelectedItem)[3]);
@@ -105,6 +105,11 @@ namespace Universities.Views
             {
                 orgId = controller.Organizations[selectedOrgIndex].OrganizationId;
                 personId = controller.GetPersonId(docArray[20], docArray[17], orgId);
+            }
+            if (personId == null)
+            {
+                CloseWaitWindow();
+                return;
             }
             List<string[]> documents = new List<string[]>() { docArray };
             documents.AddRange(lvSimilarPendingAuthors.SelectedItems.OfType<string[]>());

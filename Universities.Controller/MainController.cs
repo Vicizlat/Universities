@@ -14,7 +14,7 @@ namespace Universities.Controller
         public event EventHandler? OnOrganizationsChanged;
         public event EventHandler? OnPeopleChanged;
         public event EventHandler? OnAcadPersonnelChanged;
-        public List<Document> Documents { get; set; } = new List<Document> ();
+        public List<Document> Documents { get; set; } = new List<Document>();
         public List<DuplicateDocument> DuplicateDocuments { get; set; } = new List<DuplicateDocument>();
         public List<IncompleteDocument> IncompleteDocuments { get; set; } = new List<IncompleteDocument>();
         public List<Organization> Organizations { get; set; } = new List<Organization>();
@@ -170,15 +170,24 @@ namespace Universities.Controller
             }
         }
 
-        public int GetPersonId(string firstName, string lastName, int orgId)
+        public int? GetPersonId(string firstName, string lastName, int orgId)
         {
             Person? findPerson = DBAccess.GetContext().People.FirstOrDefault(p => p.FirstName == firstName && p.LastName == lastName && p.OrgId == orgId);
-            if (findPerson == null)
+            string msg = "A person with the same First Name, Last Name and Organization already exists but was not selected. Do you want to save this person with a new Person ID?";
+            if (findPerson == null || PromptBox.Question(msg))
             {
-                if (!DBAccess.GetContext().People.Any()) return Settings.Instance.PeopleStartId;
-                else return DBAccess.GetContext().People.OrderBy(p => p.PersonId).Last().PersonId + 1;
+                return GetNextPersonId();
             }
-            else return findPerson.PersonId;
+            else
+            {
+                return null;
+            }
+        }
+
+        public int GetNextPersonId()
+        {
+            if (!DBAccess.GetContext().People.Any()) return Settings.Instance.PeopleStartId;
+            else return DBAccess.GetContext().People.OrderBy(p => p.PersonId).Last().PersonId + 1;
         }
 
         public void AddPerson(string[] personArray)

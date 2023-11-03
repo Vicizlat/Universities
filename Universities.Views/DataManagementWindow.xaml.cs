@@ -24,9 +24,10 @@ namespace Universities.Views
             DataContext = this;
             this.controller = controller;
             controller.Documents = DBAccess.GetContext().Documents.ToList();
+            //controller.UpdateDocuments();
             UpdateDocumentsView();
-            UpdateOrganizationsView();
-            UpdatePeopleView();
+            //UpdateOrganizationsView();
+            //UpdatePeopleView();
             UpdateAcadPersonnelView();
             lvDuplicateDocuments.ItemsSource = controller.DuplicateDocuments.Select(dd => dd.ToArray());
             lvIncompleteDocuments.ItemsSource = controller.IncompleteDocuments.Select(id => id.ToArray());
@@ -37,6 +38,8 @@ namespace Universities.Views
             controller.OnOrganizationsChanged += Controller_OnOrganizationsChanged;
             controller.OnPeopleChanged += Controller_OnPeopleChanged;
             controller.OnAcadPersonnelChanged += Controller_OnAcadPersonnelChanged;
+            controller.UpdateOrganizations();
+            controller.UpdatePeople();
         }
 
         private void UpdateDocumentsView()
@@ -168,24 +171,6 @@ namespace Universities.Views
             UpdateAcadPersonnelView();
         }
 
-        private void SetIdsInOrder_Click(object sender, RoutedEventArgs e)
-        {
-            if (!PromptBox.Question("Warning! This will take a long time. Are you sure you want to start the process now?")) return;
-            List<string[]> sortedPeople = lvPeople.Items.Cast<string[]>().ToList();
-            string lastProcessedId = "0";
-            int currentId = Settings.Instance.PeopleStartId;
-            foreach (string[] person in sortedPeople)
-            {
-                if (person[0] != lastProcessedId)
-                {
-                    lastProcessedId = person[0];
-                    currentId++;
-                }
-                DBAccess.EditPersonId(person, currentId);
-            }
-            MessageBox.Show("All done!");
-        }
-
         private void EditSelected_Click(object sender, RoutedEventArgs e)
         {
             string[] person = lvPeople.SelectedItem as string[];
@@ -271,7 +256,6 @@ namespace Universities.Views
 
         private void lvPeople_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //SetIdsInOrder.IsEnabled = lvPeople.SelectedItems.Count == 0;
             DeleteSelected.IsEnabled = lvPeople.SelectedItems.Count > 0;
             EditSelected.IsEnabled = lvPeople.SelectedItems.Count == 1;
             UpdatePeopleCount();
@@ -279,8 +263,26 @@ namespace Universities.Views
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            lvPeople.ItemsSource = controller.People.Where(p => p.ToString().ToLower().Contains(SearchBox.Text.ToLower())).Select(p => p.ToArray());
-            UpdatePeopleCount();
+            if (DocumentsTab.IsSelected)
+            {
+                lvDocuments.ItemsSource = controller.Documents.Where(d => d.ToString().ToLower().Contains(SearchBox.Text.ToLower())).Select(d => d.ToArray());
+                UpdateDocumentsCount();
+            }
+            if (OrganizationsTab.IsSelected)
+            {
+                lvOrganizations.ItemsSource = controller.Organizations.Where(o => o.ToString().ToLower().Contains(SearchBox.Text.ToLower())).Select(o => o.ToArray());
+                UpdateOrganizationsCount();
+            }
+            if (PeopleTab.IsSelected)
+            {
+                lvPeople.ItemsSource = controller.People.Where(p => p.ToString().ToLower().Contains(SearchBox.Text.ToLower())).Select(p => p.ToArray());
+                UpdatePeopleCount();
+            }
+            if (AcadPersonnelTab.IsSelected)
+            {
+                lvAcadPersonnel.ItemsSource = controller.AcadPersonnel.Where(ap => ap.ToString().ToLower().Contains(SearchBox.Text.ToLower())).Select(ap => ap.ToArray());
+                UpdateAcadPersonnelCount();
+            }
         }
 
         private void DataManageWindow_Closing(object sender, CancelEventArgs e)
@@ -294,6 +296,7 @@ namespace Universities.Views
             UpdateOrganizationsCount();
             UpdatePeopleCount();
             UpdateAcadPersonnelCount();
+            SearchBox.Clear();
         }
 
         private void UpdateDocumentsCount()
