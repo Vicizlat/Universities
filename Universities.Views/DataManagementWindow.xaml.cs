@@ -17,6 +17,7 @@ namespace Universities.Views
         private readonly MainController controller;
         private GridViewColumnHeader listViewSortCol = null;
         private SortAdorner listViewSortAdorner = null;
+        private TabItem lastSelectedTab = null;
 
         public DataManagementWindow(MainController controller)
         {
@@ -292,11 +293,17 @@ namespace Universities.Views
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (e.Source is TabControl tabControl)
+            {
+                if (lastSelectedTab != null && (tabControl.SelectedItem as TabItem) != lastSelectedTab)
+                    SearchBox.Clear();
+                lastSelectedTab = tabControl.SelectedItem as TabItem;
+            }
+
             UpdateDocumentsCount();
             UpdateOrganizationsCount();
             UpdatePeopleCount();
             UpdateAcadPersonnelCount();
-            SearchBox.Clear();
         }
 
         private void UpdateDocumentsCount()
