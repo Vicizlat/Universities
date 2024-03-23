@@ -121,27 +121,43 @@ namespace Universities.Handlers
 
         private static async Task<string> GetAsync(string requestPage)
         {
-            string urlPreffix = Settings.Instance.Server.StartsWith("http") ? string.Empty : "https://";
-            string requestUrl = urlPreffix + Settings.Instance.Server + "/api/" + requestPage;
-            if (useTestUrl) requestUrl = "http://localhost/universities-web" + "/api/" + requestPage;
-            string responseString = await client.GetStringAsync(requestUrl);
-            return responseString;
+            string responseString = string.Empty;
+            try
+            {
+                string urlPreffix = Settings.Instance.Server.StartsWith("http") ? string.Empty : "https://";
+                string requestUrl = urlPreffix + Settings.Instance.Server + "/api/" + requestPage;
+                if (useTestUrl) requestUrl = "http://localhost/universities-web" + "/api/" + requestPage;
+                responseString = await client.GetStringAsync(requestUrl);
+                return responseString;
+            }
+            catch
+            {
+                return responseString;
+            }
         }
 
         private static async Task<string> PostAsync(string requestPage, Dictionary<string, string> values)
         {
-            string urlPreffix = Settings.Instance.Server.StartsWith("http") ? string.Empty : "https://";
-            string requestUrl = urlPreffix + Settings.Instance.Server + "/api/" + requestPage;
-            if (useTestUrl) requestUrl = "http://localhost/universities-web" + "/api/" + requestPage;
-            FormUrlEncodedContent content = new FormUrlEncodedContent(values);
-            HttpResponseMessage response = await client.PostAsync(requestUrl, content);
-            string responseString = await response.Content.ReadAsStringAsync();
-            string logMsg = $"POST: {requestPage}/{string.Join(", ", values)}/";
-            if (requestPage.Contains("get_from_table")) logMsg += $"Results found: {responseString.Split("<br>", StringSplitOptions.RemoveEmptyEntries).Length}";
-            else if (requestPage.Contains("create_verify_user")) logMsg = $"POST: {requestPage}/Mode: {values["mode"]}, Name: {values["username"]}/Response: {responseString.Split("<br>").Length > 0}";
-            else logMsg += $"Response: {responseString}";
-            Logging.Instance.WriteLine(logMsg);
-            return responseString;
+            string responseString = string.Empty;
+            try
+            {
+                string urlPreffix = Settings.Instance.Server.StartsWith("http") ? string.Empty : "https://";
+                string requestUrl = urlPreffix + Settings.Instance.Server + "/api/" + requestPage;
+                if (useTestUrl) requestUrl = "http://localhost/universities-web" + "/api/" + requestPage;
+                FormUrlEncodedContent content = new FormUrlEncodedContent(values);
+                HttpResponseMessage response = await client.PostAsync(requestUrl, content);
+                responseString = await response.Content.ReadAsStringAsync();
+                string logMsg = $"POST: {requestPage}/{string.Join(", ", values)}/";
+                if (requestPage.Contains("get_from_table")) logMsg += $"Results found: {responseString.Split("<br>", StringSplitOptions.RemoveEmptyEntries).Length}";
+                else if (requestPage.Contains("create_verify_user")) logMsg = $"POST: {requestPage}/Mode: {values["mode"]}, Name: {values["username"]}/Response: {responseString.Split("<br>").Length > 0}";
+                else logMsg += $"Response: {responseString}";
+                Logging.Instance.WriteLine(logMsg);
+                return responseString;
+            }
+            catch
+            {
+                return responseString;
+            }
         }
     }
 }
