@@ -1,6 +1,6 @@
 ﻿using Universities.Utils;
 
-namespace Universities.Data.Models
+namespace Universities.Models
 {
     public class Person
     {
@@ -10,54 +10,45 @@ namespace Universities.Data.Models
         public string LastName { get; set; }
         public int OrgId { get; set; }
         public string DocId { get; set; }
-        public string? AuthorId { get; set; }
+        public string AuthorId { get; set; }
         public string EmailAddress { get; set; }
         public string OtherNames { get; set; }
         public string FormerInstitution { get; set; }
 
-        public Person()
+        public Person(string[] lineArr)
         {
-
-        }
-
-        public Person(string[] lineArr) : this()
-        {
-            PersonId = int.Parse(lineArr[0]);
-            FirstName = lineArr[1];
-            LastName = lineArr[2];
-            OrgId = int.Parse(lineArr[3]);
-            DocId = lineArr[4];
-            AuthorId = lineArr[5];
-            EmailAddress = lineArr[6];
-            OtherNames = lineArr[7];
-            FormerInstitution = lineArr[8];
+            Id = int.Parse(lineArr[0]);
+            PersonId = int.Parse(lineArr[1]);
+            FirstName = lineArr[2];
+            LastName = lineArr[3];
+            OrgId = int.Parse(lineArr[4]);
+            DocId = lineArr[5];
+            AuthorId = lineArr[6];
+            EmailAddress = lineArr[7];
+            OtherNames = lineArr[8];
+            FormerInstitution = lineArr[9];
         }
 
         public string[] ToArray()
         {
             return new string[]
             {
+                $"{Id}",
                 $"{PersonId}",
                 FirstName,
                 LastName,
                 $"{OrgId}",
                 DocId,
-                AuthorId ?? string.Empty,
+                AuthorId,
                 EmailAddress,
                 OtherNames,
-                FormerInstitution,
-                $"{Id}"
+                FormerInstitution
             };
-        }
-
-        public string ToExportString()
-        {
-            return string.Join(Settings.Instance.Separator, ToArray().SkipLast(1));
         }
 
         public override string ToString()
         {
-            return string.Join(Settings.Instance.Separator, ToArray());
+            return string.Join(Settings.Instance.Separator, ToArray().Skip(1));
         }
     }
 }

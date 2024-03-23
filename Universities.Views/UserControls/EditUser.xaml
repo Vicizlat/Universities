@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="Universities.Views.UserControls.EditUser"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Universities.Views.UserControls"
+             mc:Ignorable="d" d:DesignHeight="340" d:DesignWidth="520" IsVisibleChanged="UserControl_IsVisibleChanged">
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Row="1" Grid.ColumnSpan="3" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold" Content="Edit User"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="10, 0" Padding="2" Text="Username:"/>
+        <ComboBox x:Name="Users" Grid.Row="2" Grid.Column="0" Margin="10, 20, 10, 0" Padding="5" SelectionChanged="Users_SelectionChanged"/>
+        <TextBlock Grid.Row="2" Grid.Column="1" Margin="10, 0" Padding="2" Text="New Password:"/>
+        <TextBox x:Name="Password" Grid.Row="2" Grid.Column="1" Margin="10, 20, 10, 0" Padding="5" TextChanged="Text_OnTextChanged"/>
+        <CheckBox x:Name="cbRemoveUser" Grid.Row="3" Grid.Column="0" Margin="10, 10, 10, 0" IsChecked="False" Content="Remove selected User" Click="cbRemoveUser_Click"/>
+        <ComboBox x:Name="cbSetRole" Grid.Row="3" Grid.Column="1" Margin="10, 10, 10, 0" Padding="2" SelectionChanged="cbSetRole_SelectionChanged">
+            <ComboBoxItem x:Name="Item0"/>
+            <ComboBoxItem Content="User" Background="Orange"/>
+            <ComboBoxItem Content="Admin" Background="DeepSkyBlue"/>
+            <ComboBoxItem x:Name="SuperAdmin" Content="SuperAdmin" Background="LightGreen"/>
+        </ComboBox>
+        <Button x:Name="Confirm" Grid.Row="4" Grid.Column="0" Margin="10, 20, 10, 0" Background="LightGreen" IsEnabled="False" Content="Confirm" Click="ConfirmButton_Click"/>
+        <Button x:Name="Cancel" Grid.Row="4" Grid.Column="1" Margin="10, 20, 10, 0" Background="IndianRed" Content="Cancel" Click="Cancel_Click"/>
+    </Grid>
+</UserControl>

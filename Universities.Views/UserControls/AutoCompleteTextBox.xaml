@@ -4,13 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Universities.Views.UserControls"
-             mc:Ignorable="d" d:DesignHeight="30" d:DesignWidth="200">
-    <StackPanel Orientation="Vertical">
+             mc:Ignorable="d" d:DesignHeight="100" d:DesignWidth="200">
+    <StackPanel Orientation="Vertical" VerticalAlignment="Bottom">
         <!-- Auto Suggestion box -->
-        <Popup x:Name="AutoListPopup" MaxHeight="300" MinWidth="600" Visibility="Collapsed" StaysOpen="False" Placement="Top" MouseLeave="AutoList_LostMouseCapture">
-            <ListBox x:Name="AutoList" SelectionChanged="AutoList_SelectionChanged" Padding="5" Background="AntiqueWhite"/>
+        <Popup x:Name="AutoListPopup" MaxHeight="300" Visibility="Collapsed" Placement="Top" MouseLeave="AutoList_MouseLeave">
+            <ListBox x:Name="AutoList" SelectionChanged="AutoList_SelectionChanged" Background="AntiqueWhite"/>
         </Popup>
         <!-- Text Box -->
-        <TextBox x:Name="AutoTextBox" Padding="2" TextChanged="AutoTextBox_TextChanged" GotMouseCapture="AutoTextBox_GotFocus" KeyUp="AutoTextBox_KeyUp"/>
+        <TextBox x:Name="AutoTextBox" Padding="2" TextChanged="AutoTextBox_TextChanged" KeyUp="AutoTextBox_KeyUp" GotMouseCapture="AutoTextBox_GotMouseCapture"/>
     </StackPanel>
 </UserControl>

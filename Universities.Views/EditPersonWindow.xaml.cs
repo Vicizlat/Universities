@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Universities.Controller;
@@ -9,9 +10,9 @@ namespace Universities.Views
 {
     public partial class EditPersonWindow
     {
+        private MainController Controller { get; }
         public string[] Person { get; }
-        public MainController Controller { get; }
-        private int selectedOrgIndex;
+        private int selectedOrgIndex { get; }
 
         public EditPersonWindow(string[] person, MainController controller)
         {
@@ -19,56 +20,49 @@ namespace Universities.Views
             DataContext = this;
             Person = person;
             Controller = controller;
-            Organizations.ItemsSource = Controller.OrganizationsDisplayNames;
-            Organizations.SelectedItem = DBAccess.GetOrganization(int.Parse(Person[3]))?.GetDisplayName(controller.Organizations);
-            PersonId.Text = Person[0];
+            Organizations.ItemsSource = Controller.Organizations.Select(o => o.ToString());
+            Organizations.SelectedItem = Controller.Organizations.FirstOrDefault(o => int.Parse(Person[4]) == o.OrganizationId).ToString();
+            PersonId.Text = Person[1];
             selectedOrgIndex = Organizations.SelectedIndex;
             Save.IsEnabled = false;
         }
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter && Save.IsEnabled)
-            {
-                Save_Click(this, e);
-            }
-            if (e.Key == Key.Escape)
-            {
-                Cancel_Click(this, e);
-            }
+            if (e.Key == Key.Enter && Save.IsEnabled) Save_Click(this, e);
+            if (e.Key == Key.Escape) Cancel_Click(this, e);
         }
 
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e) => IsSaveEnabled();
+
+        private void Organizations_SelectionChanged(object sender, SelectionChangedEventArgs e) => IsSaveEnabled();
+
+        private void IsSaveEnabled()
         {
             Save.IsEnabled = PersonId.Text != Person[0] || Organizations.SelectedIndex != selectedOrgIndex;
         }
 
-        private void Organizations_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void Save_Click(object sender, RoutedEventArgs e)
         {
-            Save.IsEnabled = PersonId.Text != Person[0] || Organizations.SelectedIndex != selectedOrgIndex;
-        }
-
-        private void Save_Click(object sender, RoutedEventArgs e)
-        {
-            if (PersonId.Text != Person[0])
+            string msg = $"Do you want to apply these changes to every person with this PersonID?";
+            string question = "YES = Apply to all\tNO = Apply to this entry only";
+            bool applyToAll = PromptBox.Question(msg, question);
+            int idToApply = applyToAll ? 0 : int.Parse(Person[0]);
+            int personIdToApply = applyToAll ? int.Parse(Person[1]) : 0;
+            if (PersonId.Text != Person[1])
             {
-                if (DBAccess.EditPersonId(Person, int.Parse(PersonId.Text))) PromptBox.Information("PersonId changed successfully!");
-                else PromptBox.Error("Failed to change PersonId!");
+                DialogResult = await PhpHandler.UpdateInTable($"{MainOrg.Preffix}_people", "PersonID", PersonId.Text, idToApply, personIdToApply);
             }
             if (Organizations.SelectedIndex != selectedOrgIndex)
             {
-                int orgId = Controller.Organizations[Organizations.SelectedIndex].OrganizationId;
-                if (DBAccess.EditPersonOrgId(Person, orgId)) PromptBox.Information("Organization changed successfully!");
-                else PromptBox.Error("Failed to change Organization!");
+                string orgId = Organizations.SelectedItem.ToString().Split(";")[0];
+                DialogResult = await PhpHandler.UpdateInTable($"{MainOrg.Preffix}_people", "OrganizationID", orgId, idToApply, personIdToApply);
             }
             Close();
         }
 
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
+        private void Cancel_Click(object sender, RoutedEventArgs e) => Close();
 
-        private void PersonId_KeyDown(object sender, KeyEventArgs e) => e.Handled = KeyPressHandler.NotNumbers(e);
+        private void PersonId_KeyDown(object sender, KeyEventArgs e) => e.Handled = !KeyPressHandler.Numbers(e.Key);
     }
 }

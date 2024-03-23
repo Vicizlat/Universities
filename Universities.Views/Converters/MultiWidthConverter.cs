@@ -2,7 +2,7 @@
 using System.Windows.Data;
 using System.Globalization;
 
-namespace Universities.Views
+namespace Universities.Views.Converters
 {
     public class MultiWidthConverter : IMultiValueConverter
     {

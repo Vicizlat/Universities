@@ -1,29 +1,22 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-
-namespace Universities.Utils
+﻿namespace Universities.Utils
 {
     public static class Constants
     {
-        public const int BackupDaysToKeep = 5;
-        public const int BackupsPerDayToKeep = 5;
-        public static readonly string WorkingFolder = string.Join('\\', Environment.CurrentDirectory.Split('\\').ToList().SkipLast(1));
-        public static readonly string SettingsPath = Directory.CreateDirectory(Path.Combine(WorkingFolder, "Settings")).FullName;
-        public static readonly string SettingsFilePath = Path.Combine(SettingsPath, "Settings.xml");
-        public static readonly string LogsPath = Directory.CreateDirectory(Path.Combine(WorkingFolder, "Logs")).FullName;
-        public static readonly string LogFileName = $"Log-{DateTime.Now:[yyyy-MM-dd][HH-mm-ss]}.txt";
-        public static readonly string LogFilePath = Path.Combine(LogsPath, LogFileName);
-        public static readonly string BackupsPath = Directory.CreateDirectory(Path.Combine(WorkingFolder, "Backups")).FullName;
-        public static readonly string TodayPath = Directory.CreateDirectory(Path.Combine(BackupsPath, $"{DateTime.Now:yyyy.MM.dd}")).FullName;
-        public static readonly string NowPath = Directory.CreateDirectory(Path.Combine(TodayPath, $"{DateTime.Now:HH..mm}")).FullName;
-        public const string ConnectionDetailsWarning = "Some connection information is missing in the Settings file." +
-            " Please provide connection details in the Settings window.";
-        public static readonly char[] Separators =
-        {
-            ',',
-            ';'
-        };
+        public const string ErrorSettings = "Settings are wrong or incomplete!";
+        public const string ErrorFileRead = "Error reading file {0}. The file is missing or in use by another program.";
+        public const string ErrorNoSeparator = "No obvious separator found in header line. Please, use ',' or ';' as separator.";
+        public const string ErrorManySeparators = "Detected multiple possible separators in header line. Please, check the uploaded file and use only one separator.";
+        public const string ErrorWrongFile = "The file you selected has different columns than expected. Did you select the wrong file?";
+        public const string ErrorNoSettingsFile = "Settings file not found. Please, fill in all required information.";
+        public const string SuccessImport = "Successfully imported {0} {1} from {2}.";
+        public const string SuccessExport = "Successfully exported all {0} to {1}.";
+        public const string FailExport = "Failed to export {0} to {1}.";
+        public const string InfDifferentColums = "Line {0} has different number of columns than the header line.";
+        public const string InfClearTable = "This will completly clear the {0} table for {1}!";
+        public const string InfDeleteMainOrg = "This will delete Main Organization '{0}' and all tables associated with it!";
+        public const string InfDeleteSelected = "This will permanently delete all selected items from {0}!";
+        public const string QuestionAreYouSure = "Are you sure you want to do that?";
+        public const string QuestionImportContinue = "Do you want to skip this line and continue with the import?";
         public static readonly string[] ExportOrganizationsHeader =
         {
             "OrganizationID",
@@ -48,41 +41,45 @@ namespace Universities.Utils
             "LastNames",
             "Faculty",
             "Department",
+            "AuthorId",
             "Notes",
             "Comments"
         };
         public static readonly string[] ExportDocumentsHeader =
         {
-            "UT",
-            "country",
-            "zipLocation",
-            "zipCode",
-            "city",
-            "street",
-            "addr_no",
-            "full_address",
-            "orgaNameConcatenated",
-            "orgaEnhancedName_1",
-            "orgaEnhancedName_2",
-            "orgaEnhancedName_3",
-            "orgaEnhancedName_4",
-            "subOrgaNameConcatenated",
-            "seq_no",
-            "full_name",
-            "role",
-            "last_name",
-            "display_name",
-            "wos_standard",
-            "first_name",
+            "Accession Number (UT)",
+            "Country",
+            "Location",
+            "Zip Code",
+            "City",
+            "Street",
+            "Address No",
+            "Full Address",
+            "Organisation names (concatenated)",
+            "1st Enhanced Organisation name",
+            "2nd Enhanced Organisation name",
+            "3rd Enhanced Organisation name",
+            "Enhanced Organisation Names (concatenated)",
+            "Sub-organisation names (concatenated)",
+            "Researcher/Author SeqNo (position)",
+            "Full Name",
+            "Role",
+            "Claimed Web of Science Researcher Profile",
+            "Reprint contact",
+            "Address No (2)",
+            "Last Name",
+            "Display Name",
+            "WOS Standard Name",
+            "Distinct Author ID",
+            "First Name",
+            "ResearcherID",
+            "Other ResearcherID",
+            "ORCID ID",
+            "Preferred Full Name",
+            "Preferred Last Name",
+            "Preferred First Name",
             "AssignedToUser",
             "Processed"
-        };
-        public enum ExitCodes
-        {
-            NoErrors = 0,
-            NoSettings = 1,
-            NoInternet = 2,
-            NoDatabase = 3
         };
     }
 }

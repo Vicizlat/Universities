@@ -12,7 +12,7 @@ namespace Universities.Views.UserControls
     {
         public event EventHandler OnSelectionChanged;
         public event EventHandler OnTextChanged;
-        public List<string> AutoSuggestionList { get; set; }
+        public IEnumerable<string> AutoSuggestionList { get; set; }
 
         public AutoCompleteTextBox()
         {
@@ -24,6 +24,7 @@ namespace Universities.Views.UserControls
         {
             AutoListPopup.IsOpen = openPopup;
             AutoListPopup.Visibility = openPopup ? Visibility.Visible : Visibility.Collapsed;
+            AutoList.Width = AutoTextBox.ActualWidth;
         }
 
         public bool Validate()
@@ -54,7 +55,7 @@ namespace Universities.Views.UserControls
                 AutoSuggestionPopup(false);
                 if (AutoList.SelectedIndex < 0) return;
                 AutoTextBox.Text = $"{AutoList.SelectedItem}";
-                OnSelectionChanged?.Invoke(AutoSuggestionList.IndexOf(AutoTextBox.Text), null);
+                OnSelectionChanged?.Invoke(AutoSuggestionList.ToList().IndexOf(AutoTextBox.Text), null);
                 AutoList.SelectedIndex = -1;
             }
             catch (Exception ex)
@@ -63,14 +64,14 @@ namespace Universities.Views.UserControls
             }
         }
 
-        private void AutoTextBox_GotFocus(object sender, RoutedEventArgs e)
+        private void AutoTextBox_GotMouseCapture(object sender, RoutedEventArgs e)
         {
             AutoTextBox.Text = string.Empty;
             AutoSuggestionPopup(true);
             AutoList.ItemsSource = AutoSuggestionList;
         }
 
-        private void AutoList_LostMouseCapture(object sender, MouseEventArgs e)
+        private void AutoList_MouseLeave(object sender, MouseEventArgs e)
         {
             AutoSuggestionPopup(false);
         }
@@ -81,7 +82,7 @@ namespace Universities.Views.UserControls
             {
                 AutoTextBox.Text = $"{AutoList.Items[0]}";
                 AutoSuggestionPopup(false);
-                OnSelectionChanged?.Invoke(AutoSuggestionList.IndexOf(AutoTextBox.Text), null);
+                OnSelectionChanged?.Invoke(AutoSuggestionList.ToList().IndexOf(AutoTextBox.Text), null);
             }
         }
     }

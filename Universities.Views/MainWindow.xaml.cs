@@ -1,50 +1,53 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Universities.Controller;
+using Universities.Handlers;
 using Universities.Utils;
 
 namespace Universities.Views
 {
     public partial class MainWindow
     {
-        private readonly MainController controller;
+        public MainController Controller;
         private readonly string version;
         private WaitWindow WaitWindow;
         private string[] docArray = Array.Empty<string>();
-        private int docId = Settings.Instance.LastDocNo;
+        private int docId = User.LastDocId;
         private int selectedOrgIndex = -1;
 
-        public MainWindow(MainController controller, string version)
+        public MainWindow(string version)
         {
             InitializeComponent();
             DataContext = this;
             this.version = version;
-            Title = $"Universities     v.{version}     User: {SqlCommands.CurrentUser.Item1}     Database: {Settings.Instance.Database}";
-            this.controller = controller;
-            if (!SqlCommands.CurrentUser.Item2)
-            {
-                AddUser.Visibility = Visibility.Hidden;
-                DataManage.Visibility = Visibility.Hidden;
-            }
-            if (controller.Organizations.Count > 0)
-            {
-                SelectOrganization.AutoSuggestionList = controller.OrganizationsDisplayNames;
-            }
-            PopulateFields();
+            DataManage.Visibility = User.Role.Contains("admin") ? Visibility.Visible : Visibility.Hidden;
             SelectOrganization.OnSelectionChanged += SelectOrganization_SetSelectedIndex;
-            controller.OnDocumentsChanged += OnDocumentsChanged;
-            controller.OnOrganizationsChanged += OnOrganizationsChanged;
-            DBAccess.OnDBChanged += DBAccess_OnDBChanged;
+        }
+        
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (Controller.Organizations.Any())
+            {
+                if (Settings.Instance.ShowParentOrganization) SelectOrganization.AutoSuggestionList = Controller.Organizations.Select(o => o.OrgaNameWithParent);
+                else SelectOrganization.AutoSuggestionList = Controller.Organizations.Select(o => o.OrganizationName);
+            }
+            Controller.OnDocumentsChanged += OnDocumentsChanged;
+            Controller.OnOrganizationsChanged += OnOrganizationsChanged;
+            Controller.OnMainOrgChanged += OnMainOrgChanged;
+            CloseWaitWindow();
         }
 
-        private void DBAccess_OnDBChanged(object sender, EventArgs e)
+        private void OnMainOrgChanged(object sender, EventArgs e)
         {
-            Title = $"Universities     v.{version}     User: {SqlCommands.CurrentUser.Item1}     Database: {Settings.Instance.Database}";
+            Title = $"Universities\tv.{version}\t\tUser: {User.Username}\t\tMain organization: {MainOrg.Name}";
+            docId = User.LastDocId;
+            PopulateFields();
         }
 
         private void OnDocumentsChanged(object sender, EventArgs e)
@@ -54,86 +57,61 @@ namespace Universities.Views
 
         private void OnOrganizationsChanged(object sender, EventArgs e)
         {
-            SelectOrganization.AutoSuggestionList = controller.OrganizationsDisplayNames;
+            if (Settings.Instance.ShowParentOrganization)
+            {
+                SelectOrganization.AutoSuggestionList = Controller.Organizations.Select(o => o.OrgaNameWithParent);
+                ParentOrganization.ItemsSource = Controller.Organizations.Select(o => o.OrgaNameWithParent);
+            }
+            else
+            {
+                SelectOrganization.AutoSuggestionList = Controller.Organizations.Select(o => o.OrganizationName);
+                ParentOrganization.ItemsSource = Controller.Organizations.Select(o => o.OrganizationName);
+            }
             selectedOrgIndex = -1;
             SaveButton.IsEnabled = SelectOrganization.Validate();
         }
 
-        private void AddUserIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            new AddUserWindow().ShowDialog();
-        }
-
         private void ImportExportIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            new DataManagementWindow(controller).ShowDialog();
+            new DataManagementWindow(Controller).ShowDialog();
         }
 
         private void SettingsIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            new SettingsWindow().ShowDialog();
+            bool result = (bool)new SettingsWindow().ShowDialog();
+            if (result)
+            {
+                Controller.MainOrgChangedAsync();
+                DataManage.Visibility = User.Role.Contains("admin") ? Visibility.Visible : Visibility.Hidden;
+            }
         }
 
         private void AddOrganization_OnClick(object sender, RoutedEventArgs e)
         {
-            new AddOrganization(controller).ShowDialog();
+            AddNewOrg.Visibility = Visibility.Visible;
         }
 
-        private void PreviousButton_OnClick(object sender, RoutedEventArgs e)
+        private void NavButton_OnClick(object sender, RoutedEventArgs e)
         {
-            docId--;
+            if (sender == PreviousButton) docId--;
+            else if (sender == NextButton) docId++;
             PopulateFields();
         }
 
-        private void NextButton_OnClick(object sender, RoutedEventArgs e)
+        private async void PopulateFields()
         {
-            docId++;
-            PopulateFields();
-        }
-
-        private void SaveButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            ShowWaitWindow();
-            int orgId;
-            int? personId = null;
-            if (lvSimilarProcessedAuthors.SelectedItem != null)
-            {
-                orgId = int.Parse(((string[])lvSimilarProcessedAuthors.SelectedItem)[3]);
-                personId = int.Parse(((string[])lvSimilarProcessedAuthors.SelectedItem)[0]);
-            }
-            else
-            {
-                orgId = controller.Organizations[selectedOrgIndex].OrganizationId;
-                personId = controller.GetPersonId(docArray[20], docArray[17], orgId);
-            }
-            if (personId == null)
-            {
-                CloseWaitWindow();
-                return;
-            }
-            List<string[]> documents = new List<string[]>() { docArray };
-            documents.AddRange(lvSimilarPendingAuthors.SelectedItems.OfType<string[]>());
-            foreach (string[] doc in documents)
-            {
-                controller.AddPerson(new string[] { $"{personId}", doc[20], doc[17], $"{orgId}", doc[0], "", "", "", "" });
-                controller.UpdateDocument(doc, true);
-            }
-            controller.UpdateDocuments();
-            CloseWaitWindow();
-        }
-
-        private void PopulateFields()
-        {
-            if (controller.Documents.Count == 0) docId = -1;
-            if (controller.Documents.Count < docId) docId = controller.Documents.Count - 1;
-            docArray = docId >= 0 && docId < controller.Documents.Count ? controller.Documents[docId].ToArray() : Array.Empty<string>();
+            ShowWaitWindow("Loading Data...");
+            if (Controller.Documents.Count() == 0) docId = -1;
+            if (Controller.Documents.Count() < docId) docId = Controller.Documents.Count() - 1;
+            docArray = docId >= 0 && docId < Controller.Documents.Count() ? Controller.Documents.ElementAtOrDefault(docId).ToArray() : Array.Empty<string>();
             SaveButton.IsEnabled = SelectOrganization.Validate();
             selectedOrgIndex = -1;
             SelectOrganization.AutoTextBox.Text = string.Empty;
             PreviousButton.IsEnabled = docId >= 0;
             PreviousButton.Content = $"<< Previous {(docId < 0 ? "(0)" : $"({docId})")}";
-            NextButton.IsEnabled = docId < controller.Documents.Count - 1;
-            NextButton.Content = $"({controller.Documents.Count - docId - 1}) Next >>";
+            NextButton.IsEnabled = docId < Controller.Documents.Count() - 1;
+            NextButton.Content = $"({Controller.Documents.Count() - docId - 1}) Next >>";
+            await PhpHandler.UpdateInTable("users", "LastDocId", $"{docId}", id: User.Id);
             if (docId < 0)
             {
                 ALastName.Text = string.Empty;
@@ -148,22 +126,49 @@ namespace Universities.Views
             }
             else
             {
-                ALastName.Text = docArray[17];
-                AFirstName.Text = docArray[20];
-                Wos.Text = docArray[0];
-                Address.Text = docArray[7];
-                SubOrganizationName.Text = docArray[13];
+                ALastName.Text = docArray[21];
+                AFirstName.Text = docArray[25];
+                Wos.Text = docArray[1];
+                Address.Text = docArray[8];
+                SubOrganizationName.Text = docArray[14];
                 lvSimilarPendingAuthors.ItemsSource = GetSimilarPendingAuthors();
                 lvSimilarProcessedAuthors.ItemsSource = GetSimilarProcessedAuthors();
                 lvSimilarProcessedAuthors.Background = lvSimilarProcessedAuthors.Items.Count > 0 ? Brushes.LightGreen : Brushes.Transparent;
                 lvAcadPersonnel.ItemsSource = GetMatchingAcadPersonnel();
             }
+            CloseWaitWindow();
+        }
+
+        private async void SaveButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            ShowWaitWindow("Saving Person...");
+            string[] simAuthor = (string[])lvSimilarProcessedAuthors.SelectedItem ?? new string[4];
+            int orgId = int.TryParse(simAuthor[3], out int selOrgId) ? selOrgId : Controller.Organizations.ElementAtOrDefault(selectedOrgIndex).OrganizationId;
+            int personId = int.TryParse(simAuthor[0], out int selPerId) ? selPerId : await Controller.GetPersonId(docArray[21], docArray[18], orgId);
+            if (personId == 0)
+            {
+                CloseWaitWindow();
+                return;
+            }
+            List<string[]> documents = new List<string[]>() { docArray };
+            documents.AddRange(lvSimilarPendingAuthors.SelectedItems.OfType<string[]>());
+            foreach (string[] doc in documents)
+            {
+                string newPerson = $"{personId};{doc[21]};{doc[18]};{orgId};{doc[1]};;;;";
+                if (await PhpHandler.AddToTable($"{MainOrg.Preffix}_people", "person", newPerson))
+                {
+                    await PhpHandler.UpdateInTable($"{MainOrg.Preffix}_documents", "Processed", "1", id: int.Parse(doc[0]));
+                }
+            }
+            await Controller.UpdatePeopleAsync();
+            await Controller.UpdateDocuments();
+            CloseWaitWindow();
         }
 
         private IEnumerable<string[]> GetSimilarPendingAuthors()
         {
-            return controller.Documents
-                .Where(d => d.Ut != docArray[0] && controller.RegexMatch(d.LastName, docArray[17]))
+            return Controller.Documents
+                .Where(d => d.Ut != docArray[1] && Controller.RegexMatch(d.LastName, docArray[21]))
                 .OrderBy(d => d.LastName).ThenBy(d => d.FirstName)
                 .Select(d => d.ToArray());
         }
@@ -171,23 +176,28 @@ namespace Universities.Views
         private List<string[]> GetSimilarProcessedAuthors()
         {
             List<string[]> similarProcessedAuthors = new List<string[]>();
-            foreach (string[] author in controller.People.Where(p => controller.RegexMatch(p.LastName, docArray[17])).Select(p => p.ToArray()))
+            foreach (string[] author in Controller.People.Where(p => Controller.RegexMatch(p.LastName, docArray[21])).Select(p => p.ToArray()))
             {
-                if (similarProcessedAuthors.Any(pa => controller.RegexMatch(pa[0], author[0])))
+                if (similarProcessedAuthors.Any(pa => Controller.RegexMatch(pa[1], author[1])))
                 {
-                    string[] a = similarProcessedAuthors.FirstOrDefault(pa => controller.RegexMatch(pa[0], author[0]));
-                    if (a[1] != author[1] && !a[11].Contains(author[1])) a[11] += " | " + author[1];
+                    string[] pa = similarProcessedAuthors.FirstOrDefault(pa => Controller.RegexMatch(pa[1], author[1]));
+                    if (pa[2] != author[2] && !pa[11].Contains(author[2])) pa[11] += " | " + author[2];
                     continue;
                 }
-                string orgDisplayName = controller.Organizations.FirstOrDefault(o => o.OrganizationId == int.Parse(author[3])).GetDisplayName(controller.Organizations);
-                similarProcessedAuthors.Add(author.Append(orgDisplayName).Append(author[1]).ToArray());
+                string orgDisplayName;
+                if (Settings.Instance.ShowParentOrganization)
+                {
+                    orgDisplayName = Controller.Organizations.FirstOrDefault(o => o.OrganizationId == int.Parse(author[3])).OrgaNameWithParent;
+                }
+                else orgDisplayName = Controller.Organizations.FirstOrDefault(o => o.OrganizationId == int.Parse(author[4])).OrganizationName;
+                similarProcessedAuthors.Add(author.Append(orgDisplayName).Append(author[2]).ToArray());
             }
-            return similarProcessedAuthors.OrderBy(a => a[2]).ThenBy(a => a[1]).ToList();
+            return similarProcessedAuthors.OrderBy(a => a[3]).ThenBy(a => a[2]).ToList();
         }
 
         private IEnumerable<string[]> GetMatchingAcadPersonnel()
         {
-            foreach (string[] author in controller.AcadPersonnel.Where(p => controller.RegexMatch(p.LastNames, docArray[17])).Select(p => p.ToArray()))
+            foreach (string[] author in Controller.AcadPersonnel.Where(p => Controller.RegexMatch(p.LastNames, docArray[21])).Select(p => p.ToArray()))
             {
                 yield return author;
             }
@@ -202,19 +212,20 @@ namespace Universities.Views
         {
             if (sender == lvSimilarProcessedAuthors && lvSimilarProcessedAuthors.SelectedItem != null)
             {
-                SelectOrganization.AutoTextBox.Text = ((string[])lvSimilarProcessedAuthors.SelectedItem)[10];
+                SelectOrganization.AutoTextBox.Text = ((string[])lvSimilarProcessedAuthors.SelectedItem)[9];
             }
             if (sender == lvAcadPersonnel && lvAcadPersonnel.SelectedItem != null)
             {
-                string acadPersFac = ((string[])lvAcadPersonnel.SelectedItem)[2];
-                string acadPersDep = ((string[])lvAcadPersonnel.SelectedItem)[3];
+                string acadPersFac = ((string[])lvAcadPersonnel.SelectedItem)[2].ToLower().Replace(",", "");
+                string acadPersDep = ((string[])lvAcadPersonnel.SelectedItem)[3].ToLower().Replace(",", "");
                 string orgName = string.IsNullOrEmpty(acadPersDep) ? acadPersFac : acadPersDep;
-                for (int i = 0; i < SelectOrganization.AutoSuggestionList.Count; i++)
+                for (int i = 0; i < SelectOrganization.AutoSuggestionList.Count(); i++)
                 {
-                    if (SelectOrganization.AutoSuggestionList[i].StartsWith(orgName))
+                    if (SelectOrganization.AutoSuggestionList.ElementAt(i).ToLower().Replace(",", "") == orgName)
                     {
-                        SelectOrganization.AutoTextBox.Text = SelectOrganization.AutoSuggestionList[i];
+                        SelectOrganization.AutoTextBox.Text = SelectOrganization.AutoSuggestionList.ElementAt(i);
                         selectedOrgIndex = i;
+                        break;
                     }
                 }
             }
@@ -233,15 +244,59 @@ namespace Universities.Views
 
         public void CloseWaitWindow()
         {
-            if (WaitWindow != null) WaitWindow.Close();
+            WaitWindow?.Close();
         }
 
-        private void Window_Closed(object sender, EventArgs e)
+        private async void Window_Closed(object sender, EventArgs e)
         {
-            Settings.Instance.LastDocNo = docId;
-            Settings.Instance.WriteSettingsFile();
-            ImportExport.ExportBackupFiles();
+            string workingFolder = string.Join('\\', Environment.CurrentDirectory.Split('\\').ToList().SkipLast(1));
+            string backupsPath = Directory.CreateDirectory(Path.Combine(workingFolder, "Backups")).FullName;
+            string todayPath = Directory.CreateDirectory(Path.Combine(backupsPath, $"{DateTime.Now:yyyy.MM.dd}")).FullName;
+            string nowPath = Directory.CreateDirectory(Path.Combine(todayPath, $"{DateTime.Now:HH..mm}")).FullName;
+            await Controller.ExportAsync("People", filePath: $"{nowPath}\\{MainOrg.Preffix}_People.csv", noPrompt: true);
+            await Controller.ExportAsync("Organizations", filePath: $"{nowPath}\\{MainOrg.Preffix}_Organizations.csv", noPrompt: true);
+            await Controller.ExportAsync("Documents", filePath: $"{nowPath}\\{MainOrg.Preffix}_Documents.csv", noPrompt: true);
+            FileHandler.ManageBackupFiles(backupsPath);
             Application.Current.Shutdown(0);
+        }
+
+        private void NewOrgName_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            AddOrgSave.IsEnabled = !string.IsNullOrEmpty(NewOrgName.Text);
+        }
+
+        private void NewOrgName_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && AddOrgSave.IsEnabled)
+            {
+                AddOrgSave_Click(this, e);
+            }
+            if (e.Key == Key.Escape)
+            {
+                AddOrgCancel_Click(this, e);
+            }
+        }
+
+        private async void AddOrgSave_Click(object sender, RoutedEventArgs e)
+        {
+            int? parOrgId = null;
+            if (ParentOrganization.SelectedItem == null)
+            {
+                string msg = "You are adding a new organization without a Parent Organization.";
+                string question = "Are you sure you want to save without a Parent Organization?";
+                if (!PromptBox.Question(msg, question)) return;
+            }
+            else parOrgId = Controller.Organizations.ElementAtOrDefault(ParentOrganization.SelectedIndex).OrganizationId;
+            string[] lastOrg = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_organizations", firstLast: "last");
+            int orgId = lastOrg.Any() ? int.Parse(lastOrg[0].Split(";")[1]) + 1 : MainOrg.OrgStartId;
+            await PhpHandler.AddToTable($"{MainOrg.Preffix}_organizations", "organization", $"{orgId};{NewOrgName.Text};{parOrgId}");
+            await Controller.UpdateOrganizations();
+            AddNewOrg.Visibility = Visibility.Hidden;
+        }
+
+        private void AddOrgCancel_Click(object sender, RoutedEventArgs e)
+        {
+            AddNewOrg.Visibility = Visibility.Hidden;
         }
     }
 }

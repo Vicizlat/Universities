@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Universities.Controller", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Universities.Handlers", "Universities.Handlers\Universities.Handlers.csproj", "{63CAD0F1-C45D-4F7E-8FDF-51992A1458CC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Universities.Data", "Universities.Data\Universities.Data.csproj", "{E08F69C4-C940-4071-85B8-80809BB34BC1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Universities.Models", "Universities.Data\Universities.Models.csproj", "{E08F69C4-C940-4071-85B8-80809BB34BC1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

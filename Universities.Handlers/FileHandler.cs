@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Universities.Utils;
 
 namespace Universities.Handlers
 {
     public static class FileHandler
     {
+        public static readonly string WorkingFolder = string.Join('\\', Environment.CurrentDirectory.Split('\\').ToList().SkipLast(1));
+        public static readonly string LogsPath = Directory.CreateDirectory(Path.Combine(WorkingFolder, "Logs")).FullName;
+
         public static bool ReadAllLines(string fileName, out string[] contents)
         {
             try
@@ -28,12 +32,10 @@ namespace Universities.Handlers
             try
             {
                 File.WriteAllLines(fileName, contents);
-                Logging.Instance.WriteLine($"Successfully saved \"{fileName}\"!");
                 return true;
             }
             catch
             {
-                Logging.Instance.WriteLine($"Failed to save \"{fileName}\"!");
                 return false;
             }
         }
@@ -51,28 +53,18 @@ namespace Universities.Handlers
             File.Copy(fullPath1, fullPath2);
         }
 
-        public static void ManageLogFiles()
+        public static void ManageBackupFiles(string backupsPath)
         {
-            string[] files = Directory.GetFiles(Constants.LogsPath);
-            while (files.Length > 50)
-            {
-                File.Delete(files[0]);
-                files = Directory.GetFiles(Constants.LogsPath);
-            }
-        }
-
-        public static void ManageBackupFiles()
-        {
-            string[] foldersDays = Directory.GetDirectories(Constants.BackupsPath);
-            while (foldersDays.Length > Constants.BackupDaysToKeep)
+            string[] foldersDays = Directory.GetDirectories(backupsPath);
+            while (foldersDays.Length > Settings.Instance.BackupDaysToKeep)
             {
                 Directory.Delete(foldersDays[0], true);
-                foldersDays = Directory.GetDirectories(Constants.BackupsPath);
+                foldersDays = Directory.GetDirectories(backupsPath);
             }
             foreach (string folder in foldersDays)
             {
                 string[] foldersHours = Directory.GetDirectories(folder);
-                while (foldersHours.Length > Constants.BackupsPerDayToKeep)
+                while (foldersHours.Length > Settings.Instance.BackupsPerDayToKeep)
                 {
                     Directory.Delete(foldersHours[0], true);
                     foldersHours = Directory.GetDirectories(folder);

@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="Universities.Views.UserControls.AddMainOrganization"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Universities.Views.UserControls"
+             mc:Ignorable="d" d:DesignHeight="340" d:DesignWidth="520" IsVisibleChanged="UserControl_IsVisibleChanged">
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Row="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold" Content="Add New Main Organization"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="10, 0" Padding="2" Text="Main Organization Name:"/>
+        <TextBox x:Name="MainOrgName" Grid.Row="1" Grid.Column="0" Margin="10, 20, 10, 0" Padding="5" TextChanged="AddMainOrg_OnTextChanged" Background="Bisque"/>
+        <TextBlock Grid.Row="1" Grid.Column="1" Margin="10, 0" Padding="2" Text="Main Organization Preffix:"/>
+        <TextBox x:Name="MainOrgPreffix" Grid.Row="1" Grid.Column="1" Margin="10, 20, 10, 0" Padding="5" ToolTip="Auto-generated from Main Organization Name. Can be changed, but use '_' or '-' instead of empty space."/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="10, 0" Padding="2" Text="Organizations Start Id:"/>
+        <TextBox Grid.Row="2" Grid.Column="0" Margin="10, 20, 10, 0" Padding="5" Text="1000" IsReadOnly="True" ToolTip="Organizations start Ids are set by default and cannot be changed."/>
+        <TextBlock Grid.Row="2" Grid.Column="1" Margin="10, 0" Padding="2" Text="People Start Id:"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="10, 20, 10, 0" Padding="5" Text="2000" IsReadOnly="True" ToolTip="People start Ids are set by default and cannot be changed."/>
+        <Button x:Name="Confirm" Grid.Row="3" Grid.Column="0" Margin="10, 20, 10, 0" Background="LightGreen" IsEnabled="False" Content="Add Main Organization" Click="AddMainOrgConfirm_Click"/>
+        <Button Grid.Row="3" Grid.Column="1" Margin="10, 20, 10, 0" Background="IndianRed" Content="Cancel" Click="AddMainOrgCancel_Click"/>
+        <Label Grid.Row="5" Grid.ColumnSpan="2" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold" Content="Delete Main Organization"/>
+        <ComboBox x:Name="DelMainOrgSelect" Grid.Row="6" Grid.Column="0" Margin="10, 0, 10, 20" Padding="5" SelectionChanged="DelMainOrgSelect_SelectionChanged"/>
+        <Button x:Name="DelMainOrgButton" Grid.Row="6" Grid.Column="1" Margin="10, 0, 10, 20" IsEnabled="False" Background="OrangeRed" Content="Delete Main Organization" Click="DelMainOrgButton_Click"/>
+    </Grid>
+</UserControl>

@@ -2,9 +2,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:uc="clr-namespace:Universities.Views.UserControls"
+        xmlns:images="clr-namespace:Universities.Views.Images"
         x:Class="Universities.Views.SettingsWindow" mc:Ignorable="d" FontSize="13"
         Width="540" Height="360" ShowInTaskbar="True" ResizeMode="NoResize" WindowStyle="None"
         WindowStartupLocation="CenterScreen" BorderThickness="1" KeyDown="Window_KeyDown">
+    <Window.Resources>
+        <Storyboard x:Key="Animation">
+            <DoubleAnimation Storyboard.TargetName="BackgroundAnimation" Storyboard.TargetProperty="(Brush.Opacity)" From="0" To="1" Duration="0:0:0.3" AutoReverse="True"/>
+        </Storyboard>
+    </Window.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -21,43 +28,60 @@
             <ColumnDefinition Width="3*"/>
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Padding="2" FontSize="22"
-                       Text="Settings" HorizontalAlignment="Center" VerticalAlignment="Top" FontWeight="Bold"/>
+        <uc:AddMainOrganization x:Name="AddMainOrg" Grid.ColumnSpan="3" Grid.RowSpan="10" Visibility="Hidden" Panel.ZIndex="1" IsVisibleChanged="OtherOptions_IsVisibleChanged"/>
+        <uc:AddNewUser x:Name="AddUser" Grid.ColumnSpan="3" Grid.RowSpan="10" Visibility="Hidden" Panel.ZIndex="1" IsVisibleChanged="OtherOptions_IsVisibleChanged"/>
+        <uc:EditUser x:Name="EditUsers" Grid.ColumnSpan="3" Grid.RowSpan="10" Visibility="Hidden" Panel.ZIndex="1" IsVisibleChanged="OtherOptions_IsVisibleChanged"/>
+        <Label Grid.ColumnSpan="3" Margin="5, 0" HorizontalAlignment="Center" FontSize="22" FontWeight="Bold" Content="Settings" />
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="10, 0" Padding="2" Text="Server:"/>
-        <TextBox Grid.Row="1" Grid.Column="0" Margin="10, 20, 10, 0" Padding="5" Text="{Binding Path=Server}"/>
-        <TextBlock  Grid.Row="1" Grid.Column="1" Margin="10, 0" Padding="2" Text="Database:"/>
-        <ComboBox x:Name="Databases" Grid.Row="1" Grid.Column="1" Margin="10, 20, 30, 0" Padding="5"/>
-        <TextBox x:Name="NewDbName" Grid.Row="1" Grid.Column="1" Margin="10, 20, 30, 0" Padding="5" Visibility="Hidden" KeyUp="NewDbName_KeyUp"/>
-        <Button x:Name="AddDatabaseButton" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Margin="10, 20, 10, 0"
-                Padding="1, -3, 1, 3" FontSize="22" Content="+" Click="AddDatabase_Click"/>
-        <TextBlock Grid.Row="1" Grid.Column="2" Margin="10, 0" Padding="2" Text="Port:"/>
-        <TextBox Grid.Row="1" Grid.Column="2" Margin="10, 20, 10, 0" Padding="5" KeyDown="Numbers_KeyDown" Text="{Binding Path=Port}"/>
+        <TextBox x:Name="Server" Grid.Row="1" Grid.Column="0" Margin="10, 20, 10, 0" Padding="5" Text="{Binding Server}" TextChanged="TextBox_TextChanged"/>
+        <TextBlock  Grid.Row="1" Grid.Column="1" Margin="10, 0" Padding="2" Text="Main Organization:"/>
+        <ComboBox x:Name="MainOrgSelect" Grid.Row="1" Grid.Column="1" Margin="10, 20, 10, 0" Padding="5" SelectionChanged="MainOrg_SelectionChanged"/>
+        <Button x:Name="AddMainOrgButton" Grid.Row="1" Grid.Column="2" Margin="10, 20, 10, 0" Padding="0" Click="EditMainOrgButton_Click">
+            <Button.Content>
+                <TextBlock Text="Edit Main Organizations" Margin="0, -1, 0, 0" TextAlignment="Center" FontSize="12" FontFamily="Arial" TextWrapping="Wrap"/>
+            </Button.Content>
+        </Button>
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="10, 0" Padding="2" Text="Username:"/>
-        <TextBox Grid.Row="2" Grid.Column="0" Margin="10, 20, 10, 0" Padding="5" Text="{Binding Path=Username}"/>
+        <TextBox x:Name="Username" Grid.Row="2" Grid.Column="0" Margin="10, 20, 10, 0" Padding="5" Text="{Binding Username}" TextChanged="TextBox_TextChanged"/>
         <TextBlock Grid.Row="2" Grid.Column="1" Margin="10, 0" Padding="2" Text="Password:"/>
-        <TextBox x:Name="Password" Grid.Row="2" Grid.Column="1" Margin="10, 20, 10, 0" Padding="5" Text="{Binding Path=Password}"/>
-        <Button x:Name="EditUserButton" Grid.Row="2" Grid.Column="2" Margin="10, 20, 10, 0" Click="ChangePasswordButton_Click"/>
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="10, 0" Padding="2" Text="People Start Id:"/>
-        <TextBox Grid.Row="4" Grid.Column="0" Margin="10, 20, 10, 0" Padding="5" KeyDown="Numbers_KeyDown" Text="{Binding Path=PeopleStartId}"/>
-        <TextBlock Grid.Row="4" Grid.Column="1" Margin="10, 0" Padding="2" Text="Organizations Start Id:"/>
-        <TextBox Grid.Row="4" Grid.Column="1" Margin="10, 20, 10, 0" Padding="5" KeyDown="Numbers_KeyDown" Text="{Binding Path=OrgaStartId}"/>
+        <TextBox x:Name="Password" Grid.Row="2" Grid.Column="1" Margin="10, 20, 10, 0" Padding="5" Text="{Binding DecryptedPassword}" TextChanged="TextBox_TextChanged"/>
+        <StackPanel Grid.Row="2" Grid.Column="2" Margin="10, 10, 10, 0" Orientation="Horizontal" HorizontalAlignment="Right">
+            <images:ButtonImage x:Name="AddUserIcon" Margin="0, 0, 0, 0" FileName="AddUserIcon" ToolTip="Add User" Source="Images\AddUserIconBW.png" MouseLeftButtonUp="AddUserIcon_MouseLeftButtonUp"/>
+            <images:ButtonImage x:Name="EditUserIcon" Margin="30, 0, 0, 0" FileName="EditUserIcon" ToolTip="Edit User" Source="Images\EditUserIconBW.png" MouseLeftButtonUp="EditUserIcon_MouseLeftButtonUp"/>
+        </StackPanel>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="10, 0" Padding="2" Text="Backup Days to Keep:"/>
+        <TextBox x:Name="BackupDays" Grid.Row="4" Grid.Column="0" Margin="10, 20, 10, 0" Padding="5" KeyDown="Numbers_KeyDown" Text="{Binding BackupDaysToKeep}" TextChanged="TextBox_TextChanged"/>
+        <TextBlock Grid.Row="4" Grid.Column="1" Margin="10, 0" Padding="2" Text="Backups per Day to Keep:"/>
+        <TextBox x:Name="BackupsPerDay" Grid.Row="4" Grid.Column="1" Margin="10, 20, 10, 0" Padding="5" KeyDown="Numbers_KeyDown" Text="{Binding BackupsPerDayToKeep}" TextChanged="TextBox_TextChanged"/>
         <TextBlock Grid.Row="4" Grid.Column="2" Margin="10, 0" Padding="0, 2" Text="Export Separator:"/>
-        <TextBox Grid.Row="4" Grid.Column="2" Margin="40, 20, 40, 0" Padding="15, 0" MaxLength="1" FontSize="20" Text="{Binding Path=Separator}"/>
-        <CheckBox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="10, 0" VerticalAlignment="Center"
-                  Content="Show Parent Organization Name in suggested preview" IsChecked="{Binding Path=ShowParentOrganization}"/>
-        <TextBlock Grid.Row="6" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10, 0" Padding="4" Text="Regex Pattern:"/>
-        <TextBox x:Name="RegexPatternBox" Grid.Row="6" Grid.Column="1" Margin="10, 0" Padding="4" IsReadOnly="True"/>
-        <TextBox x:Name="AddToPattern" Grid.Row="6" Grid.Column="2" Margin="10, 0, 30, 0" Padding="4"/>
-        <Button x:Name="AddToPatternButton" Grid.Row="6" Grid.Column="2" HorizontalAlignment="Right" Margin="10, 0, 10, 0"
+        <TextBox x:Name="Separator" Grid.Row="4" Grid.Column="2" Margin="40, 20, 40, 0" Padding="15, 0" MaxLength="1" FontSize="20" Text="{Binding Separator}" TextChanged="TextBox_TextChanged"/>
+        <CheckBox x:Name="cbShowParentOrg" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="10, 0" VerticalAlignment="Center"
+                  Content="Show Parent Organization Name in suggested preview" IsChecked="{Binding ShowParentOrganization}" Click="cbShowParentOrg_Click"/>
+        <Grid Grid.Row="6" Grid.ColumnSpan="3" Height="30" VerticalAlignment="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="10, 0" Text="Regex Pattern:"/>
+            <TextBox x:Name="RegexPatternBox" Grid.Column="1" Margin="0, 0, 10, 0" Padding="4" IsReadOnly="True" Text="{Binding RegexPattern}"/>
+            <TextBox x:Name="AddToPattern" Grid.Column="2" Margin="10, 0, 30, 0" Padding="4">
+                <TextBox.Background>
+                    <SolidColorBrush x:Name="BackgroundAnimation" Color="LightGreen" Opacity="0"/>
+                </TextBox.Background>
+            </TextBox>
+            <Button x:Name="AddToPatternButton" Grid.Column="2" HorizontalAlignment="Right" Margin="10, 0"
                 Padding="1, -3, 1, 3" FontSize="22" Content="+" Click="AddToPatternButton_Click"/>
-        <Grid Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3" Height="30" VerticalAlignment="Bottom">
+        </Grid>
+        <Grid Grid.Row="7" Grid.ColumnSpan="3" Height="30" VerticalAlignment="Bottom">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Margin="10, 0" Content="Save" Background="LightGreen" Click="SaveButton_Click"/>
-            <Button Grid.Column="2" Margin="10, 0" Content="Cancel" Background="IndianRed" Click="CancelButton_Click"/>
+            <Button x:Name="SaveButton" Grid.Column="0" Margin="10, 0" Content="Save" Background="LightGreen" Click="SaveButton_Click"/>
+            <Button x:Name="ResetAutoIncrement" Grid.Column="1" Margin="10, 0" Content="Reset" Click="ResetAutoIncrement_Click"/>
+            <Button x:Name="CancelButton" Grid.Column="2" Margin="10, 0" Content="Cancel" Background="IndianRed" Click="CancelButton_Click"/>
         </Grid>
     </Grid>
 </Window>

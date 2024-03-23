@@ -8,10 +8,22 @@
   <ItemGroup>
     <None Remove="Images\AddUserIconBW.png" />
     <None Remove="Images\AddUserIconC.png" />
+    <None Remove="Images\DownloadIconBW.png" />
+    <None Remove="Images\DownloadIconC.png" />
+    <None Remove="Images\EditUserIconBW.png" />
+    <None Remove="Images\EditUserIconC.png" />
     <None Remove="Images\ImportExportIconBW.png" />
     <None Remove="Images\ImportExportIconC.png" />
     <None Remove="Images\SettingsIconBW.png" />
     <None Remove="Images\SettingsIconC.png" />
+    <None Remove="Images\UploadIconBW.png" />
+    <None Remove="Images\UploadIconC.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\DownloadIconBW.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +38,15 @@
     <Resource Include="Images\AddUserIconC.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\DownloadIconC.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\EditUserIconBW.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\EditUserIconC.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Images\ImportExportIconBW.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
@@ -38,19 +59,22 @@
     <Resource Include="Images\SettingsIconC.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\UploadIconBW.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\UploadIconC.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
     <Compile Update="EditPersonWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="AddUserWindow.xaml.cs">
+    <Compile Update="UserControls\EditUser.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="EditUserWindow.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="AddOrganization.xaml.cs">
+    <Compile Update="UserControls\AddNewUser.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -60,26 +84,11 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="AddUserWindow.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="EditUserWindow.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="AddOrganization.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Update="MainWindow.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
     <Page Update="SettingsWindow.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="UserControls\LabelTextBlock.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

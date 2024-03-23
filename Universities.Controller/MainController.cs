@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Universities.Data.Models;
+using System.Threading.Tasks;
+using Universities.Handlers;
+using Universities.Models;
 using Universities.Utils;
 
 namespace Universities.Controller
@@ -14,231 +16,142 @@ namespace Universities.Controller
         public event EventHandler? OnOrganizationsChanged;
         public event EventHandler? OnPeopleChanged;
         public event EventHandler? OnAcadPersonnelChanged;
-        public List<Document> Documents { get; set; } = new List<Document>();
-        public List<DuplicateDocument> DuplicateDocuments { get; set; } = new List<DuplicateDocument>();
-        public List<IncompleteDocument> IncompleteDocuments { get; set; } = new List<IncompleteDocument>();
-        public List<Organization> Organizations { get; set; } = new List<Organization>();
-        public List<string> OrganizationsDisplayNames { get; set; } = new List<string>();
-        public List<Person> People { get; set; } = new List<Person>();
-        public List<AcadPerson> AcadPersonnel { get; set; } = new List<AcadPerson>();
+        public event EventHandler? OnMainOrgChanged;
+        public IEnumerable<Document> Documents { get; set; } = new List<Document>();
+        public IEnumerable<Organization> Organizations { get; set; } = new List<Organization>();
+        public IEnumerable<Person> People { get; set; } = new List<Person>();
+        public IEnumerable<AcadPerson> AcadPersonnel { get; set; } = new List<AcadPerson>();
 
         public MainController()
         {
-            CollectionSorter.Controller = this;
-            ImportExport.Controller = this;
-            Settings.Instance.RegexPattern = string.Join("|", DBAccess.GetCommonContext().RegexPatterns.Select(rp => rp.Pattern));
+            GetRegex();
+            MainOrgChangedAsync();
+        }
+
+        private static async void GetRegex()
+        {
+            string[] regex = await PhpHandler.GetFromTableAsync("regex_patterns");
+            Settings.Instance.RegexPattern = string.Join("|", regex.Select(rp => rp.Split(";")[1]));
             Settings.Instance.WriteSettingsFile();
-            UpdateDocuments();
-            UpdateOrganizations();
-            UpdatePeople();
-            AcadPersonnel = DBAccess.GetContext().AcadPersonnel.ToList();
-            if (SqlCommands.CurrentUser.Item2)
-            {
-                DuplicateDocuments = DBAccess.GetContext().DuplicateDocuments.ToList();
-                IncompleteDocuments = DBAccess.GetContext().IncompleteDocuments.ToList();
-            }
-            DataReader.OnDocumentFound += DataReader_OnDocumentFound;
-            DataReader.OnOrganizationFound += DataReader_OnOrganizationFound;
-            DataReader.OnPersonFound += DataReader_OnPersonFound;
-            DataReader.OnAcadPersonFound += DataReader_OnAcadPersonFound; ;
-            ImportExport.OnDocumentsChanged += OnDocumentsChanged_Triggered;
-            ImportExport.OnOrganizationsChanged += OnOrganizationsChanged_Triggered;
-            ImportExport.OnPeopleChanged += OnPeopleChanged_Triggered;
-            DBAccess.OnDocumentsChanged -= OnDocumentsChanged_Triggered;
-            DBAccess.OnOrganizationsChanged -= OnOrganizationsChanged_Triggered;
-            DBAccess.OnPeopleChanged += OnPeopleChanged_Triggered;
-            DBAccess.OnDBChanged += DBAccess_OnDBChanged;
         }
 
-        private void DBAccess_OnDBChanged(object? sender, EventArgs e)
+        public async void MainOrgChangedAsync()
         {
-            UpdateDocuments();
-            UpdateOrganizations();
-            UpdatePeople();
-            AcadPersonnel = DBAccess.GetContext().AcadPersonnel.ToList();
-            if (SqlCommands.CurrentUser.Item2)
-            {
-                DuplicateDocuments = DBAccess.GetContext().DuplicateDocuments.ToList();
-                IncompleteDocuments = DBAccess.GetContext().IncompleteDocuments.ToList();
-            }
+            await UpdateDocuments();
+            await UpdateOrganizations();
+            await UpdatePeopleAsync();
+            await UpdateAcadPersonnelAsync();
+            OnMainOrgChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private void OnDocumentsChanged_Triggered(object? sender, EventArgs e) => UpdateDocuments();
-
-        private void OnOrganizationsChanged_Triggered(object? sender, EventArgs e) => UpdateOrganizations();
-
-        private void OnPeopleChanged_Triggered(object? sender, EventArgs e) => UpdatePeople();
-
-        private void DataReader_OnDocumentFound(object? sender, EventArgs e)
+        public async Task UpdateDocuments()
         {
-            if (sender == null) return;
-            string[] docArr = (string[])sender;
-            if (string.IsNullOrEmpty(docArr[17]))
-            {
-                IncompleteDocument emptyDoc = new IncompleteDocument(docArr);
-                IncompleteDocuments.Add(emptyDoc);
-                DBAccess.GetContext().IncompleteDocuments.Add(emptyDoc);
-                DBAccess.GetContext().SaveChanges();
-            }
-            else if (Documents.Any(d => d.Ut == docArr[0] && d.FirstName == docArr[20] && d.LastName == docArr[17]))
-            {
-                DuplicateDocument dupDoc = new DuplicateDocument(docArr);
-                DuplicateDocuments.Add(dupDoc);
-                DBAccess.GetContext().DuplicateDocuments.Add(dupDoc);
-                DBAccess.GetContext().SaveChanges();
-            }
-            else
-            {
-                Document doc = new Document(docArr);
-                Documents.Add(doc);
-                DBAccess.GetContext().Documents.Add(doc);
-                DBAccess.GetContext().SaveChanges();
-            }
-        }
-
-        private void DataReader_OnOrganizationFound(object? sender, EventArgs e)
-        {
-            if (sender == null) return;
-            AddOrganization((string[])sender);
-        }
-
-        private void DataReader_OnPersonFound(object? sender, EventArgs e)
-        {
-            if (sender == null) return;
-            AddPerson((string[])sender);
-        }
-
-        private void DataReader_OnAcadPersonFound(object? sender, EventArgs e)
-        {
-            if (sender == null) return;
-            AddAcadPerson((string[])sender);
-            OnAcadPersonnelChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        public bool UpdateDocument(string[] doc, object updateData)
-        {
-            Document? document = DBAccess.GetContext().Documents.FirstOrDefault(d => d.Ut == doc[0] && d.FirstName == doc[20] && d.LastName == doc[17]);
-            if (document != null)
-            {
-                if (updateData is bool) document.Processed = (bool)updateData;
-                if (updateData is string) document.AssignedToUser = (string)updateData;
-                DBAccess.GetContext().SaveChanges();
-                OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
-                return true;
-            }
-            return false;
-        }
-
-        public void UpdateDocuments()
-        {
-            string user = SqlCommands.CurrentUser.Item1;
-            bool isRoot = user == "root";
-            Documents = DBAccess.GetContext().Documents.Where(d => d.AssignedToUser == user || isRoot).Where(d => !d.Processed).ToList();
+            string assignedToUser = User.Role == "superadmin" ? "" : User.Username;
+            string[] docs = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_documents", assignedToUser: assignedToUser);
+            Documents = docs.Select(d => new Document(d.Split(";")));
             OnDocumentsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public void UpdateOrganizations()
+        public async Task UpdateOrganizations()
         {
-            Organizations = DBAccess.GetContext().Organizations.ToList();
-            OrganizationsDisplayNames = Organizations.Select(o => o.GetDisplayName(Organizations)).ToList();
+            string[] orgs = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_organizations");
+            List<Organization> orgsList = new List<Organization>();
+            foreach (string[] org in orgs.Select(o => o.Split(";")))
+            {
+                string parent = orgs.Select(o => o.Split(";")).FirstOrDefault(o => o[1] == org[3])?[2] ?? string.Empty;
+                string parentName = string.IsNullOrEmpty(parent) ? string.Empty : parent;
+                string nameWithParent = $"{org[2]} ({parentName})";
+                orgsList.Add(new Organization(org, nameWithParent));
+            }
+            Organizations = orgsList.ToArray();
             OnOrganizationsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public void UpdatePeople()
+        public async Task UpdatePeopleAsync()
         {
-            People = DBAccess.GetContext().People.ToList();
+            string[] people = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_people");
+            People = people.Select(p => new Person(p.Split(";")));
             OnPeopleChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public Organization? GetOrganizationByIndex(int index)
+        public async Task UpdateAcadPersonnelAsync()
         {
-            return index < Organizations.Count ? Organizations[index] : null;
+            string[] acadPeople = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_academic_personnel");
+            AcadPersonnel = acadPeople.Select(ap => new AcadPerson(ap.Split(";")));
+            OnAcadPersonnelChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public void AddOrganization(string[] orgArr)
+        public async Task<int> GetPersonId(string firstName, string lastName, int orgId)
         {
-            try
-            {
-                DBAccess.GetContext().Organizations.Add(new Organization(orgArr));
-                DBAccess.GetContext().SaveChanges();
-                UpdateOrganizations();
-            }
-            catch (Exception e)
-            {
-                PromptBox.Error($"Failed to add Organization: {orgArr[1]}!");
-                Logging.Instance.WriteLine(e.Message);
-            }
+            string[] findPerson = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix} _people", firstName: firstName, lastName: lastName, orgId: orgId);
+            string msg = "A person with the same First Name, Last Name and Organization already exists but was not selected.";
+            string question = "Do you want to save this person with a new PersonID?";
+            if (findPerson.Any() && !PromptBox.Question(msg, question)) return 0;
+            string[] lastPerson = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_people", firstLast: "last", column: "PersonID");
+            return lastPerson.Any() ? int.Parse(lastPerson[0].Split(";")[1]) + 1 : MainOrg.PeopleStartId;
         }
 
-        public int? GetPersonId(string firstName, string lastName, int orgId)
+        public bool GetSeparator(string line, out string separator)
         {
-            Person? findPerson = DBAccess.GetContext().People.FirstOrDefault(p => p.FirstName == firstName && p.LastName == lastName && p.OrgId == orgId);
-            string msg = "A person with the same First Name, Last Name and Organization already exists but was not selected. Do you want to save this person with a new Person ID?";
-            if (findPerson == null || PromptBox.Question(msg))
+            separator = string.Empty;
+            if (line.Contains(',') && line.Contains(';'))
             {
-                return GetNextPersonId();
+                return PromptBox.Error(Constants.ErrorManySeparators);
             }
-            else
+            else if (line.Contains(',') && !line.Contains(';'))
             {
-                return null;
+                separator = ",";
+                return true;
             }
+            else if (!line.Contains(',') && line.Contains(';'))
+            {
+                separator = ";";
+                return true;
+            }
+            else return PromptBox.Error(Constants.ErrorNoSeparator); ;
         }
 
-        public int GetNextPersonId()
+        public async Task<bool> ExportAsync(string type, bool isIncomplete = false, bool isDuplicate = false, string? filePath = null, bool noPrompt = false)
         {
-            if (!DBAccess.GetContext().People.Any()) return Settings.Instance.PeopleStartId;
-            else return DBAccess.GetContext().People.OrderBy(p => p.PersonId).Last().PersonId + 1;
-        }
-
-        public void AddPerson(string[] personArray)
-        {
-            try
+            if (filePath != null || FileDialogHandler.ShowSaveFileDialog($"Export {type}", out filePath))
             {
-                DBAccess.GetContext().People.Add(new Person(personArray));
-                DBAccess.GetContext().SaveChanges();
-                UpdatePeople();
-            }
-            catch (Exception e)
-            {
-                PromptBox.Error($"Failed to add Person: {personArray[1]} {personArray[2]}!");
-                Logging.Instance.WriteLine(e.Message);
-            }
-        }
-
-        public void AddAcadPerson(string[] acadPersonArray)
-        {
-            try
-            {
-                AcadPerson acadPerson = new AcadPerson(acadPersonArray);
-                if (!DBAccess.GetContext().Organizations.Any(o => o.OrganizationName == acadPerson.Faculty))
+                List<string> exportLines = new List<string>();
+                string table = MainOrg.Preffix;
+                if (type == "Documents")
                 {
-                    int orgId = DBAccess.GetContext().Organizations.ToList().LastOrDefault()?.OrganizationId + 1 ?? Settings.Instance.OrgaStartId;
-                    DataReader_OnOrganizationFound(new string[3] { $"{orgId}", acadPerson.Faculty, $"{GetOrganizationByIndex(0)?.OrganizationId}" }, EventArgs.Empty);
+                    exportLines.Add(string.Join(Settings.Instance.Separator, Constants.ExportDocumentsHeader));
+                    table += "_documents";
+                    if (isDuplicate) table += "_duplicate_documents";
+                    else if (isIncomplete) table += "_incomplete_documents";
                 }
-                if (!string.IsNullOrEmpty(acadPerson.Department) && !DBAccess.GetContext().Organizations.Any(o => o.OrganizationName == acadPerson.Department))
+                else if (type == "Organizations")
                 {
-                    int orgId = DBAccess.GetContext().Organizations.ToList().LastOrDefault()?.OrganizationId + 1 ?? Settings.Instance.OrgaStartId;
-                    int? parOrgId = DBAccess.GetContext().Organizations.FirstOrDefault(o => o.OrganizationName == acadPerson.Faculty)?.OrganizationId;
-                    DataReader_OnOrganizationFound(new string[3] { $"{orgId}", acadPerson.Department, $"{parOrgId}" }, EventArgs.Empty);
+                    exportLines.Add(string.Join(Settings.Instance.Separator, Constants.ExportOrganizationsHeader));
+                    table += "_organizations";
                 }
-                DBAccess.GetContext().AcadPersonnel.Add(acadPerson);
-                DBAccess.GetContext().SaveChanges();
+                else if (type == "People")
+                {
+                    exportLines.Add(string.Join(Settings.Instance.Separator, Constants.ExportPeopleHeader));
+                    table += "_people";
+                }
+                else if (type == "Academic Personnel")
+                {
+                    exportLines.Add(string.Join(Settings.Instance.Separator, Constants.ExportAcadPersonnelHeader));
+                    table += "_academic_personnel";
+                }
+                string[] lines = await PhpHandler.GetFromTableAsync(table, processed: 1);
+                exportLines.AddRange(lines.Select(l => string.Join(Settings.Instance.Separator, l.Split(";").Skip(1))));
+                if (FileHandler.WriteAllLines(filePath, exportLines))
+                {
+                    return PromptBox.Information(string.Format(Constants.SuccessExport, type, filePath), noPrompt: noPrompt);
+                }
             }
-            catch (Exception e)
-            {
-                PromptBox.Error($"Failed to add Acad. Person {acadPersonArray[0]} {acadPersonArray[1]}!");
-                Logging.Instance.WriteLine(e.Message);
-            }
-        }
-
-        public Person? FindPerson(string firstName, string lastName, string docId)
-        {
-            return DBAccess.GetContext().People.FirstOrDefault(p => p.FirstName == firstName && p.LastName == lastName && p.DocId == docId);
+            return PromptBox.Error(string.Format(Constants.FailExport, type, filePath));
         }
 
         public bool RegexMatch(string text1, string text2)
         {
-            Regex regex = new Regex(string.Join("|", Settings.Instance.RegexPattern), RegexOptions.IgnoreCase);
+            Regex regex = new Regex(Settings.Instance.RegexPattern, RegexOptions.IgnoreCase);
             text1 = regex.Replace(text1, "");
             text2 = regex.Replace(text2, "");
             return text1 == text2;

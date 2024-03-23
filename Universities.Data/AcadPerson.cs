@@ -1,6 +1,6 @@
 ﻿using Universities.Utils;
 
-namespace Universities.Data.Models
+namespace Universities.Models
 {
     public class AcadPerson
     {
@@ -9,45 +9,40 @@ namespace Universities.Data.Models
         public string LastNames { get; set; }
         public string Faculty { get; set; }
         public string Department { get; set; }
-        public string? AuthorId { get; set; }
+        public string AuthorId { get; set; }
         public string Notes { get; set; }
         public string Comments { get; set; }
 
-        public AcadPerson()
+        public AcadPerson(string[] lineArr)
         {
-
-        }
-
-        public AcadPerson(string[] lineArr) : this()
-        {
-            FirstNames = lineArr[2];
-            LastNames = lineArr[3];
-            Faculty = lineArr[4];
+            FirstNames = lineArr[1];
+            LastNames = lineArr[2];
+            Faculty = lineArr[3];
             if (Faculty.StartsWith("\"") && Faculty.EndsWith("\"") && Faculty.Contains("\"\""))
             {
                 Faculty = Faculty.Substring(1, Faculty.Length - 2).Replace("\"\"", "\"");
             }
-            Department = lineArr[5];
+            Department = lineArr[4];
             if (Department.StartsWith("\"") && Department.EndsWith("\"") && Department.Contains("\"\""))
             {
                 Department = Department.Substring(1, Department.Length - 2).Replace("\"\"", "\"");
             }
-            AuthorId = lineArr[7];
-            Notes = lineArr[9];
-            Comments = lineArr[10];
+            AuthorId = lineArr[5];
+            Notes = lineArr[6];
+            Comments = lineArr[7];
         }
 
         public string[] ToArray()
         {
             return new string[]
             {
-                string.Join(Settings.Instance.Separator, FirstNames),
-                string.Join(Settings.Instance.Separator, LastNames),
+                FirstNames,
+                LastNames,
                 Faculty,
                 Department,
-                AuthorId ?? string.Empty,
-                string.Join(Settings.Instance.Separator, Notes),
-                string.Join(Settings.Instance.Separator, Comments)
+                AuthorId,
+                Notes,
+                Comments
             };
         }
 

@@ -3,7 +3,7 @@ using System.Windows.Data;
 using System.Globalization;
 using System.Windows;
 
-namespace Universities.Views
+namespace Universities.Views.Converters
 {
     public class MultiBoolToVisibilityConverter : IMultiValueConverter
     {

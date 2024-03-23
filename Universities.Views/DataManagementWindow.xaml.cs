@@ -6,8 +6,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using Universities.Controller;
+using Universities.Models;
+using Universities.Handlers;
 using Universities.Utils;
+using System.Threading.Tasks;
 
 namespace Universities.Views
 {
@@ -18,33 +22,32 @@ namespace Universities.Views
         private GridViewColumnHeader listViewSortCol = null;
         private SortAdorner listViewSortAdorner = null;
         private TabItem lastSelectedTab = null;
+        private string[] DuplicateDocs = Array.Empty<string>();
+        private string[] IncompleteDocs = Array.Empty<string>();
 
         public DataManagementWindow(MainController controller)
         {
             InitializeComponent();
             DataContext = this;
             this.controller = controller;
-            controller.Documents = DBAccess.GetContext().Documents.ToList();
-            //controller.UpdateDocuments();
-            UpdateDocumentsView();
-            //UpdateOrganizationsView();
-            //UpdatePeopleView();
-            UpdateAcadPersonnelView();
-            lvDuplicateDocuments.ItemsSource = controller.DuplicateDocuments.Select(dd => dd.ToArray());
-            lvIncompleteDocuments.ItemsSource = controller.IncompleteDocuments.Select(id => id.ToArray());
-            List<string> list = new List<string>() { "Unassign (No User)" };
-            list.AddRange(SqlCommands.GetUsers().Select(t => t.Item1));
-            Users.ItemsSource = list;
-            controller.OnDocumentsChanged += Controller_OnDocumentsChanged;
-            controller.OnOrganizationsChanged += Controller_OnOrganizationsChanged;
-            controller.OnPeopleChanged += Controller_OnPeopleChanged;
-            controller.OnAcadPersonnelChanged += Controller_OnAcadPersonnelChanged;
-            controller.UpdateOrganizations();
-            controller.UpdatePeople();
         }
 
-        private void UpdateDocumentsView()
+        private async void DataManageWindow_LoadedAsync(object sender, RoutedEventArgs e)
         {
+            await UpdateDocumentsView();
+            await UpdateOrganizationsViewAsync();
+            await UpdatePeopleView();
+            await UpdateAcadPersonnelView();
+            List<string> list = new List<string>() { "Unassign (No User)" };
+            string[] users = await PhpHandler.GetFromTableAsync("users");
+            list.AddRange(users.Select(u => u.Split(";")).Select(us => us[1]));
+            Users.ItemsSource = list;
+        }
+
+        private async Task UpdateDocumentsView()
+        {
+            string[] docs = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_documents", processed: 1);
+            controller.Documents = docs.Select(d => new Document(d.Split(";"))).ToList();
             if (cbAssDocs.IsChecked == true)
             {
                 if (cbPrDocs.IsChecked == true)
@@ -60,34 +63,41 @@ namespace Universities.Views
             {
                 if (cbPrDocs.IsChecked == true)
                 {
-                    lvDocuments.ItemsSource = controller.Documents.Where(d => d.AssignedToUser == SqlCommands.CurrentUser.Item1).Select(d => d.ToArray());
+                    lvDocuments.ItemsSource = controller.Documents.Where(d => d.AssignedToUser == User.Username).Select(d => d.ToArray());
                 }
                 else
                 {
                     lvDocuments.ItemsSource = controller.Documents
-                        .Where(d => d.AssignedToUser == SqlCommands.CurrentUser.Item1)
+                        .Where(d => d.AssignedToUser == User.Username)
                         .Where(d => !d.Processed)
                         .Select(d => d.ToArray());
                 }
             }
+            DuplicateDocs = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_duplicate_documents", processed: 1);
+            lvDuplicateDocuments.ItemsSource = DuplicateDocs.Select(dd => dd.Split(";"));
+            IncompleteDocs = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_incomplete_documents", processed: 1);
+            lvIncompleteDocuments.ItemsSource = IncompleteDocs.Select(id => id.Split(";"));
             UpdateDocumentsCount();
         }
 
-        private void UpdateOrganizationsView()
+        private async Task UpdateOrganizationsViewAsync()
         {
+            await controller.UpdateOrganizations();
             lvOrganizations.ItemsSource = controller.Organizations.Select(o => o.ToArray());
             UpdateOrganizationsCount();
         }
 
-        private void UpdatePeopleView()
+        private async Task UpdatePeopleView()
         {
+            await controller.UpdatePeopleAsync();
             lvPeople.ItemsSource = controller.People.Select(p => p.ToArray());
             UpdatePeopleCount();
         }
 
-        private void UpdateAcadPersonnelView()
+        private async Task UpdateAcadPersonnelView()
         {
-            lvAcadPersonnel.ItemsSource = DBAccess.GetContext().AcadPersonnel.ToList().Select(p => p.ToArray());
+            await controller.UpdateAcadPersonnelAsync();
+            lvAcadPersonnel.ItemsSource = controller.AcadPersonnel.Select(p => p.ToArray());
             UpdateAcadPersonnelCount();
         }
 
@@ -111,136 +121,270 @@ namespace Universities.Views
             string direction = newDir.ToString();
             if (DocumentsTab.IsSelected)
             {
-                controller.Documents = CollectionSorter.GetDocumentsOrderedBy(sortBy, direction).ToList();
-                UpdateDocumentsView();
+                if (direction == "Ascending") lvDocuments.ItemsSource = controller.Documents.OrderBy(d => d.GetType().GetProperty(sortBy)?.GetValue(d)).Select(d => d.ToArray());
+                else lvDocuments.ItemsSource = controller.Documents.OrderByDescending(d => d.GetType().GetProperty(sortBy)?.GetValue(d)).Select(d => d.ToArray());
             }
             else if (OrganizationsTab.IsSelected)
             {
-                lvOrganizations.ItemsSource = CollectionSorter.GetOrganizationsOrderedBy(sortBy, direction).Select(o => o.ToArray());
+                if (direction == "Ascending") lvOrganizations.ItemsSource = controller.Organizations.OrderBy(o => o.GetType().GetProperty(sortBy)?.GetValue(o)).Select(o => o.ToArray());
+                else lvOrganizations.ItemsSource = controller.Organizations.OrderByDescending(o => o.GetType().GetProperty(sortBy)?.GetValue(o)).Select(o => o.ToArray());
             }
             else if (PeopleTab.IsSelected)
             {
-                lvPeople.ItemsSource = CollectionSorter.GetPeopleOrderedBy(sortBy, direction).Select(p => p.ToArray());
+                if (direction == "Ascending") lvPeople.ItemsSource = controller.People.OrderBy(p => p.GetType().GetProperty(sortBy)?.GetValue(p)).Select(p => p.ToArray());
+                else lvPeople.ItemsSource = controller.People.OrderByDescending(p => p.GetType().GetProperty(sortBy)?.GetValue(p)).Select(p => p.ToArray());
             }
         }
 
-        private void ImportButton_Click(object sender, RoutedEventArgs e)
+        private async void ImportButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowWaitWindow();
-            if (DocumentsTab.IsSelected) ImportExport.ImportDocuments();
-            if (OrganizationsTab.IsSelected) ImportExport.ImportOrganizations();
-            if (PeopleTab.IsSelected) ImportExport.ImportPeople();
-            if (AcadPersonnelTab.IsSelected) ImportExport.ImportAcadPersonnel();
-            CloseWaitWindow();
+            string selectedTabName = $"{(Tabs.SelectedItem as TabItem).Header}";
+            ShowWaitWindow($"Importing {selectedTabName}...");
+            if (FileDialogHandler.ShowOpenFileDialog($"Open {selectedTabName} file", out string filePath))
+            {
+                if (FileHandler.ReadAllLines(filePath, out string[] lines) && controller.GetSeparator(lines[0], out string separator))
+                {
+                    int counter = 0;
+                    int count = lines.Length - 1;
+                    WaitWindow.UpdateProgressBar(count);
+                    if (DocumentsTab.IsSelected)
+                    {
+                        string[] fileHeaders = lines[0].Split(separator);
+                        FileToDbWindow fileToDbWindow = new FileToDbWindow(fileHeaders, Constants.ExportDocumentsHeader);
+                        if (fileToDbWindow.ShowDialog() == true)
+                        {
+                            Dictionary<string, int> lineDict = fileToDbWindow.LineDict;
+                            foreach (string[] lineArr in lines.Skip(1).Select(l => l.Split(separator, StringSplitOptions.TrimEntries)))
+                            {
+                                if (lineArr.Length != fileHeaders.Length)
+                                {
+                                    if (PromptBox.Question(string.Format(Constants.InfDifferentColums, counter + 2), Constants.QuestionImportContinue)) continue;
+                                    else break;
+                                }
+                                counter++;
+                                if (WaitWindow.IsCanceled) break;
+                                WaitWindow.ChangeText($"Importing: {counter} / {count}");
+                                WaitWindow.ProgBar.Value = counter;
+                                Document doc = new Document(lineDict, lineArr);
+                                string tableName = $"{MainOrg.Preffix}_documents";
+                                string[] matchingDoc = await PhpHandler.GetFromTableAsync(tableName, firstName: doc.FirstName, lastName: doc.LastName, ut: doc.Ut);
+                                if (matchingDoc.Length == 1) tableName = $"{MainOrg.Preffix}_duplicate_documents";
+                                else if (string.IsNullOrEmpty(doc.Ut) || string.IsNullOrEmpty(doc.LastName)) tableName = $"{MainOrg.Preffix}_incomplete_documents";
+                                await PhpHandler.AddToTable(tableName, "document", doc.ToString());
+                            }
+                            await UpdateDocumentsView();
+                        }
+                    }
+                    if (OrganizationsTab.IsSelected)
+                    {
+                        if (lines[0].Split(separator).Length == Constants.ExportOrganizationsHeader.Length)
+                        {
+                            foreach (string[] lineArr in lines.Skip(1).Select(l => l.Split(separator, StringSplitOptions.TrimEntries)))
+                            {
+                                counter++;
+                                if (WaitWindow.IsCanceled) break;
+                                WaitWindow.ChangeText($"Importing: {counter} / {count}");
+                                WaitWindow.ProgBar.Value = counter;
+                                await PhpHandler.AddToTable($"{MainOrg.Preffix}_organizations", "organization", string.Join(";", lineArr));
+                            }
+                            await UpdateOrganizationsViewAsync();
+                        }
+                        else PromptBox.Error(Constants.ErrorWrongFile);
+                    }
+                    if (PeopleTab.IsSelected)
+                    {
+                        if (lines[0].Split(separator).Length == Constants.ExportPeopleHeader.Length)
+                        {
+                            foreach (string[] lineArr in lines.Skip(1).Select(l => l.Split(separator, StringSplitOptions.TrimEntries)))
+                            {
+                                counter++;
+                                if (WaitWindow.IsCanceled) break;
+                                WaitWindow.ChangeText($"Importing: {counter} / {count}");
+                                WaitWindow.ProgBar.Value = counter;
+                                await PhpHandler.AddToTable($"{MainOrg.Preffix}_people", "person", string.Join(";", lineArr));
+                            }
+                            await UpdatePeopleView();
+                        }
+                        else PromptBox.Error(Constants.ErrorWrongFile);
+                    }
+                    if (AcadPersonnelTab.IsSelected)
+                    {
+                        foreach (string[] lineArr in lines.Skip(1).Select(l => l.Split(separator, StringSplitOptions.TrimEntries)))
+                        {
+                            counter++;
+                            if (WaitWindow.IsCanceled) break;
+                            WaitWindow.ChangeText($"Importing: {counter} / {count}");
+                            WaitWindow.ProgBar.Value = counter;
+                            if (lines[0].Split(separator).Length != Constants.ExportAcadPersonnelHeader.Length)
+                            {
+                                string[] acadPersonArr = new string[] { lineArr[2], lineArr[3], lineArr[4], lineArr[5], $"{lineArr[7]} | {lineArr[8]}", lineArr[9], lineArr[10] };
+                                string[] lastPerson = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_academic_personnel", firstLast: "last");
+                                if (string.IsNullOrEmpty(lineArr[0]) && lastPerson.Any())
+                                {
+                                    string[] lastPersonArray = lastPerson[0].Split(";");
+                                    int lastPersonId = int.Parse(lastPersonArray[0]);
+                                    if (!string.IsNullOrEmpty(lineArr[2]))
+                                    {
+                                        await PhpHandler.UpdateInTable($"{MainOrg.Preffix}_academic_personnel", "FirstNames", lastPersonArray[1] + $" | {lineArr[2]}", lastPersonId);
+                                    }
+                                    if (!string.IsNullOrEmpty(lineArr[3]))
+                                    {
+                                        await PhpHandler.UpdateInTable($"{MainOrg.Preffix}_academic_personnel", "LastNames", lastPersonArray[2] + $" | {lineArr[3]}", lastPersonId);
+                                    }
+                                    if (!string.IsNullOrEmpty(lineArr[9]))
+                                    {
+                                        await PhpHandler.UpdateInTable($"{MainOrg.Preffix}_academic_personnel", "Notes", lastPersonArray[6] + $" | {lineArr[9]}", lastPersonId);
+                                    }
+                                    if (!string.IsNullOrEmpty(lineArr[10]))
+                                    {
+                                        await PhpHandler.UpdateInTable($"{MainOrg.Preffix}_academic_personnel", "Comments", lastPersonArray[7] + $" | {lineArr[10]}", lastPersonId);
+                                    }
+                                }
+                                else await PhpHandler.AddToTable($"{MainOrg.Preffix}_academic_personnel", "acad_person", string.Join(";", acadPersonArr));
+                            }
+                            else await PhpHandler.AddToTable($"{MainOrg.Preffix}_academic_personnel", "acad_person", string.Join(";", lineArr));
+                        }
+                        await UpdateAcadPersonnelView();
+                    }
+                    if (counter > 0) PromptBox.Information(string.Format(Constants.SuccessImport, counter, selectedTabName, filePath));
+                }
+                else PromptBox.Error(string.Format(Constants.ErrorFileRead, filePath));
+            }
+            WaitWindow?.Close();
         }
 
-        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        private async void CheckBox_ClickAsync(object sender, RoutedEventArgs e)
         {
-            UpdateDocumentsView();
+            await UpdateDocumentsView();
         }
 
-        private void ExportButton_Click(object sender, RoutedEventArgs e)
+        private async void ExportButton_Click(object sender, RoutedEventArgs e)
         {
-            string message = string.Empty;
-            if (DocumentsTab.IsSelected) ImportExport.ExportDocuments(out message);
-            if (OrganizationsTab.IsSelected) ImportExport.ExportOrganizations(out message);
-            if (PeopleTab.IsSelected) ImportExport.ExportPeople(out message);
-            if (AcadPersonnelTab.IsSelected) ImportExport.ExportAcadPersonnel(out message);
-            if (IncompleteDocumentsTab.IsSelected) ImportExport.ExportDocuments(out message, isIncomplete: true);
-            if (DuplicateDocumentsTab.IsSelected) ImportExport.ExportDocuments(out message, isDuplicate: true);
-            Logging.Instance.WriteLine(message);
-            MessageBox.Show(message);
+            if (DocumentsTab.IsSelected) await controller.ExportAsync("Documents");
+            if (OrganizationsTab.IsSelected) await controller.ExportAsync("Organizations");
+            if (PeopleTab.IsSelected) await controller.ExportAsync("People");
+            if (AcadPersonnelTab.IsSelected) await controller.ExportAsync("Academic Personnel");
+            if (IncompleteDocumentsTab.IsSelected) await controller.ExportAsync("Documents", isIncomplete: true);
+            if (DuplicateDocumentsTab.IsSelected) await controller.ExportAsync("Documents", isDuplicate: true);
         }
 
-        private void Controller_OnDocumentsChanged(object? sender, EventArgs e)
-        {
-            UpdateDocumentsView();
-        }
-
-        private void Controller_OnOrganizationsChanged(object? sender, EventArgs e)
-        {
-            UpdateOrganizationsView();
-        }
-
-        private void Controller_OnPeopleChanged(object? sender, EventArgs e)
-        {
-            UpdatePeopleView();
-        }
-
-        private void Controller_OnAcadPersonnelChanged(object? sender, EventArgs e)
-        {
-            UpdateAcadPersonnelView();
-        }
-
-        private void EditSelected_Click(object sender, RoutedEventArgs e)
+        private async void EditSelected_ClickAsync(object sender, RoutedEventArgs e)
         {
             string[] person = lvPeople.SelectedItem as string[];
-            new EditPersonWindow(person, controller).ShowDialog();
+            bool result = (bool)new EditPersonWindow(person, controller).ShowDialog();
+            if (result)
+            {
+                await controller.UpdatePeopleAsync();
+                await UpdatePeopleView();
+            }
         }
 
-        private void DeleteSelected_Click(object sender, RoutedEventArgs e)
+        private async void DeleteSelected_Click(object sender, RoutedEventArgs e)
         {
-            if (!PromptBox.Question("Are you sure you want to permanently remove all selected items?")) return;
+            string selectedTabName = $"{(Tabs.SelectedItem as TabItem).Header}";
+            if (!PromptBox.Question(string.Format(Constants.InfDeleteSelected, selectedTabName, MainOrg.Name), Constants.QuestionAreYouSure)) return;
+            ShowWaitWindow($"Deleting selected {(Tabs.SelectedItem as TabItem).Header}...");
             if (DocumentsTab.IsSelected)
             {
-                List<string[]> selectedDocuments = lvDocuments.SelectedItems.Cast<string[]>().ToList();
-                Logging.Instance.WriteLine("Documents removed from DB:");
-                selectedDocuments.ForEach(DBAccess.DeleteDocument);
-                controller.Documents = DBAccess.GetContext().Documents.ToList();
-                UpdateDocumentsView();
+                int counter = 0;
+                int count = lvDocuments.SelectedItems.Count;
+                WaitWindow.UpdateProgressBar(count);
+                foreach (string[] doc in lvDocuments.SelectedItems.Cast<string[]>())
+                {
+                    counter++;
+                    if (WaitWindow.IsCanceled) break;
+                    WaitWindow.ChangeText($"Deleting: {counter} / {count}");
+                    WaitWindow.ProgBar.Value = counter;
+                    if (!await PhpHandler.DeleteFromTable($"{MainOrg.Preffix}_documents", int.Parse(doc[0])))
+                    {
+                        PromptBox.Error($"There was a problem deleting {string.Join(";", doc)}!");
+                        continue;
+                    }
+                }
+                await UpdateDocumentsView();
             }
             if (OrganizationsTab.IsSelected)
             {
-                List<string[]> selectedOrganizations = lvOrganizations.SelectedItems.Cast<string[]>().ToList();
-                Logging.Instance.WriteLine("Organizations removed from DB:");
-                selectedOrganizations.ForEach(DBAccess.DeleteOrganization);
-                controller.Organizations = DBAccess.GetContext().Organizations.ToList();
-                UpdateOrganizationsView();
+                int counter = 0;
+                int count = lvOrganizations.SelectedItems.Count;
+                WaitWindow.UpdateProgressBar(count);
+                foreach (string[] org in lvOrganizations.SelectedItems.Cast<string[]>())
+                {
+                    counter++;
+                    if (WaitWindow.IsCanceled) break;
+                    WaitWindow.ChangeText($"Deleting: {counter} / {count}");
+                    WaitWindow.ProgBar.Value = counter;
+                    if (!await PhpHandler.DeleteFromTable($"{MainOrg.Preffix}_organizations", int.Parse(org[0])))
+                    {
+                        PromptBox.Error($"There was a problem deleting {org[2]}!");
+                        continue;
+                    }
+                }
+                await UpdateOrganizationsViewAsync();
             }
             if (PeopleTab.IsSelected)
             {
-                List<string[]> selectedPeople = lvPeople.SelectedItems.Cast<string[]>().ToList();
-                Logging.Instance.WriteLine("People removed from DB:");
-                selectedPeople.ForEach(DeletePersonAndRestoreDocument);
-                controller.People = DBAccess.GetContext().People.ToList();
-                UpdatePeopleView();
+                int counter = 0;
+                int count = lvPeople.SelectedItems.Count;
+                WaitWindow.UpdateProgressBar(count);
+                foreach (string[] person in lvPeople.SelectedItems.Cast<string[]>())
+                {
+                    counter++;
+                    if (WaitWindow.IsCanceled) break;
+                    WaitWindow.ChangeText($"Deleting: {counter} / {count}");
+                    WaitWindow.ProgBar.Value = counter;
+                    if (!await PhpHandler.DeleteFromTable($"{MainOrg.Preffix}_people", int.Parse(person[0])))
+                    {
+                        PromptBox.Error($"There was a problem deleting {person[2]} {person[3]} with PersonId: {person[1]}!");
+                        continue;
+                    }
+                    await PhpHandler.UpdateInTable($"{MainOrg.Preffix}_documents", "Processed", "0", firstName: person[2], lastName: person[3], ut: person[5]);
+                }
+                await UpdatePeopleView();
+                await UpdateDocumentsView();
             }
+            WaitWindow?.Close();
             MessageBox.Show("All done!");
         }
 
-        private void DeletePersonAndRestoreDocument(string[] personArr)
+        private async void ClearTable_Click(object sender, RoutedEventArgs e)
         {
-            string[] doc = controller.Documents.FirstOrDefault(d => d.Ut == personArr[4] && d.FirstName == personArr[1] && d.LastName == personArr[2]).ToArray();
-            if (controller.UpdateDocument(doc, false)) DBAccess.DeletePerson(personArr);
-        }
-
-        private void Window_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Escape) Close();
+            string selectedTabName = $"{(Tabs.SelectedItem as TabItem).Header}";
+            if (!PromptBox.Question(string.Format(Constants.InfClearTable, selectedTabName, MainOrg.Name), Constants.QuestionAreYouSure)) return;
+            if (DocumentsTab.IsSelected) PromptBox.Information(await PhpHandler.ClearTable($"{MainOrg.Preffix}_documents"));
+            if (OrganizationsTab.IsSelected) PromptBox.Information(await PhpHandler.ClearTable($"{MainOrg.Preffix}_organizations"));
+            if (PeopleTab.IsSelected) PromptBox.Information(await PhpHandler.ClearTable($"{MainOrg.Preffix}_people"));
+            if (AcadPersonnelTab.IsSelected) PromptBox.Information(await PhpHandler.ClearTable($"{MainOrg.Preffix}_academic_personnel"));
+            if (DuplicateDocumentsTab.IsSelected) PromptBox.Information(await PhpHandler.ClearTable($"{MainOrg.Preffix}_duplicate_documents"));
+            if (IncompleteDocumentsTab.IsSelected) PromptBox.Information(await PhpHandler.ClearTable($"{MainOrg.Preffix}_incomplete_documents"));
+            DataManageWindow_LoadedAsync(sender, e);
         }
 
         private void Users_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Assign.IsEnabled = !((string)Users.SelectedItem).Contains("Unable");
+            Assign.IsEnabled = lvDocuments.SelectedItems.Count > 0;
         }
 
-        private void Assign_Click(object sender, RoutedEventArgs e)
+        private async void Assign_ClickAsync(object sender, RoutedEventArgs e)
         {
-            List<string[]> selectedItems = new List<string[]>();
-            foreach (string[] item in lvDocuments.SelectedItems) selectedItems.Add(item);
-            string selectedUser = Users.SelectedItem.ToString().StartsWith("Unassign") ? string.Empty : Users.SelectedItem.ToString();
-            selectedItems.ForEach(d => controller.UpdateDocument(d, selectedUser));
+            ShowWaitWindow($"Assigning {Users.SelectedItem} to selected Documents...");
+            string selectedUser = Users.SelectedIndex == 0 ? string.Empty : $"{Users.SelectedItem}";
+            int counter = 0;
+            int count = lvDocuments.SelectedItems.Count;
+            WaitWindow.UpdateProgressBar(count);
+            foreach (string[] doc in lvDocuments.SelectedItems.Cast<string[]>().ToList())
+            {
+                counter++;
+                if (WaitWindow.IsCanceled) break;
+                WaitWindow.ChangeText($"Assigning: {counter} / {count}");
+                WaitWindow.ProgBar.Value = counter;
+                await PhpHandler.UpdateInTable($"{MainOrg.Preffix}_documents", "AssignedToUser", selectedUser, id: int.Parse(doc[0]));
+            }
             lvDocuments.SelectedItems.Clear();
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            string senderButton = ((Button)sender).Content.ToString() ?? string.Empty;
-            bool processed = senderButton == "Processed";
-            List<string[]> selectedItems = new List<string[]>();
-            foreach (string[] item in lvDocuments.SelectedItems) selectedItems.Add(item);
-            selectedItems.ForEach(d => controller.UpdateDocument(d, processed));
-            lvDocuments.SelectedItems.Clear();
+            Users.SelectedItem = null;
+            await UpdateDocumentsView();
+            WaitWindow?.Close();
+            PromptBox.Information("All assignments done!");
         }
 
         private void lvDocuments_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -284,11 +428,16 @@ namespace Universities.Views
                 lvAcadPersonnel.ItemsSource = controller.AcadPersonnel.Where(ap => ap.ToString().ToLower().Contains(SearchBox.Text.ToLower())).Select(ap => ap.ToArray());
                 UpdateAcadPersonnelCount();
             }
-        }
-
-        private void DataManageWindow_Closing(object sender, CancelEventArgs e)
-        {
-            controller.UpdateDocuments();
+            if (DuplicateDocumentsTab.IsSelected)
+            {
+                lvDuplicateDocuments.ItemsSource = DuplicateDocs.Where(dd => dd.ToLower().Contains(SearchBox.Text.ToLower())).Select(dd => dd.Split(";"));
+                UpdateDocumentsCount();
+            }
+            if (IncompleteDocumentsTab.IsSelected)
+            {
+                lvIncompleteDocuments.ItemsSource = IncompleteDocs.Where(id => id.ToLower().Contains(SearchBox.Text.ToLower())).Select(id => id.Split(";"));
+                UpdateDocumentsCount();
+            }
         }
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -358,9 +507,26 @@ namespace Universities.Views
             WaitWindow.Show();
         }
 
-        public void CloseWaitWindow()
+        private void Button_MouseEnter(object sender, MouseEventArgs e)
         {
-            if (WaitWindow != null) WaitWindow.Close();
+            if (((Button)sender) == ImportButton) ImportButtonImage.Source = new BitmapImage(new Uri(@"Images/UploadIconC.png", UriKind.Relative));
+            if (((Button)sender) == ExportButton) ExportButtonImage.Source = new BitmapImage(new Uri(@"Images/DownloadIconC.png", UriKind.Relative));
+        }
+
+        private void Button_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (((Button)sender) == ImportButton) ImportButtonImage.Source = new BitmapImage(new Uri(@"Images/UploadIconBW.png", UriKind.Relative));
+            if (((Button)sender) == ExportButton) ExportButtonImage.Source = new BitmapImage(new Uri(@"Images/DownloadIconBW.png", UriKind.Relative));
+        }
+
+        private void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape) Close();
+        }
+
+        private async void DataManageWindow_Closing(object sender, CancelEventArgs e)
+        {
+            await controller.UpdateDocuments();
         }
     }
 }
