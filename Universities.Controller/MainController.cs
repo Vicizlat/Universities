@@ -83,7 +83,7 @@ namespace Universities.Controller
 
         public async Task<int> GetPersonId(string firstName, string lastName, int orgId)
         {
-            string[] findPerson = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix} _people", firstName: firstName, lastName: lastName, orgId: orgId);
+            string[] findPerson = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_people", firstName: firstName, lastName: lastName, orgId: orgId);
             string msg = "A person with the same First Name, Last Name and Organization already exists but was not selected.";
             string question = "Do you want to save this person with a new PersonID?";
             if (findPerson.Any() && !PromptBox.Question(msg, question)) return 0;

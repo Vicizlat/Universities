@@ -142,9 +142,9 @@ namespace Universities.Views
         private async void SaveButton_OnClick(object sender, RoutedEventArgs e)
         {
             ShowWaitWindow("Saving Person...");
-            string[] simAuthor = (string[])lvSimilarProcessedAuthors.SelectedItem ?? new string[4];
-            int orgId = int.TryParse(simAuthor[3], out int selOrgId) ? selOrgId : Controller.Organizations.ElementAtOrDefault(selectedOrgIndex).OrganizationId;
-            int personId = int.TryParse(simAuthor[0], out int selPerId) ? selPerId : await Controller.GetPersonId(docArray[21], docArray[18], orgId);
+            string[] simAuthor = (string[])lvSimilarProcessedAuthors.SelectedItem ?? new string[12];
+            int orgId = int.TryParse(simAuthor[4], out int selOrgId) ? selOrgId : Controller.Organizations.ElementAtOrDefault(selectedOrgIndex).OrganizationId;
+            int personId = int.TryParse(simAuthor[1], out int selPerId) ? selPerId : await Controller.GetPersonId(docArray[25], docArray[21], orgId);
             if (personId == 0)
             {
                 CloseWaitWindow();
@@ -154,7 +154,7 @@ namespace Universities.Views
             documents.AddRange(lvSimilarPendingAuthors.SelectedItems.OfType<string[]>());
             foreach (string[] doc in documents)
             {
-                string newPerson = $"{personId};{doc[21]};{doc[18]};{orgId};{doc[1]};;;;";
+                string newPerson = $"{personId};{doc[25]};{doc[21]};{orgId};{doc[1]};;;;";
                 if (await PhpHandler.AddToTable($"{MainOrg.Preffix}_people", "person", newPerson))
                 {
                     await PhpHandler.UpdateInTable($"{MainOrg.Preffix}_documents", "Processed", "1", id: int.Parse(doc[0]));
@@ -212,7 +212,7 @@ namespace Universities.Views
         {
             if (sender == lvSimilarProcessedAuthors && lvSimilarProcessedAuthors.SelectedItem != null)
             {
-                SelectOrganization.AutoTextBox.Text = ((string[])lvSimilarProcessedAuthors.SelectedItem)[9];
+                SelectOrganization.AutoTextBox.Text = ((string[])lvSimilarProcessedAuthors.SelectedItem)[10];
             }
             if (sender == lvAcadPersonnel && lvAcadPersonnel.SelectedItem != null)
             {
@@ -238,8 +238,8 @@ namespace Universities.Views
 
         public void ShowWaitWindow(string text = null)
         {
-            WaitWindow = new WaitWindow(text);
-            WaitWindow.Show();
+            //WaitWindow = new WaitWindow(text);
+            //WaitWindow.Show();
         }
 
         public void CloseWaitWindow()
