@@ -168,7 +168,7 @@ namespace Universities.Views
         private IEnumerable<string[]> GetSimilarPendingAuthors()
         {
             return Controller.Documents
-                .Where(d => d.Ut != docArray[1] && Controller.RegexMatch(d.LastName, docArray[21]))
+                .Where(d => d.Ut != docArray[1] && Controller.RegexMatch(d.LastName.ToLower(), docArray[21].ToLower()))
                 .OrderBy(d => d.LastName).ThenBy(d => d.FirstName)
                 .Select(d => d.ToArray());
         }
@@ -176,7 +176,7 @@ namespace Universities.Views
         private List<string[]> GetSimilarProcessedAuthors()
         {
             List<string[]> similarProcessedAuthors = new List<string[]>();
-            foreach (string[] author in Controller.People.Where(p => Controller.RegexMatch(p.LastName, docArray[21])).Select(p => p.ToArray()))
+            foreach (string[] author in Controller.People.Where(p => Controller.RegexMatch(p.LastName.ToLower(), docArray[21].ToLower())).Select(p => p.ToArray()))
             {
                 if (similarProcessedAuthors.Any(pa => Controller.RegexMatch(pa[1], author[1])))
                 {
@@ -197,7 +197,7 @@ namespace Universities.Views
 
         private IEnumerable<string[]> GetMatchingAcadPersonnel()
         {
-            foreach (string[] author in Controller.AcadPersonnel.Where(p => Controller.RegexMatch(p.LastNames, docArray[21])).Select(p => p.ToArray()))
+            foreach (string[] author in Controller.AcadPersonnel.Where(p => Controller.RegexMatch(p.LastNames.ToLower(), docArray[21].ToLower())).Select(p => p.ToArray()))
             {
                 yield return author;
             }
