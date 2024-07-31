@@ -29,7 +29,7 @@ namespace Universities.Views
             DataManage.Visibility = User.Role.Contains("admin") ? Visibility.Visible : Visibility.Hidden;
             SelectOrganization.OnSelectionChanged += SelectOrganization_SetSelectedIndex;
         }
-        
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             if (Controller.Organizations.Any())
@@ -168,7 +168,7 @@ namespace Universities.Views
         private IEnumerable<string[]> GetSimilarPendingAuthors()
         {
             return Controller.Documents
-                .Where(d => d.Ut != docArray[1] && Controller.RegexMatch(d.LastName.ToLower(), docArray[21].ToLower()))
+                .Where(d => d.Ut != docArray[1] && Controller.RegexMatch(d.LastName, docArray[21]))
                 .OrderBy(d => d.LastName).ThenBy(d => d.FirstName)
                 .Select(d => d.ToArray());
         }
@@ -176,7 +176,7 @@ namespace Universities.Views
         private List<string[]> GetSimilarProcessedAuthors()
         {
             List<string[]> similarProcessedAuthors = new List<string[]>();
-            foreach (string[] author in Controller.People.Where(p => Controller.RegexMatch(p.LastName.ToLower(), docArray[21].ToLower())).Select(p => p.ToArray()))
+            foreach (string[] author in Controller.People.Where(p => Controller.RegexMatch(p.LastName, docArray[21])).Select(p => p.ToArray()))
             {
                 if (similarProcessedAuthors.Any(pa => Controller.RegexMatch(pa[1], author[1])))
                 {
@@ -197,7 +197,7 @@ namespace Universities.Views
 
         private IEnumerable<string[]> GetMatchingAcadPersonnel()
         {
-            foreach (string[] author in Controller.AcadPersonnel.Where(p => Controller.RegexMatch(p.LastNames.ToLower(), docArray[21].ToLower())).Select(p => p.ToArray()))
+            foreach (string[] author in Controller.AcadPersonnel.Where(p => Controller.RegexMatch(p.LastNames, docArray[21])).Select(p => p.ToArray()))
             {
                 yield return author;
             }
@@ -216,18 +216,13 @@ namespace Universities.Views
             }
             if (sender == lvAcadPersonnel && lvAcadPersonnel.SelectedItem != null)
             {
-                string acadPersFac = ((string[])lvAcadPersonnel.SelectedItem)[2].ToLower().Replace(",", "");
-                string acadPersDep = ((string[])lvAcadPersonnel.SelectedItem)[3].ToLower().Replace(",", "");
+                string acadPersFac = ((string[])lvAcadPersonnel.SelectedItem)[2].ToLower().Replace(",", "").Trim();
+                string acadPersDep = ((string[])lvAcadPersonnel.SelectedItem)[3].ToLower().Replace(",", "").Trim();
                 string orgName = string.IsNullOrEmpty(acadPersDep) ? acadPersFac : acadPersDep;
-                for (int i = 0; i < SelectOrganization.AutoSuggestionList.Count(); i++)
-                {
-                    if (SelectOrganization.AutoSuggestionList.ElementAt(i).ToLower().Replace(",", "") == orgName)
-                    {
-                        SelectOrganization.AutoTextBox.Text = SelectOrganization.AutoSuggestionList.ElementAt(i);
-                        selectedOrgIndex = i;
-                        break;
-                    }
-                }
+                IEnumerable<string> orgs = SelectOrganization.AutoSuggestionList.Select(o => o.ToLower().Replace(",", "").Trim());
+                string match = orgs.FirstOrDefault(o => Math.Abs(o.Length - orgName.Length) <= 2 && (o.Contains(orgName) || orgName.Contains(o)));
+                selectedOrgIndex = orgs.ToList().IndexOf(match);
+                SelectOrganization.AutoTextBox.Text = SelectOrganization.AutoSuggestionList.ElementAt(selectedOrgIndex);
             }
         }
 

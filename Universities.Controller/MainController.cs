@@ -120,9 +120,9 @@ namespace Universities.Controller
                 if (type == "Documents")
                 {
                     exportLines.Add(string.Join(Settings.Instance.Separator, Constants.ExportDocumentsHeader));
-                    table += "_documents";
                     if (isDuplicate) table += "_duplicate_documents";
                     else if (isIncomplete) table += "_incomplete_documents";
+                    else table += "_documents";
                 }
                 else if (type == "Organizations")
                 {
@@ -154,7 +154,7 @@ namespace Universities.Controller
             Regex regex = new Regex(Settings.Instance.RegexPattern, RegexOptions.IgnoreCase);
             text1 = regex.Replace(text1, "");
             text2 = regex.Replace(text2, "");
-            return text1 == text2;
+            return text1.ToLower() == text2.ToLower();
         }
     }
 }
