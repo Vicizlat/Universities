@@ -8,8 +8,8 @@
         Width="540" Height="360" ShowInTaskbar="True" ResizeMode="NoResize" WindowStyle="None"
         WindowStartupLocation="CenterScreen" BorderThickness="1" KeyDown="Window_KeyDown">
     <Window.Resources>
-        <Storyboard x:Key="Animation">
-            <DoubleAnimation Storyboard.TargetName="BackgroundAnimation" Storyboard.TargetProperty="(Brush.Opacity)" From="0" To="1" Duration="0:0:0.3" AutoReverse="True"/>
+        <Storyboard x:Key="AddToPatternAnimation">
+            <DoubleAnimation Storyboard.TargetName="AddToPatternBgColor" Storyboard.TargetProperty="(Brush.Opacity)" From="0" To="1" Duration="0:0:0.3" AutoReverse="True"/>
         </Storyboard>
     </Window.Resources>
     <Grid Margin="10">
@@ -67,7 +67,7 @@
             <TextBox x:Name="RegexPatternBox" Grid.Column="1" Margin="0, 0, 10, 0" Padding="4" IsReadOnly="True" Text="{Binding RegexPattern}"/>
             <TextBox x:Name="AddToPattern" Grid.Column="2" Margin="10, 0, 30, 0" Padding="4">
                 <TextBox.Background>
-                    <SolidColorBrush x:Name="BackgroundAnimation" Color="LightGreen" Opacity="0"/>
+                    <SolidColorBrush x:Name="AddToPatternBgColor" Color="LightGreen" Opacity="0"/>
                 </TextBox.Background>
             </TextBox>
             <Button x:Name="AddToPatternButton" Grid.Column="2" HorizontalAlignment="Right" Margin="10, 0"

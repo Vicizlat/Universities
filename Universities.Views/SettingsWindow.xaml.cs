@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Management;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -140,16 +138,23 @@ namespace Universities.Views
             string newPattern = AddToPattern.Text;
             string[] regex = await PhpHandler.GetFromTableAsync("regex_patterns");
             Settings.Instance.RegexPattern = string.Join("|", regex.Select(rp => rp.Split(";")[1]));
-            if (!string.IsNullOrEmpty(newPattern) && !Settings.Instance.RegexPattern.Contains(newPattern))
+            if (!string.IsNullOrEmpty(newPattern) && !regex.Any(rp => rp.Split(";")[1] == newPattern))
             {
                 if (await PhpHandler.AddToTable("regex_patterns", "regex", newPattern))
                 {
                     AddToPattern.Text = string.Empty;
-                    (FindResource("Animation") as Storyboard).Begin();
+                    AddToPatternBgColor.Color = Colors.LightGreen;
+                    (FindResource("AddToPatternAnimation") as Storyboard).Begin();
                     Settings.Instance.RegexPattern += $"|{newPattern}";
+                    RegexPatternBox.Text = Settings.Instance.RegexPattern;
                     RegexPatternBox.ToolTip = Settings.Instance.RegexPattern;
                     Settings.Instance.WriteSettingsFile();
                 }
+            }
+            else
+            {
+                AddToPatternBgColor.Color = Colors.IndianRed;
+                (FindResource("AddToPatternAnimation") as Storyboard).Begin();
             }
         }
 
