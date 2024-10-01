@@ -17,8 +17,16 @@ namespace Universities.Views
         public SettingsWindow()
         {
             InitializeComponent();
-            DataContext = Settings.Instance;
+            DataContext = this;
             GetMainOrgs(MainOrg.Preffix);
+            Server.Text = Settings.Instance.Server;
+            Username.Text = Settings.Instance.Username;
+            Password.Text = Settings.Instance.DecryptedPassword;
+            BackupDays.Text = $"{Settings.Instance.BackupDaysToKeep}";
+            BackupsPerDay.Text = $"{Settings.Instance.BackupsPerDayToKeep}";
+            Separator.Text = Settings.Instance.Separator;
+            cbShowParentOrg.IsChecked = Settings.Instance.ShowParentOrganization;
+            RegexPatternBox.Text = Settings.Instance.RegexPattern;
             RegexPatternBox.ToolTip = Settings.Instance.RegexPattern;
             AddMainOrgButton.Visibility = User.Role.Contains("admin") ? Visibility.Visible : Visibility.Hidden;
             AddUserIcon.Visibility = User.Role.Contains("admin") ? Visibility.Visible : Visibility.Hidden;
@@ -118,6 +126,12 @@ namespace Universities.Views
                     MainOrg.CheckMainOrg(await PhpHandler.GetFromTableAsync("main_organizations"), selMainOrgPref);
                     await PhpHandler.UpdateInTable("users", "LastMainOrg", selMainOrgPref, id: User.Id);
                 }
+                Settings.Instance.Server = Server.Text;
+                Settings.Instance.Username = Username.Text;
+                Settings.Instance.DecryptedPassword = Password.Text;
+                Settings.Instance.BackupDaysToKeep = int.Parse(BackupDays.Text);
+                Settings.Instance.BackupsPerDayToKeep = int.Parse(BackupsPerDay.Text);
+                Settings.Instance.Separator = Separator.Text;
                 Settings.Instance.ShowParentOrganization = cbShowParentOrg.IsChecked.GetValueOrDefault();
                 Settings.Instance.WriteSettingsFile();
                 DialogResult = PromptBox.Information("All settings saved successfully.");

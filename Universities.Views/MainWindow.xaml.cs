@@ -187,7 +187,7 @@ namespace Universities.Views
                 string orgDisplayName;
                 if (Settings.Instance.ShowParentOrganization)
                 {
-                    orgDisplayName = Controller.Organizations.FirstOrDefault(o => o.OrganizationId == int.Parse(author[3])).OrgaNameWithParent;
+                    orgDisplayName = Controller.Organizations.FirstOrDefault(o => o.OrganizationId == int.Parse(author[4])).OrgaNameWithParent;
                 }
                 else orgDisplayName = Controller.Organizations.FirstOrDefault(o => o.OrganizationId == int.Parse(author[4])).OrganizationName;
                 similarProcessedAuthors.Add(author.Append(orgDisplayName).Append(author[2]).ToArray());
