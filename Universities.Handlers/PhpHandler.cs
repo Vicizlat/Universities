@@ -42,6 +42,22 @@ namespace Universities.Handlers
             return response;
         }
 
+        public static async Task<string[]> GetColumnsAsync(string table)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string>
+            {
+                { "table", table },
+                { "type", "query_columns" }
+            };
+            string result = string.Empty;
+            string response = await PostAsync($"get_from_table.php", values);
+            foreach(string line in response.Split("<br>", StringSplitOptions.RemoveEmptyEntries))
+            {
+                result += $"{line.Split(";")[0]};";
+            }
+            return result.Split(";", StringSplitOptions.RemoveEmptyEntries);
+        }
+
         public static async Task<string[]> GetFromTableAsync(string table, string assignedToUser = "", int id = 0, int processed = 0, string firstName = "", string lastName = "", int orgId = 0, string ut = "", string firstLast = "", string column = "")
         {
             Dictionary<string, string> values = new Dictionary<string, string> { { "table", table } };
@@ -69,7 +85,12 @@ namespace Universities.Handlers
         public static async Task<bool> AddToTable(string table, string type, string data)
         {
             data = data.Replace("&", "and");
-            Dictionary<string, string> values = new Dictionary<string, string> { { "table", table }, { "type", type }, { "data", data } };
+            Dictionary<string, string> values = new Dictionary<string, string>
+            {
+                { "table", table },
+                { "type", type },
+                { "data", data }
+            };
             string response = await PostAsync($"add_to_table.php", values);
             return response == "success";
         }
@@ -110,6 +131,29 @@ namespace Universities.Handlers
             Dictionary<string, string> values = new Dictionary<string, string> { { "table", table } };
             string response = await PostAsync($"clear_table.php", values);
             return response;
+        }
+
+        public static async Task<string[]> GetInfoSchemaAsync(string table)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string> { { "table", table } };
+            string response = await PostAsync($"get_info_schema.php", values);
+            return response.Split("<br>", StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        public static async Task<bool> AddColumnsToTable(string table)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string> { { "table", table }, { "mode", "add" } };
+            string response = await PostAsync($"alter_table.php", values);
+            if (response != "success") PromptBox.Error(response);
+            return response == "success";
+        }
+
+        public static async Task<bool> DeleteColumnFromTable(string table, string column)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string> { { "table", table }, { "column", column }, { "mode", "delete" } };
+            string response = await PostAsync($"alter_table.php", values);
+            if (response != "success") PromptBox.Error(response);
+            return response == "success";
         }
 
         public static async Task<string> ResetAutoIncrement(string table)

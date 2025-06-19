@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 using Universities.Handlers;
 using Universities.Models;
 using Universities.Utils;
@@ -37,11 +38,44 @@ namespace Universities.Controller
 
         public async void MainOrgChangedAsync()
         {
+            await TrimTables();
             await UpdateDocuments();
             await UpdateOrganizations();
             await UpdatePeopleAsync();
             await UpdateAcadPersonnelAsync();
             OnMainOrgChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        public async Task TrimTables()
+        {
+            string[] columns = await PhpHandler.GetColumnsAsync($"{MainOrg.Preffix}_people");
+            if (!columns.Contains("Added_By_User") && !columns.Contains("Added_On_Date"))
+            {
+                if (!await PhpHandler.AddColumnsToTable($"{MainOrg.Preffix}_people"))
+                {
+                    PromptBox.Error("Failed to add new columns to the People table. Please check your database connection or permissions.");
+                }
+            }
+
+            string[] dbHeaders = await PhpHandler.GetInfoSchemaAsync($"{MainOrg.Preffix}_documents");
+            foreach (string header in dbHeaders.Skip(1))
+            {
+                if (!Constants.ExportDocumentsHeader.Contains(header))
+                {
+                    if (!await PhpHandler.DeleteColumnFromTable($"{MainOrg.Preffix}_documents", header) ||
+                        !await PhpHandler.DeleteColumnFromTable($"{MainOrg.Preffix}_duplicate_documents", header) ||
+                        !await PhpHandler.DeleteColumnFromTable($"{MainOrg.Preffix}_incomplete_documents", header))
+                        break;
+                }
+            }
+            dbHeaders = await PhpHandler.GetInfoSchemaAsync($"{MainOrg.Preffix}_academic_personnel");
+            foreach (string header in dbHeaders.Skip(1))
+            {
+                if (!Constants.ExportAcadPersonnelHeader.Contains(header))
+                {
+                    if (!await PhpHandler.DeleteColumnFromTable($"{MainOrg.Preffix}_academic_personnel", header)) break;
+                }
+            }
         }
 
         public async Task UpdateDocuments()

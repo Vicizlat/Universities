@@ -15,17 +15,16 @@ namespace Universities.Views
     public partial class MainWindow
     {
         public MainController Controller;
-        private readonly string version;
+        public string Version { get; set; }
         private WaitWindow WaitWindow;
-        private string[] docArray = Array.Empty<string>();
+        public Dictionary<string, string> Document { get; set; }
         private int docId = User.LastDocId;
         private int selectedOrgIndex = -1;
 
-        public MainWindow(string version)
+        public MainWindow()
         {
             InitializeComponent();
             DataContext = this;
-            this.version = version;
             DataManage.Visibility = User.Role.Contains("admin") ? Visibility.Visible : Visibility.Hidden;
             SelectOrganization.OnSelectionChanged += SelectOrganization_SetSelectedIndex;
         }
@@ -45,7 +44,7 @@ namespace Universities.Views
 
         private void OnMainOrgChanged(object sender, EventArgs e)
         {
-            Title = $"Universities\tv.{version}\t\tUser: {User.Username}\t\tMain organization: {MainOrg.Name}";
+            Title = $"Universities\tv.{Version}\t\tUser: {User.Username}\t\tMain organization: {MainOrg.Name}";
             docId = User.LastDocId;
             PopulateFields();
         }
@@ -103,7 +102,7 @@ namespace Universities.Views
             ShowWaitWindow("Loading Data...");
             if (Controller.Documents.Count() == 0) docId = -1;
             if (Controller.Documents.Count() < docId) docId = Controller.Documents.Count() - 1;
-            docArray = docId >= 0 && docId < Controller.Documents.Count() ? Controller.Documents.ElementAtOrDefault(docId).ToArray() : Array.Empty<string>();
+            Document = docId >= 0 && docId < Controller.Documents.Count() ? Controller.Documents.ElementAtOrDefault(docId).ToDict() : new Dictionary<string, string>();
             SaveButton.IsEnabled = SelectOrganization.Validate();
             selectedOrgIndex = -1;
             SelectOrganization.AutoTextBox.Text = string.Empty;
@@ -119,18 +118,18 @@ namespace Universities.Views
                 Wos.Text = string.Empty;
                 Address.Text = string.Empty;
                 SubOrganizationName.Text = string.Empty;
-                lvSimilarPendingAuthors.ItemsSource = new List<string[]>();
+                lvSimilarPendingAuthors.ItemsSource = new List<Dictionary<string, string>>();
                 lvSimilarProcessedAuthors.ItemsSource = new List<string[]>();
                 lvAcadPersonnel.ItemsSource = new List<string[]>();
                 lvSimilarProcessedAuthors.Background = Brushes.Transparent;
             }
             else
             {
-                ALastName.Text = docArray[21];
-                AFirstName.Text = docArray[25];
-                Wos.Text = docArray[1];
-                Address.Text = docArray[8];
-                SubOrganizationName.Text = docArray[14];
+                ALastName.Text = Document["Last Name"];
+                AFirstName.Text = Document["First Name"];
+                Wos.Text = Document["Accession Number (UT)"];
+                Address.Text = Document["Full Address"];
+                SubOrganizationName.Text = Document["Sub-organisation names (concatenated)"];
                 lvSimilarPendingAuthors.ItemsSource = GetSimilarPendingAuthors();
                 lvSimilarProcessedAuthors.ItemsSource = GetSimilarProcessedAuthors();
                 lvSimilarProcessedAuthors.Background = lvSimilarProcessedAuthors.Items.Count > 0 ? Brushes.LightGreen : Brushes.Transparent;
@@ -144,20 +143,19 @@ namespace Universities.Views
             ShowWaitWindow("Saving Person...");
             string[] simAuthor = (string[])lvSimilarProcessedAuthors.SelectedItem ?? new string[12];
             int orgId = int.TryParse(simAuthor[4], out int selOrgId) ? selOrgId : Controller.Organizations.ElementAtOrDefault(selectedOrgIndex).OrganizationId;
-            int personId = int.TryParse(simAuthor[1], out int selPerId) ? selPerId : await Controller.GetPersonId(docArray[25], docArray[21], orgId);
+            int personId = int.TryParse(simAuthor[1], out int selPerId) ? selPerId : await Controller.GetPersonId(Document["First Name"], Document["Last Name"], orgId);
             if (personId == 0)
             {
                 CloseWaitWindow();
                 return;
             }
-            List<string[]> documents = new List<string[]>() { docArray };
-            documents.AddRange(lvSimilarPendingAuthors.SelectedItems.OfType<string[]>());
-            foreach (string[] doc in documents)
+            foreach (Dictionary<string, string> doc in lvSimilarPendingAuthors.SelectedItems.OfType<Dictionary<string, string>>().Append(Document))
             {
-                string newPerson = $"{personId};{doc[25]};{doc[21]};{orgId};{doc[1]};;;;";
+                string date = DateTime.Now.ToShortDateString();
+                string newPerson = $"{personId};{doc["First Name"]};{doc["Last Name"]};{orgId};{doc["Accession Number (UT)"]};;;;;{User.Username}";
                 if (await PhpHandler.AddToTable($"{MainOrg.Preffix}_people", "person", newPerson))
                 {
-                    await PhpHandler.UpdateInTable($"{MainOrg.Preffix}_documents", "Processed", "1", id: int.Parse(doc[0]));
+                    await PhpHandler.UpdateInTable($"{MainOrg.Preffix}_documents", "Processed", "1", id: int.Parse(doc["Id"]));
                 }
             }
             await Controller.UpdatePeopleAsync();
@@ -165,18 +163,18 @@ namespace Universities.Views
             CloseWaitWindow();
         }
 
-        private IEnumerable<string[]> GetSimilarPendingAuthors()
+        private IEnumerable<Dictionary<string, string>> GetSimilarPendingAuthors()
         {
             return Controller.Documents
-                .Where(d => d.Ut != docArray[1] && Controller.RegexMatch(d.LastName, docArray[21]))
+                .Where(d => d.Ut != Document["Accession Number (UT)"] && Controller.RegexMatch(d.LastName, Document["Last Name"]))
                 .OrderBy(d => d.LastName).ThenBy(d => d.FirstName)
-                .Select(d => d.ToArray());
+                .Select(d => d.ToDict());
         }
 
         private List<string[]> GetSimilarProcessedAuthors()
         {
             List<string[]> similarProcessedAuthors = new List<string[]>();
-            foreach (string[] author in Controller.People.Where(p => Controller.RegexMatch(p.LastName, docArray[21])).Select(p => p.ToArray()))
+            foreach (string[] author in Controller.People.Where(p => Controller.RegexMatch(p.LastName, Document["Last Name"])).Select(p => p.ToArray()))
             {
                 if (similarProcessedAuthors.Any(pa => Controller.RegexMatch(pa[1], author[1])))
                 {
@@ -197,7 +195,7 @@ namespace Universities.Views
 
         private IEnumerable<string[]> GetMatchingAcadPersonnel()
         {
-            foreach (string[] author in Controller.AcadPersonnel.Where(p => Controller.RegexMatch(p.LastNames, docArray[21])).Select(p => p.ToArray()))
+            foreach (string[] author in Controller.AcadPersonnel.Where(p => Controller.RegexMatch(p.LastNames, Document["Last Name"])).Select(p => p.ToArray()))
             {
                 yield return author;
             }

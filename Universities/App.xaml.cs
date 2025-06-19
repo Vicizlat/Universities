@@ -32,7 +32,8 @@ namespace Universities
             }
 
             MainController controller = new MainController();
-            MainWindow MainWindow = new MainWindow(installedVersion);
+            MainWindow MainWindow = new MainWindow();
+            MainWindow.Version = installedVersion;
             MainWindow.Controller = controller;
             waitWindow?.Close();
             MainWindow.Show();

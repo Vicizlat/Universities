@@ -30,7 +30,7 @@ namespace Universities.Models
 
         public override string ToString()
         {
-            return string.Join(Settings.Instance.Separator, new[] { $"{OrganizationId}", OrganizationName, $"{ParentId}" });
+            return string.Join(Constants.ImportSeparator, new[] { $"{OrganizationId}", OrganizationName, $"{ParentId}" });
         }
     }
 }

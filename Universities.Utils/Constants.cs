@@ -3,6 +3,7 @@
     public static class Constants
     {
         public const string ErrorSettings = "Settings are wrong or incomplete!";
+        public const string ImportSeparator = ";";
         public const string ErrorFileRead = "Error reading file {0}. The file is missing or in use by another program.";
         public const string ErrorNoSeparator = "No obvious separator found in header line. Please, use ',' or ';' as separator.";
         public const string ErrorManySeparators = "Detected multiple possible separators in header line. Please, check the uploaded file and use only one separator.";
@@ -61,20 +62,12 @@
             "3rd Enhanced Organisation name",
             "Enhanced Organisation Names (concatenated)",
             "Sub-organisation names (concatenated)",
-            "Researcher/Author SeqNo (position)",
             "Full Name",
-            "Role",
-            "Claimed Web of Science Researcher Profile",
-            "Reprint contact",
-            "Address No (2)",
             "Last Name",
             "Display Name",
             "WOS Standard Name",
             "Distinct Author ID",
             "First Name",
-            "ResearcherID",
-            "Other ResearcherID",
-            "ORCID ID",
             "Preferred Full Name",
             "Preferred Last Name",
             "Preferred First Name",

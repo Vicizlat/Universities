@@ -48,7 +48,7 @@ namespace Universities.Models
 
         public override string ToString()
         {
-            return string.Join(Settings.Instance.Separator, ToArray());
+            return string.Join(Constants.ImportSeparator, ToArray());
         }
     }
 }

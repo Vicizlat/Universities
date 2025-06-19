@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net7.0-windows</TargetFramework>
+		<TargetFramework>net8.0-windows7.0</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<StartupObject>Universities.App</StartupObject>
 		<ApplicationIcon>Universities.ico</ApplicationIcon>
 		<Product>Universities</Product>
 		<Authors>Victor Zlatarev</Authors>
 		<Copyright>Copyright © 2022</Copyright>
-		<Version>0.4.6</Version>
+		<Version>0.4.7</Version>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -22,8 +22,8 @@ namespace Universities.Views
         private GridViewColumnHeader listViewSortCol = null;
         private SortAdorner listViewSortAdorner = null;
         private TabItem lastSelectedTab = null;
-        private string[] DuplicateDocs = Array.Empty<string>();
-        private string[] IncompleteDocs = Array.Empty<string>();
+        private IEnumerable<Dictionary<string, string>> DuplicateDocs { get; set; }
+        private IEnumerable<Dictionary<string, string>> IncompleteDocs { get; set; }
 
         public DataManagementWindow(MainController controller)
         {
@@ -52,31 +52,33 @@ namespace Universities.Views
             {
                 if (cbPrDocs.IsChecked == true)
                 {
-                    lvDocuments.ItemsSource = controller.Documents.Select(d => d.ToArray());
+                    lvDocuments.ItemsSource = controller.Documents.Select(d => d.ToDict());
                 }
                 else
                 {
-                    lvDocuments.ItemsSource = controller.Documents.Where(d => !d.Processed).Select(d => d.ToArray());
+                    lvDocuments.ItemsSource = controller.Documents.Where(d => !d.Processed).Select(d => d.ToDict());
                 }
             }
             else
             {
                 if (cbPrDocs.IsChecked == true)
                 {
-                    lvDocuments.ItemsSource = controller.Documents.Where(d => d.AssignedToUser == User.Username).Select(d => d.ToArray());
+                    lvDocuments.ItemsSource = controller.Documents.Where(d => d.AssignedToUser == User.Username).Select(d => d.ToDict());
                 }
                 else
                 {
                     lvDocuments.ItemsSource = controller.Documents
                         .Where(d => d.AssignedToUser == User.Username)
                         .Where(d => !d.Processed)
-                        .Select(d => d.ToArray());
+                        .Select(d => d.ToDict());
                 }
             }
-            DuplicateDocs = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_duplicate_documents", processed: 1);
-            lvDuplicateDocuments.ItemsSource = DuplicateDocs.Select(dd => dd.Split(";"));
-            IncompleteDocs = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_incomplete_documents", processed: 1);
-            lvIncompleteDocuments.ItemsSource = IncompleteDocs.Select(id => id.Split(";"));
+            string[] ddocs = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_duplicate_documents", processed: 1);
+            DuplicateDocs = ddocs.Select(dd => new Document(dd.Split(";")).ToDict());
+            lvDuplicateDocuments.ItemsSource = DuplicateDocs;
+            string[] idocs = await PhpHandler.GetFromTableAsync($"{MainOrg.Preffix}_incomplete_documents", processed: 1);
+            IncompleteDocs = idocs.Select(id => new Document(id.Split(";")).ToDict());
+            lvIncompleteDocuments.ItemsSource = IncompleteDocs;
             UpdateDocumentsCount();
         }
 
@@ -97,7 +99,7 @@ namespace Universities.Views
         private async Task UpdateAcadPersonnelView()
         {
             await controller.UpdateAcadPersonnelAsync();
-            lvAcadPersonnel.ItemsSource = controller.AcadPersonnel.Select(p => p.ToArray());
+            lvAcadPersonnel.ItemsSource = controller.AcadPersonnel.Select(ap => ap.ToArray());
             UpdateAcadPersonnelCount();
         }
 
@@ -121,8 +123,8 @@ namespace Universities.Views
             string direction = newDir.ToString();
             if (DocumentsTab.IsSelected)
             {
-                if (direction == "Ascending") lvDocuments.ItemsSource = controller.Documents.OrderBy(d => d.GetType().GetProperty(sortBy)?.GetValue(d)).Select(d => d.ToArray());
-                else lvDocuments.ItemsSource = controller.Documents.OrderByDescending(d => d.GetType().GetProperty(sortBy)?.GetValue(d)).Select(d => d.ToArray());
+                if (direction == "Ascending") lvDocuments.ItemsSource = controller.Documents.OrderBy(d => d.GetType().GetProperty(sortBy)?.GetValue(d)).Select(d => d.ToDict());
+                else lvDocuments.ItemsSource = controller.Documents.OrderByDescending(d => d.GetType().GetProperty(sortBy)?.GetValue(d)).Select(d => d.ToDict());
             }
             else if (OrganizationsTab.IsSelected)
             {
@@ -289,13 +291,13 @@ namespace Universities.Views
                 int counter = 0;
                 int count = lvDocuments.SelectedItems.Count;
                 WaitWindow.UpdateProgressBar(count);
-                foreach (string[] doc in lvDocuments.SelectedItems.Cast<string[]>())
+                foreach (Dictionary<string, string> doc in lvDocuments.SelectedItems.Cast<Dictionary<string, string>>())
                 {
                     counter++;
                     if (WaitWindow.IsCanceled) break;
                     WaitWindow.ChangeText($"Deleting: {counter} / {count}");
                     WaitWindow.ProgBar.Value = counter;
-                    if (!await PhpHandler.DeleteFromTable($"{MainOrg.Preffix}_documents", int.Parse(doc[0])))
+                    if (!await PhpHandler.DeleteFromTable($"{MainOrg.Preffix}_documents", int.Parse(doc["Id"])))
                     {
                         PromptBox.Error($"There was a problem deleting {string.Join(";", doc)}!");
                         continue;
@@ -372,13 +374,13 @@ namespace Universities.Views
             int counter = 0;
             int count = lvDocuments.SelectedItems.Count;
             WaitWindow.UpdateProgressBar(count);
-            foreach (string[] doc in lvDocuments.SelectedItems.Cast<string[]>().ToList())
+            foreach (Dictionary<string, string> doc in lvDocuments.SelectedItems.Cast<Dictionary<string, string>>())
             {
                 counter++;
                 if (WaitWindow.IsCanceled) break;
                 WaitWindow.ChangeText($"Assigning: {counter} / {count}");
                 WaitWindow.ProgBar.Value = counter;
-                await PhpHandler.UpdateInTable($"{MainOrg.Preffix}_documents", "AssignedToUser", selectedUser, id: int.Parse(doc[0]));
+                await PhpHandler.UpdateInTable($"{MainOrg.Preffix}_documents", "AssignedToUser", selectedUser, id: int.Parse(doc["Id"]));
             }
             lvDocuments.SelectedItems.Clear();
             Users.SelectedItem = null;
@@ -410,7 +412,7 @@ namespace Universities.Views
         {
             if (DocumentsTab.IsSelected)
             {
-                lvDocuments.ItemsSource = controller.Documents.Where(d => d.ToString().ToLower().Contains(SearchBox.Text.ToLower())).Select(d => d.ToArray());
+                lvDocuments.ItemsSource = controller.Documents.Where(d => d.ToString().ToLower().Contains(SearchBox.Text.ToLower())).Select(d => d.ToDict());
                 UpdateDocumentsCount();
             }
             if (OrganizationsTab.IsSelected)
@@ -430,12 +432,12 @@ namespace Universities.Views
             }
             if (DuplicateDocumentsTab.IsSelected)
             {
-                lvDuplicateDocuments.ItemsSource = DuplicateDocs.Where(dd => dd.ToLower().Contains(SearchBox.Text.ToLower())).Select(dd => dd.Split(";"));
+                lvDuplicateDocuments.ItemsSource = DuplicateDocs.Where(dd => string.Join(';', dd.Values).ToLower().Contains(SearchBox.Text.ToLower())).Select(dd => dd);
                 UpdateDocumentsCount();
             }
             if (IncompleteDocumentsTab.IsSelected)
             {
-                lvIncompleteDocuments.ItemsSource = IncompleteDocs.Where(id => id.ToLower().Contains(SearchBox.Text.ToLower())).Select(id => id.Split(";"));
+                lvIncompleteDocuments.ItemsSource = IncompleteDocs.Where(id => string.Join(';', id.Values).ToLower().Contains(SearchBox.Text.ToLower())).Select(id => id);
                 UpdateDocumentsCount();
             }
         }

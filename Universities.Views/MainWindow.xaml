@@ -69,10 +69,10 @@
         <ListView x:Name="lvSimilarPendingAuthors" Grid.Row="3" Margin="10, 0" SelectionMode="Extended">
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
-                    <GridViewColumn DisplayMemberBinding="{Binding [21]}" Header="LastName" Width="150"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding [25]}" Header="FirstName" Width="150"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding [8]}" Header="Address" Width="333"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding [14]}" Header="SubOrgaName" Width="200"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [Last Name]}" Header="LastName" Width="150"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [First Name]}" Header="FirstName" Width="150"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [Full Address]}" Header="Address" Width="333"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [Sub-organisation names (concatenated)]}" Header="SubOrgaName" Width="200"/>
                 </GridView>
             </ListView.View>
         </ListView>
