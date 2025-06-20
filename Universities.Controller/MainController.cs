@@ -4,7 +4,6 @@ using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows;
 using Universities.Handlers;
 using Universities.Models;
 using Universities.Utils;

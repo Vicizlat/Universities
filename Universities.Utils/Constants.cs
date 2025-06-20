@@ -34,7 +34,9 @@
             "AuthorID",
             "EmailAddress",
             "OtherNames",
-            "FormerInstitution"
+            "FormerInstitution",
+            "Added_By_User",
+            "Added_On_Date"
         };
         public static readonly string[] ExportAcadPersonnelHeader =
         {
