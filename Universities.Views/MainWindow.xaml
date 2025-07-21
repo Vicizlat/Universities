@@ -83,8 +83,8 @@
                 <GridView AllowsColumnReorder="False">
                     <GridViewColumn DisplayMemberBinding="{Binding [1]}" Header="Person Id" Width="90"/>
                     <GridViewColumn DisplayMemberBinding="{Binding [3]}" Header="Last Name" Width="150"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding [11]}" Header="First Names" Width="280"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding [10]}" Header="OrgaName (ParentOrgaName)" Width="313"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [13]}" Header="First Names" Width="280"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding [12]}" Header="OrgaName (ParentOrgaName)" Width="Auto"/>
                 </GridView>
             </ListView.View>
         </ListView>

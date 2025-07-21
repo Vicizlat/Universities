@@ -179,7 +179,7 @@ namespace Universities.Views
                 if (similarProcessedAuthors.Any(pa => Controller.RegexMatch(pa[1], author[1])))
                 {
                     string[] pa = similarProcessedAuthors.FirstOrDefault(pa => Controller.RegexMatch(pa[1], author[1]));
-                    if (pa[2] != author[2] && !pa[11].Contains(author[2])) pa[11] += " | " + author[2];
+                    if (pa[2] != author[2] && !pa[13].Contains(author[2])) pa[13] += " | " + author[2];
                     continue;
                 }
                 string orgDisplayName;
@@ -210,7 +210,7 @@ namespace Universities.Views
         {
             if (sender == lvSimilarProcessedAuthors && lvSimilarProcessedAuthors.SelectedItem != null)
             {
-                SelectOrganization.AutoTextBox.Text = ((string[])lvSimilarProcessedAuthors.SelectedItem)[10];
+                SelectOrganization.AutoTextBox.Text = ((string[])lvSimilarProcessedAuthors.SelectedItem)[12];
             }
             if (sender == lvAcadPersonnel && lvAcadPersonnel.SelectedItem != null)
             {
