@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+//using System.Net;
+//using System.Net.Http;
+//using System.Threading.Tasks;
+//using System.Windows;
 using Universities.Utils;
 
 namespace Universities.Handlers
@@ -71,5 +75,30 @@ namespace Universities.Handlers
                 }
             }
         }
+
+        //private static readonly HttpClient httpClient = new HttpClient();
+
+        //public static async Task DownloadFileAsync(string fileUrl, string destinationPath)
+        //{
+        //    try
+        //    {
+        //        using var response = await httpClient.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
+        //        response.EnsureSuccessStatusCode();
+
+        //        await using var contentStream = await response.Content.ReadAsStreamAsync();
+        //        await using var fileStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None);
+
+        //        await contentStream.CopyToAsync(fileStream);
+        //        PromptBox.Information($"Downloaded: {destinationPath}");
+        //    }
+        //    catch (HttpRequestException ex)
+        //    {
+        //        PromptBox.Error($"HTTP error: {ex.Message}");
+        //    }
+        //    catch (IOException ex)
+        //    {
+        //        PromptBox.Error($"File I/O error: {ex.Message}");
+        //    }
+        //}
     }
 }

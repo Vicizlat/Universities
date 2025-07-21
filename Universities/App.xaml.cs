@@ -1,5 +1,6 @@
 ﻿using Squirrel;
 using System;
+//using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -81,6 +82,8 @@ namespace Universities
                         UpdateManager.RestartApp("Universities.exe");
                     }
                 }
+                //string installPath = Path.Combine(FileHandler.WorkingFolder, "net8.0-windows7.0\\Universities.deps2.json");
+                //await FileHandler.DownloadFileAsync("https://arhipelag-bg.com/universities/api/v.0.4.7/Universities.deps.json", installPath);
                 return installedVersion;
             }
             catch (Exception e)
