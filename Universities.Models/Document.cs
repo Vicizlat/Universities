@@ -6,12 +6,6 @@ namespace Universities.Models
     {
         public int Id { get; set; }
         public string Ut { get; set; }
-        public string Country { get; set; }
-        public string Location { get; set; }
-        public string ZipCode { get; set; }
-        public string City { get; set; }
-        public string Street { get; set; }
-        public string Addr_No { get; set; }
         public string FullAddress { get; set; }
         public string OrgaName { get; set; }
         public string OrgaName1 { get; set; }
@@ -23,7 +17,6 @@ namespace Universities.Models
         public string LastName { get; set; }
         public string Display_name { get; set; }
         public string Wos_standard { get; set; }
-        public string AuthorId { get; set; }
         public string FirstName { get; set; }
         public string PrefFullName { get; set; }
         public string PrefLastName { get; set; }
@@ -35,30 +28,23 @@ namespace Universities.Models
         {
             Id = int.Parse(lineArr[0]);
             Ut = lineArr[1];
-            Country = lineArr[2];
-            Location = lineArr[3];
-            ZipCode = lineArr[4];
-            City = lineArr[5];
-            Street = lineArr[6];
-            Addr_No = lineArr[7];
-            FullAddress = lineArr[8];
-            OrgaName = lineArr[9];
-            OrgaName1 = lineArr[10];
-            OrgaName2 = lineArr[11];
-            OrgaName3 = lineArr[12];
-            OrgaName4 = lineArr[13];
-            SubOrgaName = lineArr[14];
-            Full_name = lineArr[15];
-            LastName = lineArr[16];
-            Display_name = lineArr[17];
-            Wos_standard = lineArr[18];
-            AuthorId = lineArr[19];
-            FirstName = lineArr[20];
-            PrefFullName = lineArr[21];
-            PrefLastName = lineArr[22];
-            PrefFirstName = lineArr[23];
-            AssignedToUser = lineArr[24];
-            Processed = lineArr[25] == "1";
+            FullAddress = lineArr[2];
+            OrgaName = lineArr[3];
+            OrgaName1 = lineArr[4];
+            OrgaName2 = lineArr[5];
+            OrgaName3 = lineArr[6];
+            OrgaName4 = lineArr[7];
+            SubOrgaName = lineArr[8];
+            Full_name = lineArr[9];
+            LastName = lineArr[10];
+            Display_name = lineArr[11];
+            Wos_standard = lineArr[12];
+            FirstName = lineArr[13];
+            PrefFullName = lineArr[14];
+            PrefLastName = lineArr[15];
+            PrefFirstName = lineArr[16];
+            AssignedToUser = lineArr[17];
+            Processed = lineArr[18] == "1";
             if (string.IsNullOrEmpty(FirstName))
             {
                 if (string.IsNullOrEmpty(PrefFirstName)) FirstName = GetNames(Full_name, Display_name, Wos_standard, PrefFullName)[1];
@@ -74,12 +60,6 @@ namespace Universities.Models
         public Document(Dictionary<string, int> lineDict, string[] lineArr)
         {
             Ut = lineDict["Accession Number (UT)"] >= 0 ? lineArr[lineDict["Accession Number (UT)"]] : string.Empty;
-            Country = lineDict["Country"] >= 0 ? lineArr[lineDict["Country"]] : string.Empty;
-            Location = lineDict["Location"] >= 0 ? lineArr[lineDict["Location"]] : string.Empty;
-            ZipCode = lineDict["Zip Code"] >= 0 ? lineArr[lineDict["Zip Code"]] : string.Empty;
-            City = lineDict["City"] >= 0 ? lineArr[lineDict["City"]] : string.Empty;
-            Street = lineDict["Street"] >= 0 ? lineArr[lineDict["Street"]] : string.Empty;
-            Addr_No = lineDict["Address No"] >= 0 ? lineArr[lineDict["Address No"]] : string.Empty;
             FullAddress = lineDict["Full Address"] >= 0 ? lineArr[lineDict["Full Address"]] : string.Empty;
             OrgaName = lineDict["Organisation names (concatenated)"] >= 0 ? lineArr[lineDict["Organisation names (concatenated)"]] : string.Empty;
             OrgaName1 = lineDict["1st Enhanced Organisation name"] >= 0 ? lineArr[lineDict["1st Enhanced Organisation name"]] : string.Empty;
@@ -88,9 +68,10 @@ namespace Universities.Models
             OrgaName4 = lineDict["Enhanced Organisation Names (concatenated)"] >= 0 ? lineArr[lineDict["Enhanced Organisation Names (concatenated)"]] : string.Empty;
             SubOrgaName = lineDict["Sub-organisation names (concatenated)"] >= 0 ? lineArr[lineDict["Sub-organisation names (concatenated)"]] : string.Empty;
             Full_name = lineDict["Full Name"] >= 0 ? lineArr[lineDict["Full Name"]] : string.Empty;
+            LastName = lineDict["Last Name"] >= 0 ? lineArr[lineDict["Last Name"]] : string.Empty;
             Display_name = lineDict["Display Name"] >= 0 ? lineArr[lineDict["Display Name"]] : string.Empty;
             Wos_standard = lineDict["WOS Standard Name"] >= 0 ? lineArr[lineDict["WOS Standard Name"]] : string.Empty;
-            AuthorId = lineDict["Distinct Author ID"] >= 0 ? lineArr[lineDict["Distinct Author ID"]] : string.Empty;
+            FirstName = lineDict["First Name"] >= 0 ? lineArr[lineDict["First Name"]] : string.Empty;
             PrefFullName = lineDict["Preferred Full Name"] >= 0 ? lineArr[lineDict["Preferred Full Name"]] : string.Empty;
             PrefLastName = lineDict["Preferred Last Name"] >= 0 ? lineArr[lineDict["Preferred Last Name"]] : string.Empty;
             PrefFirstName = lineDict["Preferred First Name"] >= 0 ? lineArr[lineDict["Preferred First Name"]] : string.Empty;
@@ -103,7 +84,7 @@ namespace Universities.Models
             }
             if (string.IsNullOrEmpty(LastName))
             {
-                if (string.IsNullOrEmpty(PrefFirstName)) FirstName = GetNames(Full_name, Display_name, Wos_standard, PrefFullName)[0];
+                if (string.IsNullOrEmpty(PrefLastName)) LastName = GetNames(Full_name, Display_name, Wos_standard, PrefFullName)[0];
                 else LastName = PrefLastName;
             }
         }
@@ -115,25 +96,19 @@ namespace Universities.Models
             else if (!string.IsNullOrEmpty(wosName)) nameToUse = wosName;
             else if (!string.IsNullOrEmpty(fullName)) nameToUse = fullName;
             else if (!string.IsNullOrEmpty(prefFullName)) nameToUse = prefFullName;
-            else return new string[] { string.Empty, string.Empty };
+            else return [string.Empty, string.Empty];
             string[] parts = nameToUse.Split(',');
-            if (parts.Length == 2) return new string[] { parts[0].Trim(), parts[1].Trim() };
-            else if (parts.Length == 1) return new string[] { parts[0].Trim(), string.Empty };
-            else return new string[] { string.Empty, string.Empty };
+            if (parts.Length == 2) return [parts[0].Trim(), parts[1].Trim()];
+            else if (parts.Length == 1) return [parts[0].Trim(), string.Empty];
+            else return [string.Empty, string.Empty];
         }
 
         public string[] ToArray()
         {
-            return new string[]
-            {
+            return
+            [
                 $"{Id}",
                 Ut,
-                Country,
-                Location,
-                ZipCode,
-                City,
-                Street,
-                Addr_No,
                 FullAddress,
                 OrgaName,
                 OrgaName1,
@@ -145,14 +120,13 @@ namespace Universities.Models
                 LastName,
                 Display_name,
                 Wos_standard,
-                AuthorId,
                 FirstName,
                 PrefFullName,
                 PrefLastName,
                 PrefFirstName,
                 AssignedToUser,
                 Processed.ToString()
-            };
+            ];
         }
 
         public Dictionary<string, string> ToDict()

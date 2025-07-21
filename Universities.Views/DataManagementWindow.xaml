@@ -125,6 +125,12 @@
                             <GridViewColumn DisplayMemberBinding="{Binding [5]}">
                                 <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="DocId"/>
                             </GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding [10]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AddedByUser"/>
+                            </GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding [11]}">
+                                <GridViewColumnHeader Padding="2" Click="ListViewColumnHeader_Click" Content="AddedOnDate"/>
+                            </GridViewColumn>
                         </GridView>
                     </ListView.View>
                 </ListView>

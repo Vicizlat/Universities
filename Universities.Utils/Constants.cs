@@ -51,12 +51,6 @@
         public static readonly string[] ExportDocumentsHeader =
         {
             "Accession Number (UT)",
-            "Country",
-            "Location",
-            "Zip Code",
-            "City",
-            "Street",
-            "Address No",
             "Full Address",
             "Organisation names (concatenated)",
             "1st Enhanced Organisation name",
@@ -68,7 +62,6 @@
             "Last Name",
             "Display Name",
             "WOS Standard Name",
-            "Distinct Author ID",
             "First Name",
             "Preferred Full Name",
             "Preferred Last Name",

@@ -14,6 +14,8 @@ namespace Universities.Models
         public string EmailAddress { get; set; }
         public string OtherNames { get; set; }
         public string FormerInstitution { get; set; }
+        public string AddedByUser { get; set; }
+        public string AddedOnDate { get; set; }
 
         public Person(string[] lineArr)
         {
@@ -27,12 +29,14 @@ namespace Universities.Models
             EmailAddress = lineArr[7];
             OtherNames = lineArr[8];
             FormerInstitution = lineArr[9];
+            AddedByUser = lineArr[10];
+            AddedOnDate = lineArr[11];
         }
 
         public string[] ToArray()
         {
-            return new string[]
-            {
+            return
+            [
                 $"{Id}",
                 $"{PersonId}",
                 FirstName,
@@ -42,8 +46,10 @@ namespace Universities.Models
                 AuthorId,
                 EmailAddress,
                 OtherNames,
-                FormerInstitution
-            };
+                FormerInstitution,
+                AddedByUser,
+                AddedOnDate
+            ];
         }
 
         public override string ToString()
